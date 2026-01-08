@@ -63,8 +63,76 @@ export default function SolanaLandingPage() {
      <div className="absolute top-40 right-20 w-12 h-12 bg-white/20 rounded-full"></div>
     </div>
    </section>
-   
-   
+   {/* How It Works Section */}
+   <section className="max-w-7xl mx-auto px-6 py-16">
+    <div className="text-center mb-12">
+     <h2 className="text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
+     <p className="text-gray-600 text-lg">Start sharing and trading Solana in just a few easy steps.</p>
+     
+    </div>
+    <div className="grid md:grid-cols-3 gap-8">
+     {/* Step 1 */}
+     <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition">
+      <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-6">
+       <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+           <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeWidth="2"/>
+                <line x1="12" y1="9" x2="12" y2="15" strokeWidth="2"/>
+                <line x1="9" y1="12" x2="15" y2="12" strokeWidth="2"/>
+       </svg>
+      </div>
+      <h3 className="text-xl font-bold text-gray-900 mb-3">
+       Create an Account
+      </h3>
+      <p className="text-gray-600">Sign up and set up your wallet to start using Solana Coins.</p>
+     </div>
+     
+     {/* Step 2 */}
+     <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition">
+      <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-6">
+       <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" strokeWidth="2"/>
+                <circle cx="12" cy="10" r="3" strokeWidth="2"/>
+       </svg>
+      </div>
+      <h3 className="text-xl font-bold text-gray-900 mb-3"> Connect Ypur Wallet</h3>
+      <p className="text-gray-600">Securely link your Solana wallet to our platform.</p>
+     </div>
+     
+     {/* Step 3 */}
+     <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition">
+      <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-6">
+       <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" strokeWidth="2"/>
+        
+       </svg>
+      </div>
+      <h3 className="text-xl font-bold text-gray-900 mb-3">Start Sharing & Earning</h3>
+      <p className="text-gray-600">Trade, share, or lend your SOL to earn rewards and interest.</p>
+     </div>
+    </div>
+   </section>
+      <section className="max-w-5xl mx-auto px-6 py-16">
+        <div className="bg-gradient-to-br from-purple-600 via-purple-500 to-purple-700 rounded-3xl p-12 text-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-radial from-purple-400/20 to-transparent"></div>
+          <div className="absolute top-10 left-10 w-24 h-24 bg-purple-400/30 rounded-full blur-2xl"></div>
+          <div className="absolute bottom-10 right-10 w-32 h-32 bg-purple-300/20 rounded-full blur-2xl"></div>
+          
+          <div className="relative z-10">
+            <h2 className="text-4xl font-bold text-white mb-4">Start Earning Solana Today</h2>
+            <p className="text-purple-100 text-lg mb-8 max-w-2xl mx-auto">
+              Join the Solana Coins community and start trading and sharing your SOL now.
+            </p>
+            <div className="flex gap-4 justify-center">
+              <button className="bg-white text-purple-600 px-8 py-3 rounded-full hover:bg-gray-50 transition font-semibold">
+                Get Started
+              </button>
+              <button className="bg-purple-500 text-white px-8 py-3 rounded-full hover:bg-purple-600 transition font-semibold border-2 border-purple-400">
+                Learn More
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
   </div>
  )
 }
