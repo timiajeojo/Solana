@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 
 export default function SolanaLandingPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -33,9 +34,11 @@ export default function SolanaLandingPage() {
             <a href="#support" className="text-gray-700 hover:text-purple-600 transition">
               Support
             </a>
-            <button className="bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition font-medium">
-              Get Started
-            </button>
+            <Link href="/auth">
+              <button className="bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition font-medium">
+                Get Started
+              </button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -104,9 +107,11 @@ export default function SolanaLandingPage() {
             Share, trade, and lend your Solana tokens in a secure and decentralized way, connecting with a global community of traders.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 mb-12">
-            <button className="bg-purple-600 text-white px-8 py-3 rounded-full hover:bg-purple-700 transition font-semibold">
-              Get Started
-            </button>
+            <Link href="/auth">
+              <button className="bg-purple-600 text-white px-8 py-3 rounded-full hover:bg-purple-700 transition font-semibold">
+                Get Started
+              </button>
+            </Link>
             <button className="bg-white text-gray-700 px-8 py-3 rounded-full hover:bg-gray-50 transition font-semibold border border-gray-300">
               Learn More
             </button>
@@ -202,9 +207,11 @@ export default function SolanaLandingPage() {
               Join the Solana Coins community and start trading and sharing your SOL now.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-white text-purple-600 px-8 py-3 rounded-full hover:bg-gray-50 transition font-semibold">
-                Get Started
-              </button>
+              <Link href="/auth">
+                <button className="bg-white text-purple-600 px-8 py-3 rounded-full hover:bg-gray-50 transition font-semibold">
+                  Get Started
+                </button>
+              </Link>
               <button className="bg-purple-500 text-white px-8 py-3 rounded-full hover:bg-purple-600 transition font-semibold border-2 border-purple-400">
                 Learn More
               </button>
