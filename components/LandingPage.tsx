@@ -1,6 +1,7 @@
 import React from 'react';
 
 export default function SolanaLandingPage() {
+ const [isMenuOpen, setIsMenuOpen] = useState(false)
  return (
   <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100">
    <nav className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
@@ -18,8 +19,36 @@ export default function SolanaLandingPage() {
             Get Started
           </button>condition ? true : false
     </div>
-   </nav>
+    {/* Mobile Menu Button */}
+    <button 
+    className="md:hidden text-gray-700 hover:text-purple-600 transition" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {isMenuOpen ? (
+       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+     </svg>
+    </button>
    
+   {/* Mobile Dropdown Menu */}
+   {isMenuOpen && (
+    <div className="md:hidden mt-4 py-4 bg-white rounded-2xl shadow-lg">
+     <a href="#" className="block px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition">
+      Home
+     </a>
+     <a href="#" className="block px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition">Features</a>
+     <a href="#" className="block px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition">
+              Support
+            </a>
+               <div className="px-6 pt-3">
+              <button className="w-full bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition">
+                Get Started
+              </button>
+            </div>
+    </div>
+   )}
+   </nav>
    {/* Hero section */}
    <section className="max-w-7xl mx-auto px-6 py-16 grid md:grid-cols-2 gap-12 items-center">
     <div>
