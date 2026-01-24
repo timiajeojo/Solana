@@ -13,4 +13,7 @@ export default function AuthForm() {
   const [passowrd, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState('');
+  const router = useRouter()
+  
+  const handleEmailAuth = async (e: React.);
 }
