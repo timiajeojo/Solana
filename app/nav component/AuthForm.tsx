@@ -6,5 +6,8 @@ import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
+} from 'firebase/auth'
+import { useRouter } from 'next/navigation'
+export default function AuthForm() {
   
 }
