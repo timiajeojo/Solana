@@ -16,6 +16,9 @@ export default function AuthForm() {
   const router = useRouter()
   
   const handleEmailAuth = async (e: React.FormEvent) => {
-    e.
+    e.preventDefault()
+    setError('')
+    
+    
   };
 }
