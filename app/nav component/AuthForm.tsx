@@ -42,6 +42,9 @@ export default function AuthForm() {
   };
   
   return (
-    <div clasName=""
+    <div clasName="max-w-md w-full mx-auto">
+    <div className=""
+    </div>
+    
     )
 }
