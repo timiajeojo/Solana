@@ -19,6 +19,10 @@ export default function AuthForm() {
     e.preventDefault()
     setError('')
     
-    
+    try {
+      if (isSignUp) {
+        await createUserWithEmailAndPassword(auth, email, password)
+      }
+    }
   };
 }
