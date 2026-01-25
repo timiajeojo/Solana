@@ -33,7 +33,11 @@ export default function AuthForm() {
   
   const handleGoogleAuth = async () => {
     try {
-      const provider = new GoogleAuthProvider;
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider)
+      router.push('/dashboard')
+    } catch (err: any) {
+      
     }
   };
 }
