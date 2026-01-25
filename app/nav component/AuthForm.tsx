@@ -47,6 +47,9 @@ export default function AuthForm() {
     <h2 className="text-2xl font-bold text-black mb-6">
     {isSignUp ? 'Create Account': 'Sign In'}
     </h2>
+    {error && (
+      <div className=""
+      )
     </div>
     
     )
