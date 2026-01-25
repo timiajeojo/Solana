@@ -37,7 +37,8 @@ export default function AuthForm() {
       await signInWithPopup(auth, provider)
       router.push('/dashboard')
     } catch (err: any) {
-      
+      setError(err.message)
     }
   };
+  
 }
