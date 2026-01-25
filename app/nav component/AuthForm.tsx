@@ -23,7 +23,7 @@ export default function AuthForm() {
       if (isSignUp) {
         await createUserWithEmailAndPassword(auth, email, password)
       } else {
-        await signInWithEmailAndPassword(auth, )
+        await signInWithEmailAndPassword(auth, email, password)
       }
     }
   };
