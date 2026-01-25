@@ -31,5 +31,9 @@ export default function AuthForm() {
     }
   };
   
-  const handleGoogleAuth = ;
+  const handleGoogleAuth = async () => {
+    try {
+      const provider = new GoogleAuthProvider;
+    }
+  };
 }
