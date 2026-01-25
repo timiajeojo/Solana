@@ -43,7 +43,8 @@ export default function AuthForm() {
   
   return (
     <div clasName="max-w-md w-full mx-auto">
-    <div className=""
+    <div className="bg-white border border-gray-200">
+    <div className
     </div>
     
     )
