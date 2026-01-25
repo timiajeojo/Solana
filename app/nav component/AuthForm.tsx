@@ -22,6 +22,8 @@ export default function AuthForm() {
     try {
       if (isSignUp) {
         await createUserWithEmailAndPassword(auth, email, password)
+      } else {
+        
       }
     }
   };
