@@ -25,6 +25,11 @@ export default function AuthForm() {
       } else {
         await signInWithEmailAndPassword(auth, email, password)
       }
+      router.push('/dashboard')
+    } catch (err: any) {
+      setError(err.message)
     }
   };
+  
+  const handleGoogleAuth = ;
 }
