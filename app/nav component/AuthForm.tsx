@@ -82,5 +82,7 @@ export default function AuthForm() {
     <input 
     type="password"
     value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    
     )
 }
