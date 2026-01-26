@@ -83,6 +83,10 @@ export default function AuthForm() {
     type="password"
     value={password}
     onChange={(e) => setPassword(e.target.value)}
-    className="w-full px-4 py-2 border border-gray-300 rounded-lg "
+    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 text-black">
+    placeholder"••••••••"
+    required
+    />
+    </div>
     )
 }
