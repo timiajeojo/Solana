@@ -83,6 +83,6 @@ export default function AuthForm() {
     type="password"
     value={password}
     onChange={(e) => setPassword(e.target.value)}
-    
+    className="w-full px-4 py-2 border bo"
     )
 }
