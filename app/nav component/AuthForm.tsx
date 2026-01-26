@@ -66,12 +66,21 @@ export default function AuthForm() {
         Email
         </label>
         <input 
-        type="email",
-        value={email},
+        type="email"
+        value={email}
         onChange={(e) => setEmail(e.target.value)}
         className="w-full px-4 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-200 text-black">
-        
+        placeholder="you@example.com"
+        required
+        />
     </div>
     
+    <div>
+    <label className="block text-sm font-medium text-grey-700 mb-1">
+    Password
+    </label>
+    <input 
+    type="password"
+    value={password}
     )
 }
