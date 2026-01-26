@@ -93,5 +93,8 @@ export default function AuthForm() {
     type="submit"
     className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-medium tracking-colors">
     {isSignUp ? 'Sign Up' : 'Sign In'}
+    </button>
+    </form>
+    
     )
 }
