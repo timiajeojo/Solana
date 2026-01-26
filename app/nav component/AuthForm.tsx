@@ -59,6 +59,17 @@ export default function AuthForm() {
        {error}
        </div>
         )}
+        
+        <form onSubmit={handleEmailAuth} className="space-y-4">
+        <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+        Email
+        </label>
+        <input 
+        type="email",
+        value={email},
+        onChange={(e) => setEmail(e.target.value)}
+        className="w-full px-4 px-4 py-2 border border-gray-300 rounded-lg "
     </div>
     
     )
