@@ -96,5 +96,9 @@ export default function AuthForm() {
     </button>
     </form>
     
+    <div className="mt-4">
+    <button 
+    onClick={handleGoogleAuth}
+    className=""
     )
 }
