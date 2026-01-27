@@ -17,3 +17,7 @@ export interface Investment {
   purchase_date: string;
   created_at?: string;
 }
+
+export async function getInvestments(userId: string) {
+  
+}
