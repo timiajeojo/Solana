@@ -99,6 +99,6 @@ export default function AuthForm() {
     <div className="mt-4">
     <button 
     onClick={handleGoogleAuth}
-    className=""
+    className="w-full border border-gray-300 text-black py-2 "
     )
 }
