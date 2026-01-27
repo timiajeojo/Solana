@@ -19,5 +19,9 @@ export interface Investment {
 }
 
 export async function getInvestments(userId: string) {
-  
+  const { data, error } = await supabase
+  .from('investments')
+  .select('*')
+  .eq('user_id' userId)
+  ;
 }
