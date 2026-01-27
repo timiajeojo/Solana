@@ -32,3 +32,7 @@ export async function getInvestments(userId: string) {
   return data
 }
 
+export async function addInvestments(investment: Investment) {
+  
+}
+
