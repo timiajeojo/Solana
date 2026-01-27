@@ -27,5 +27,7 @@ export async function getInvestments(userId: string) {
   
   if (error) {
     console.error('Error fetching investments:', error);
+    return []
   }
+  return data
 }
