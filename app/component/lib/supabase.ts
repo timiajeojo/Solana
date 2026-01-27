@@ -23,5 +23,5 @@ export async function getInvestments(userId: string) {
   .from('investments')
   .select('*')
   .eq('user_id' userId)
-  ;
+  .order('purchase_date' { ascending: false});
 }
