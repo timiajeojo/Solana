@@ -113,6 +113,8 @@ export default function AuthForm() {
       : 'Dont have an account? Sign Up'
     }
     </button>
-    
+    </div>
+    </div>
+    </div>
     )
 }
