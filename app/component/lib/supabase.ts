@@ -46,3 +46,8 @@ export async function addInvestments(investment: Investment) {
   return data
 }
 
+export async function updateInvestments(id: number, updates: partial<investment>) {
+  const { data, error } = await supabase;
+  
+}
+
