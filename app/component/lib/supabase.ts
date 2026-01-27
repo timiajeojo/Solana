@@ -24,4 +24,8 @@ export async function getInvestments(userId: string) {
   .select('*')
   .eq('user_id' userId)
   .order('purchase_date' { ascending: false});
+  
+  if (error) {
+    console.error('Error fetching investments:', error);
+  }
 }
