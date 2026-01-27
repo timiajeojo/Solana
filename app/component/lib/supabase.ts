@@ -33,6 +33,15 @@ export async function getInvestments(userId: string) {
 }
 
 export async function addInvestments(investment: Investment) {
+  const {data, error } = await supabase;
+  .from('investments')
+  .insert([investment])
+  .select()
+  .single()
   
+  if (error) {
+    console.error('Error adding investment:', error)
+    throw error
+  }
 }
 
