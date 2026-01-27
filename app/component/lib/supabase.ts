@@ -31,3 +31,4 @@ export async function getInvestments(userId: string) {
   }
   return data
 }
+
