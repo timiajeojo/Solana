@@ -107,6 +107,9 @@ export default function AuthForm() {
     <div className="mt-4 text-center">
     <button 
     onClick={() => setIsSignUp(!isSignUp)}
-    className="text-purple-600 hover:text-purple-700 text-sm"
+    className="text-purple-600 hover:text-purple-700 text-sm">
+    {isSignUp
+      ? 'Already have an accoount'
+    }
     )
 }
