@@ -43,5 +43,6 @@ export async function addInvestments(investment: Investment) {
     console.error('Error adding investment:', error)
     throw error
   }
+  return data
 }
 
