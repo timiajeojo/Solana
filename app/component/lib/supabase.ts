@@ -5,3 +5,5 @@ const supabaseAnonKey = process.env.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3M
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing supabase environment variable. Please check your .env.local file ');
 }
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
