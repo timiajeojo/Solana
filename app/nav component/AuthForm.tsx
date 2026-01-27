@@ -109,7 +109,10 @@ export default function AuthForm() {
     onClick={() => setIsSignUp(!isSignUp)}
     className="text-purple-600 hover:text-purple-700 text-sm">
     {isSignUp
-      ? 'Already have an accoount'
+      ? 'Already have an accoount? Sign in'
+      : 'Dont have an account? Sign Up'
     }
+    </button>
+    
     )
 }
