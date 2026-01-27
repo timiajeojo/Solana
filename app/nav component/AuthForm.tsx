@@ -100,5 +100,6 @@ export default function AuthForm() {
     <button 
     onClick={handleGoogleAuth}
     className="w-full border border-gray-300 text-black py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+    Continue with Google
     )
 }
