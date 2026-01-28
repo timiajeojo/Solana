@@ -60,5 +60,10 @@ export async function updateInvestments(id: number, updates: partial<investment>
   
 }
 
-ret
+return data
+}
+
+export async function deleteInvestment(id: number) {
+  
+}
 
