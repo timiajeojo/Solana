@@ -83,4 +83,8 @@ export async function signUpWithEmail(email: string, passowrd:string) {
     passowrd
   });
   
+  if (error) {
+    
+  }
+  
 }
