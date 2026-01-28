@@ -76,3 +76,5 @@ export async function deleteInvestment(id: number) {
   return true
 }
 
+//sign up with email and password
+
