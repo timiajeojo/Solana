@@ -128,3 +128,7 @@ export async function signOut() {
     throw error
   }
 }
+
+export async function getCurrentUser() {
+  
+}
