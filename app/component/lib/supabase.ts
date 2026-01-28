@@ -48,6 +48,13 @@ export async function addInvestments(investment: Investment) {
 
 export async function updateInvestments(id: number, updates: partial<investment>) {
   const { data, error } = await supabase;
+  .from('investments')
+  .update(updates)
+  .eq('id', id)
+  .select()
+  .single()
+  
+  
   
 }
 
