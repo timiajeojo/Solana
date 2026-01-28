@@ -89,3 +89,6 @@ export async function signUpWithEmail(email: string, passowrd:string) {
   }
   return data
 }
+
+//signin with email and password
+
