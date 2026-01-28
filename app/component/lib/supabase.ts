@@ -91,4 +91,6 @@ export async function signUpWithEmail(email: string, passowrd:string) {
 }
 
 //signin with email and password
-
+export async function signInWithEmail(email: string, password:string) {
+  
+}
