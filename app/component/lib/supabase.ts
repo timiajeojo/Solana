@@ -109,7 +109,13 @@ export async function signInWithGoogle() {
   const { data, error } = await supabase.auth.signInWithGoogle({
     provider: 'google',
     options:{
-    redirectTo
+    redirectTo: `${window.location.origin}/dashboard`,}
   });
+  
+  if (error) {
+    console.error('Error signing in with google:', error)
+    throw error 
+  }
+  return data()
 }
 
