@@ -54,7 +54,11 @@ export async function updateInvestments(id: number, updates: partial<investment>
   .select()
   .single()
   
-  
+  if (error)
+  console.error('Error updating investment:', error)
+  throw error 
   
 }
+
+ret
 
