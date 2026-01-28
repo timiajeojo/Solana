@@ -138,3 +138,11 @@ export async function getCurrentUser() {
   }
   return user
 }
+
+// listen to auth state changing 
+
+export function onAuthStateChange(callback: (user:any) => void) {
+  return supabase.auth.onAuthStateChange((event, session) => {
+    callback(session?.user ?? null)
+  })
+}
