@@ -103,3 +103,13 @@ export async function signInWithEmail(email: string, password:string) {
   }
   return data
 }
+
+//signin with google
+export async function signInWithGoogle() {
+  const { data, error } = await supabase.auth.signInWithGoogle({
+    provider: 'google',
+    options:{
+    redirectTo
+  });
+}
+
