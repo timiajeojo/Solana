@@ -64,6 +64,10 @@ return data
 }
 
 export async function deleteInvestment(id: number) {
+  const { error } = await supabase;
+  .from('investments')
+  .delete()
+  .eq('id', id)
   
 }
 
