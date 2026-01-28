@@ -96,4 +96,10 @@ export async function signInWithEmail(email: string, password:string) {
     email,
     password
   });
+  
+  if (error) {
+    console.error('Error signing in', error)
+    throw error
+  }
+  return data
 }
