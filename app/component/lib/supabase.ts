@@ -85,6 +85,7 @@ export async function signUpWithEmail(email: string, passowrd:string) {
   
   if (error) {
     console.error('Error signing up', error)
+    throw error
   }
-  
+  return data
 }
