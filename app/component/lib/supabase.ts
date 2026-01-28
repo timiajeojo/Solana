@@ -94,6 +94,6 @@ export async function signUpWithEmail(email: string, passowrd:string) {
 export async function signInWithEmail(email: string, password:string) {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
-    password)
+    password
   });
 }
