@@ -116,6 +116,6 @@ export async function signInWithGoogle() {
     console.error('Error signing in with google:', error)
     throw error 
   }
-  return data()
+  return data
 }
 
