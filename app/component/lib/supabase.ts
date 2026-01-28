@@ -78,5 +78,9 @@ export async function deleteInvestment(id: number) {
 
 //sign up with email and password
 export async function signUpWithEmail(email: string, passowrd:string) {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    passowrd
+  });
   
 }
