@@ -69,5 +69,10 @@ export async function deleteInvestment(id: number) {
   .delete()
   .eq('id', id)
   
+  if (error) {
+    console.error('Error deleting investments:', error)
+    throw error
+  }
+  return true
 }
 
