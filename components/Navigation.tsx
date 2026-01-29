@@ -28,6 +28,7 @@ export default function Navigation() {
       <div className="max-w-6xl mx-auto px-4">
       <div className="flex items-center justify-between h-16">
       <div className="flex items-center gap-8">
-      <
+      <link href="/dashboard" className="flex items-center gap-2">
+      
       )
 }
