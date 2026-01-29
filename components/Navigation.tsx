@@ -31,6 +31,7 @@ export default function Navigation() {
       <link href="/dashboard" className="flex items-center gap-2">
       <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
       <TrendingUp className="w-6 h-6 text-white" />
-      
+      </div>
+      <span className=""
       )
 }
