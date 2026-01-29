@@ -8,5 +8,8 @@ import { signOut } from '../app/component/lib/supabase';
 
 export default function Navigation() {
   const pathname = userPathname();
-  const router = useRouter;
+  const router = useRouter();
+  const navItems = [
+    { href: '/dashboard', label: 'Dashboard', }
+    ];
 }
