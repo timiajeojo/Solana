@@ -49,7 +49,16 @@ export default function Navigation() {
             : 'text-gray-600 hover:bg-gray-100'
           }`}
           >
+          <Icon className="w-4 h-4" />
+          <span className="font-medium">{item.label}</span>
+          </Link>
           )
-      })
+      })}
+      </div> 
+      </div>
+      
+      <button
+      onClick={handleLogout}
+      className="flex items-center gap-2 px-4 py-2"
       )
 }
