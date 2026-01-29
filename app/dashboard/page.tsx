@@ -1,268 +1,243 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { TrendingUp, Wallet, ArrowUpRight, ArrowDownRight, Plus } from 'lucide-react';
+import { getCurrentUser, getInvestments, addInvestment } from '../component/lib/supabase';
+import Navigation from '../../components/Navigation';
 
-export default function Dashboard() {
- const [isMenuOpen, setIsMenuOpen] = useState(false);
- const [isSidebarOpen, setIsSidebarOpen] = useState(false);
- 
- const user = {
-  name: 'John Doe',
-  email: 'john@example.com',
-  wallet: '7xKX...9mPq',
-  balance: '125.50',
-  referralCode: 'JOHN2024'
- };
- 
- const handleLogout = () => {
-  console.log('Logging out...');
-  window.location.href = '/';
- };
- 
- return (
-  <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100">
-      <nav className="bg-white shadow-sm sticky top-0 z-40">
-        <div className="px-6 py-4 max-w-7xl mx-auto">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button 
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="lg:hidden p-2 text-gray-700 hover:text-purple-600 transition"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
+interface Investment {
+  id?: number;
+  amount: number;
+  sol_price: number;
+  sol_amount: number;
+  purchase_date: string;
+}
 
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-purple-400 rounded-lg flex items-center justify-center">
-                  <div className="w-6 h-1 bg-white rounded-full"></div>
-                </div>
-                <span className="text-xl font-bold text-gray-900">Solana Coins</span>
-              </div>
+export default function DashboardPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [investments, setInvestments] = useState<Investment[]>([]);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newInvestment, setNewInvestment] = useState({ amount: '', solPrice: '' });
+  const [currentSolPrice] = useState(102.30); // You can fetch this from an API later
+
+  useEffect(() => {
+    checkUser();
+  }, []);
+
+  const checkUser = async () => {
+    try {
+      const currentUser = await getCurrentUser();
+      if (!currentUser) {
+        router.push('/auth');
+        return;
+      }
+      setUser(currentUser);
+      await loadInvestments(currentUser.id);
+    } catch (error) {
+      console.error('Error checking user:', error);
+      router.push('/auth');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadInvestments = async (userId: string) => {
+    try {
+      const data = await getInvestments(userId);
+      setInvestments(data || []);
+    } catch (error) {
+      console.error('Error loading investments:', error);
+    }
+  };
+
+  const handleAddInvestment = async () => {
+    if (!newInvestment.amount || !newInvestment.solPrice || !user) return;
+
+    try {
+      const amount = parseFloat(newInvestment.amount);
+      const solPrice = parseFloat(newInvestment.solPrice);
+      const solAmount = amount / solPrice;
+
+      const investment = {
+        user_id: user.id,
+        amount,
+        sol_price: solPrice,
+        sol_amount: solAmount,
+        purchase_date: new Date().toISOString(),
+      };
+
+      await addInvestment(investment);
+      await loadInvestments(user.id);
+      setNewInvestment({ amount: '', solPrice: '' });
+      setShowAddModal(false);
+    } catch (error) {
+      console.error('Error adding investment:', error);
+      alert('Failed to add investment');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Calculate portfolio metrics
+  const totalInvested = investments.reduce((sum, inv) => sum + inv.amount, 0);
+  const totalSolCoins = investments.reduce((sum, inv) => sum + inv.sol_amount, 0);
+  const currentValue = totalSolCoins * currentSolPrice;
+  const profitLoss = currentValue - totalInvested;
+  const profitLossPercent = totalInvested > 0 ? ((profitLoss / totalInvested) * 100).toFixed(2) : '0.00';
+
+  return (
+    <div className="min-h-screen bg-white">
+      <Navigation />
+      
+      <div className="max-w-6xl mx-auto p-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-black">Dashboard</h1>
+            <p className="text-gray-600 mt-1">Welcome back, {user?.email}</p>
+          </div>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            Add Investment
+          </button>
+        </div>
+
+        {/* Portfolio Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
+            <div className="flex items-center gap-2 text-purple-700 mb-2">
+              <Wallet className="w-5 h-5" />
+              <span className="text-sm font-medium">Total Invested</span>
             </div>
-            
-            <div className="relative">
-              <button 
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl transition"
-              >
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-400 rounded-full flex items-center justify-center text-white font-semibold">
-                  {user.name.charAt(0)}
-                </div>
-                <span className="hidden md:block font-medium text-gray-900">{user.name}</span>
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+            <p className="text-3xl font-bold text-black">${totalInvested.toFixed(2)}</p>
+          </div>
 
-              {isMenuOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl overflow-hidden z-50">
-                  <div className="py-2">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm font-semibold text-gray-900">{user.name}</p>
-                      <p className="text-xs text-gray-500">{user.email}</p>
-                    </div>
-                    <a href="#profile" className="block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition">
-                      Profile Settings
-                    </a>
-                    <a href="#wallet" className="block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition">
-                      Wallet
-                    </a>
-                    <button 
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                </div>
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
+            <div className="flex items-center gap-2 text-purple-700 mb-2">
+              <TrendingUp className="w-5 h-5" />
+              <span className="text-sm font-medium">Current Value</span>
+            </div>
+            <p className="text-3xl font-bold text-black">${currentValue.toFixed(2)}</p>
+          </div>
+
+          <div className={`rounded-xl p-6 border ${
+            profitLoss >= 0 
+              ? 'bg-gradient-to-br from-green-50 to-green-100 border-green-200' 
+              : 'bg-gradient-to-br from-red-50 to-red-100 border-red-200'
+          }`}>
+            <div className="flex items-center gap-2 mb-2">
+              {profitLoss >= 0 ? (
+                <>
+                  <ArrowUpRight className="w-5 h-5 text-green-700" />
+                  <span className="text-sm font-medium text-green-700">Profit</span>
+                </>
+              ) : (
+                <>
+                  <ArrowDownRight className="w-5 h-5 text-red-700" />
+                  <span className="text-sm font-medium text-red-700">Loss</span>
+                </>
               )}
+            </div>
+            <p className={`text-3xl font-bold ${profitLoss >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+              ${Math.abs(profitLoss).toFixed(2)}
+            </p>
+            <p className={`text-sm mt-1 ${profitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {profitLoss >= 0 ? '+' : ''}{profitLossPercent}%
+            </p>
+          </div>
+        </div>
+
+        {/* Portfolio Stats */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h2 className="text-xl font-bold text-black mb-4">Portfolio Overview</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Total SOL Coins</p>
+              <p className="text-2xl font-bold text-purple-600">{totalSolCoins.toFixed(4)}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Avg. Buy Price</p>
+              <p className="text-2xl font-bold text-black">
+                ${totalSolCoins > 0 ? (totalInvested / totalSolCoins).toFixed(2) : '0.00'}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Current Price</p>
+              <p className="text-2xl font-bold text-black">${currentSolPrice.toFixed(2)}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Total Investments</p>
+              <p className="text-2xl font-bold text-purple-600">{investments.length}</p>
             </div>
           </div>
         </div>
-      </nav>
-
-      <div className="flex">
-        <aside className={`
-          fixed lg:sticky top-0 left-0 h-screen bg-white shadow-lg z-30 transition-transform duration-300
-          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-          w-64 lg:block
-        `}>
-          <div className="p-6 pt-24 lg:pt-6">
-            <nav className="space-y-2">
-              <a href="#dashboard" className="flex items-center gap-3 px-4 py-3 bg-purple-50 text-purple-600 rounded-xl font-semibold">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-                Dashboard
-              </a>
-              <a href="#trade" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl transition">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-                Trade
-              </a>
-              <a href="#share" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl transition">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                </svg>
-                Share & Earn
-              </a>
-              <a href="#lend" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl transition">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Lending
-              </a>
-              <a href="#transactions" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl transition">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                Transactions
-              </a>
-              <a href="#settings" className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl transition">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                Settings
-              </a>
-            </nav>
-          </div>
-        </aside>
-
-        {isSidebarOpen && (
-          <div 
-            onClick={() => setIsSidebarOpen(false)}
-            className="fixed inset-0 bg-black/50 z-20 lg:hidden"
-          ></div>
-        )}
-
-        <main className="flex-1 p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {user.name}! 👋</h1>
-              <p className="text-gray-600">Here&apos;s what&apos;s happening with your Solana today.</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <div className="bg-gradient-to-br from-purple-600 to-purple-500 rounded-2xl p-6 text-white">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-purple-100">Total Balance</span>
-                  <svg className="w-6 h-6 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h2 className="text-3xl font-bold mb-1">{user.balance} SOL</h2>
-                <p className="text-purple-100 text-sm">≈ $2,510.00 USD</p>
-              </div>
-
-              <div className="bg-white rounded-2xl p-6 shadow-lg">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-gray-600">Total Earned</span>
-                  <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                  </svg>
-                </div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-1">25.30 SOL</h2>
-                <p className="text-green-600 text-sm font-medium">+12.5% this month</p>
-              </div>
-
-              <div className="bg-white rounded-2xl p-6 shadow-lg">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-gray-600">Active Trades</span>
-                  <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-                  </svg>
-                </div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-1">8</h2>
-                <p className="text-gray-600 text-sm">3 pending orders</p>
-              </div>
-
-              <div className="bg-white rounded-2xl p-6 shadow-lg">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-gray-600">Referrals</span>
-                  <svg className="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
-                </div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-1">24</h2>
-                <p className="text-gray-600 text-sm">Code: {user.referralCode}</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              <div className="bg-white rounded-2xl p-6 shadow-lg">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Wallet</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-purple-50 rounded-xl">
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1">Connected Wallet</p>
-                      <p className="font-mono font-semibold text-gray-900">{user.wallet}</p>
-                    </div>
-                    <button className="text-purple-600 hover:text-purple-700">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                      </svg>
-                    </button>
-                  </div>
-                  <div className="flex gap-3">
-                    <button className="flex-1 bg-purple-600 text-white py-3 rounded-xl hover:bg-purple-700 transition font-semibold">
-                      Deposit
-                    </button>
-                    <button className="flex-1 bg-purple-100 text-purple-600 py-3 rounded-xl hover:bg-purple-200 transition font-semibold">
-                      Withdraw
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl p-6 shadow-lg">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Recent Activity</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl transition">
-                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                      <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-gray-900">Received SOL</p>
-                      <p className="text-sm text-gray-600">2 hours ago</p>
-                    </div>
-                    <span className="font-bold text-green-600">+5.20 SOL</span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl transition">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-gray-900">Trade Executed</p>
-                      <p className="text-sm text-gray-600">5 hours ago</p>
-                    </div>
-                    <span className="font-bold text-gray-900">12.50 SOL</span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl transition">
-                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                      <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-gray-900">Lending Interest</p>
-                      <p className="text-sm text-gray-600">1 day ago</p>
-                    </div>
-                    <span className="font-bold text-green-600">+0.85 SOL</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
       </div>
+
+      {/* Add Investment Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-black mb-4">Add New Investment</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Investment Amount ($)
+                </label>
+                <input
+                  type="number"
+                  value={newInvestment.amount}
+                  onChange={(e) => setNewInvestment({ ...newInvestment, amount: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 text-black"
+                  placeholder="100.00"
+                  step="0.01"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  SOL Price at Purchase ($)
+                </label>
+                <input
+                  type="number"
+                  value={newInvestment.solPrice}
+                  onChange={(e) => setNewInvestment({ ...newInvestment, solPrice: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 text-black"
+                  placeholder="98.50"
+                  step="0.01"
+                />
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-black rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAddInvestment}
+                  className="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+                >
+                  Add Investment
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
- );
+  );
 }
