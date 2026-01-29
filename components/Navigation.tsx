@@ -6,4 +6,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { layoutDashboard, History, TrendingUp, LogOut } from 'lucide-react';
 import { signOut } from '../app/component/lib/supabase';
 
-export 
+export default function Navigation() {
+  
+}
