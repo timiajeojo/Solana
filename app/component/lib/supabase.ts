@@ -1,6 +1,4 @@
-// ============================================
-// FILE: app/component/lib/supabase.ts
-// ============================================
+
 import { createClient } from '@supabase/supabase-js';
 
 // FIXED: Environment variables need to be strings with proper names
