@@ -33,6 +33,12 @@ export default function Navigation() {
       <TrendingUp className="w-6 h-6 text-white" />
       </div>
       <span className="text-xl font-bold text-black"> Solana Tracker </span>
+      </link>
       
+      <div className="flex gap-1">
+      {navItems.map((item) => {
+        const Icon = item.icon;
+        const isActive = pathname === item.href;
+      })
       )
 }
