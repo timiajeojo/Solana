@@ -45,8 +45,10 @@ export default function Navigation() {
           href={item.href}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
             isActive
-            ? 'bg-purple-100 text-purple-700 '
+            ? 'bg-purple-100 text-purple-700'
+            : 'text-gray-600 hover:bg-gray-100'
           }`}
+          >
           )
       })
       )
