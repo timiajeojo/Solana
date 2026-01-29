@@ -43,7 +43,10 @@ export default function Navigation() {
           <Link
           key={item.href}
           href={item.href}
-          className={}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+            isActive
+            ? 'bg-purple-100 text-purple-700 '
+          }`}
           )
       })
       )
