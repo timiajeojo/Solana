@@ -7,5 +7,6 @@ import { layoutDashboard, History, TrendingUp, LogOut } from 'lucide-react';
 import { signOut } from '../app/component/lib/supabase';
 
 export default function Navigation() {
-  const pathname = userPathname;
+  const pathname = userPathname();
+  const router = useRouter;
 }
