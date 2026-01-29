@@ -10,6 +10,16 @@ export default function Navigation() {
   const pathname = userPathname();
   const router = useRouter();
   const navItems = [
-    { href: '/dashboard', label: 'Dashboard', }
+    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/history', label: 'History', icon: History }
     ];
+    const handleLogout = async () => {
+      try {
+        await signOut()
+        router.push('/auth')
+      } catch (err) {
+        console.error('Logout Error:', error);
+        
+      }
+    };
 }
