@@ -1,12 +1,23 @@
-import { createClient  } from '@supabase/supabase-js';
+// ============================================
+// FILE: app/component/lib/supabase.ts
+// ============================================
+import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.https://exfvkdeewzlneuhldtfq.supabase.co;
-const supabaseAnonKey = process.env.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4ZnZrZGVld3psbmV1aGxkdGZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0NjY0OTMsImV4cCI6MjA4NTA0MjQ5M30.9ObubipBEglL5b5puBPx_q40pTTvpzrJ5T3QdCt1yu8;
+// FIXED: Environment variables need to be strings with proper names
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+// Validate that environment variables exist
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing supabase environment variable. Please check your .env.local file ');
+  throw new Error('Missing Supabase environment variables. Please check your .env.local file.');
 }
 
+// Create and export the Supabase client
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// ============================================
+// Helper functions for investments
+// ============================================
 
 export interface Investment {
   id?: number;
@@ -18,131 +29,146 @@ export interface Investment {
   created_at?: string;
 }
 
+// Get all investments for a user
 export async function getInvestments(userId: string) {
   const { data, error } = await supabase
-  .from('investments')
-  .select('*')
-  .eq('user_id' userId)
-  .order('purchase_date' { ascending: false});
-  
+    .from('investments')
+    .select('*')
+    .eq('user_id', userId) // FIXED: Added comma
+    .order('purchase_date', { ascending: false }); // FIXED: Added comma
+
   if (error) {
     console.error('Error fetching investments:', error);
-    return []
+    return [];
   }
-  return data
+
+  return data;
 }
 
-export async function addInvestments(investment: Investment) {
-  const {data, error } = await supabase;
-  .from('investments')
-  .insert([investment])
-  .select()
-  .single()
-  
+// Add a new investment
+export async function addInvestment(investment: Investment) { // FIXED: Function name
+  const { data, error } = await supabase // FIXED: Removed semicolon
+    .from('investments')
+    .insert([investment])
+    .select()
+    .single();
+
   if (error) {
-    console.error('Error adding investment:', error)
-    throw error
+    console.error('Error adding investment:', error);
+    throw error;
   }
-  return data
+
+  return data;
 }
 
-export async function updateInvestments(id: number, updates: partial<investment>) {
-  const { data, error } = await supabase;
-  .from('investments')
-  .update(updates)
-  .eq('id', id)
-  .select()
-  .single()
-  
-  if (error)
-  console.error('Error updating investment:', error)
-  throw error 
-  
+// Update an investment
+export async function updateInvestment(id: number, updates: Partial<Investment>) { // FIXED: Partial capitalization
+  const { data, error } = await supabase // FIXED: Removed semicolon
+    .from('investments')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating investment:', error);
+    throw error;
+  }
+
+  return data;
 }
 
-return data
-}
-
+// Delete an investment
 export async function deleteInvestment(id: number) {
-  const { error } = await supabase;
-  .from('investments')
-  .delete()
-  .eq('id', id)
-  
+  const { error } = await supabase // FIXED: Removed semicolon
+    .from('investments')
+    .delete()
+    .eq('id', id);
+
   if (error) {
-    console.error('Error deleting investments:', error)
-    throw error
+    console.error('Error deleting investment:', error);
+    throw error;
   }
-  return true
+
+  return true;
 }
 
-//sign up with email and password
-export async function signUpWithEmail(email: string, passowrd:string) {
+// ============================================
+// Authentication helpers
+// ============================================
+
+// Sign up with email and password
+export async function signUpWithEmail(email: string, password: string) { // FIXED: Typo "passowrd" -> "password"
   const { data, error } = await supabase.auth.signUp({
     email,
-    passowrd
+    password, // FIXED: Typo
   });
-  
+
   if (error) {
-    console.error('Error signing up', error)
-    throw error
+    console.error('Error signing up:', error);
+    throw error;
   }
-  return data
+
+  return data;
 }
 
-//signin with email and password
-export async function signInWithEmail(email: string, password:string) {
+// Sign in with email and password
+export async function signInWithEmail(email: string, password: string) {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
-    password
+    password,
   });
-  
+
   if (error) {
-    console.error('Error signing in', error)
-    throw error
+    console.error('Error signing in:', error);
+    throw error;
   }
-  return data
+
+  return data;
 }
 
-//signin with google
+// Sign in with Google
 export async function signInWithGoogle() {
-  const { data, error } = await supabase.auth.signInWithGoogle({
+  const { data, error } = await supabase.auth.signInWithOAuth({ // FIXED: signInWithGoogle -> signInWithOAuth
     provider: 'google',
-    options:{
-    redirectTo: `${window.location.origin}/dashboard`,}
+    options: {
+      redirectTo: `${window.location.origin}/dashboard`,
+    },
   });
-  
+
   if (error) {
-    console.error('Error signing in with google:', error)
-    throw error 
+    console.error('Error signing in with Google:', error);
+    throw error;
   }
-  return data
+
+  return data;
 }
 
-//sign out 
-
+// Sign out
 export async function signOut() {
-  const { data, error } = await supabase.auth.signOut();
+  const { error } = await supabase.auth.signOut();
+
   if (error) {
-    console.error('Error signing out:', error)
-    throw error
+    console.error('Error signing out:', error);
+    throw error;
   }
 }
 
+// Get current user
 export async function getCurrentUser() {
-  const { data: { user }, error} = await supabase.auth.getUser();
-  
+  const { data: { user }, error } = await supabase.auth.getUser();
+
   if (error) {
-    console.error('Error getting user:', error)
-    return null
+    console.error('Error getting user:', error);
+    return null;
   }
-  return user
+
+  return user;
 }
 
-// listen to auth state changing 
-
-export function onAuthStateChange(callback: (user:any) => void) {
+// Listen to auth state changes
+export function onAuthStateChange(callback: (user: any) => void) {
   return supabase.auth.onAuthStateChange((event, session) => {
-    callback(session?.user ?? null)
-  })
+    callback(session?.user ?? null);
+  });
 }
