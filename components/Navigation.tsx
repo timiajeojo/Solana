@@ -59,6 +59,8 @@ export default function Navigation() {
       
       <button
       onClick={handleLogout}
-      className="flex items-center gap-2 px-4 py-2"
+      className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+      <LogOut className="w-4 h-4" />
+      <span className="font-medium">Logout
       )
 }
