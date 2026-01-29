@@ -1,8 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { signUpWithEmail, signInWithEmail, signInWithGoogle } from '../component/lib/supabase';
 
 export default function AuthPage() {
+  const router = useRouter();
   const [isSignIn, setIsSignIn] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -11,25 +14,74 @@ export default function AuthPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [referralCode, setReferralCode] = useState('');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
-    if (!isSignIn && password !== confirmPassword) {
-      alert('Passwords do not match!');
+  const handleSubmit = async () => {
+    setError('');
+    setLoading(true);
+
+    // Validation
+    if (!email || !password) {
+      setError('Please fill in all required fields');
+      setLoading(false);
       return;
     }
-    console.log(isSignIn ? 'Signing in...' : 'Signing up...', { 
-      email, 
-      password,
-      referralCode: !isSignIn ? referralCode : undefined
-    });
+
+    if (!isSignIn && password !== confirmPassword) {
+      setError('Passwords do not match!');
+      setLoading(false);
+      return;
+    }
+
+    if (!isSignIn && password.length < 6) {
+      setError('Password must be at least 6 characters');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      if (isSignIn) {
+        // Sign In
+        const result = await signInWithEmail(email, password);
+        console.log('Sign in successful:', result);
+        router.push('/dashboard');
+      } else {
+        // Sign Up
+        const result = await signUpWithEmail(email, password);
+        console.log('Sign up successful:', result);
+        alert('Success! Check your email to verify your account before signing in.');
+        // Switch to sign in tab
+        setIsSignIn(true);
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+      }
+    } catch (err: any) {
+      console.error('Auth error:', err);
+      setError(err.message || 'Authentication failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleWalletSignIn = () => {
-    console.log('Sign in with Wallet');
+    console.log('Wallet sign in not implemented yet');
+    setError('Wallet sign in coming soon!');
   };
 
-  const handleGoogleSignIn = () => {
-    console.log('Sign in with Google');
+  const handleGoogleSignIn = async () => {
+    setError('');
+    setLoading(true);
+
+    try {
+      await signInWithGoogle();
+      // Redirect happens automatically via Supabase
+    } catch (err: any) {
+      console.error('Google auth error:', err);
+      setError(err.message || 'Google sign-in failed');
+      setLoading(false);
+    }
   };
 
   return (
@@ -48,7 +100,10 @@ export default function AuthPage() {
             <a href="/" className="text-gray-700 hover:text-purple-600 transition">Home</a>
             <a href="#features" className="text-gray-700 hover:text-purple-600 transition">Features</a>
             <a href="#support" className="text-gray-700 hover:text-purple-600 transition">Support</a>
-            <button className="bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition font-medium">
+            <button 
+              onClick={() => router.push('/dashboard')}
+              className="bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition font-medium"
+            >
               Get Started
             </button>
           </div>
@@ -100,13 +155,24 @@ export default function AuthPage() {
             {isSignIn ? 'Welcome to Solana Coins' : 'Create Your Account'}
           </h1>
 
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+              {error}
+            </div>
+          )}
+
           {/* Tabs */}
           <div className="flex gap-8 mb-8 border-b border-gray-200">
             <button
-              onClick={() => setIsSignIn(true)}
+              onClick={() => {
+                setIsSignIn(true);
+                setError('');
+              }}
               className={`pb-3 px-2 font-semibold transition relative ${
                 isSignIn ? 'text-purple-600' : 'text-gray-400'
               }`}
+              disabled={loading}
             >
               Sign In
               {isSignIn && (
@@ -114,10 +180,14 @@ export default function AuthPage() {
               )}
             </button>
             <button
-              onClick={() => setIsSignIn(false)}
+              onClick={() => {
+                setIsSignIn(false);
+                setError('');
+              }}
               className={`pb-3 px-2 font-semibold transition relative ${
                 !isSignIn ? 'text-purple-600' : 'text-gray-400'
               }`}
+              disabled={loading}
             >
               Sign Up
               {!isSignIn && (
@@ -140,7 +210,8 @@ export default function AuthPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-purple-50/30"
+                  disabled={loading}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-purple-50/30 disabled:opacity-50"
                 />
               </div>
 
@@ -156,12 +227,14 @@ export default function AuthPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition pr-12 bg-purple-50/30"
+                    disabled={loading}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition pr-12 bg-purple-50/30 disabled:opacity-50"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    disabled={loading}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -174,9 +247,10 @@ export default function AuthPage() {
               {/* Sign In Button */}
               <button
                 onClick={handleSubmit}
-                className="w-full bg-purple-600 text-white py-3 rounded-full hover:bg-purple-700 transition font-semibold text-lg shadow-lg"
+                disabled={loading}
+                className="w-full bg-purple-600 text-white py-3 rounded-full hover:bg-purple-700 transition font-semibold text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Sign In
+                {loading ? 'Signing In...' : 'Sign In'}
               </button>
 
               {/* Divider */}
@@ -190,7 +264,8 @@ export default function AuthPage() {
               <div className="space-y-3">
                 <button
                   onClick={handleWalletSignIn}
-                  className="w-full flex items-center justify-center gap-3 py-3 border-2 border-gray-200 rounded-full hover:bg-gray-50 hover:border-purple-300 transition font-semibold text-gray-700"
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-3 py-3 border-2 border-gray-200 rounded-full hover:bg-gray-50 hover:border-purple-300 transition font-semibold text-gray-700 disabled:opacity-50"
                 >
                   <div className="w-6 h-6 bg-gradient-to-br from-purple-600 to-purple-400 rounded flex items-center justify-center">
                     <div className="w-4 h-0.5 bg-white rounded-full"></div>
@@ -200,7 +275,8 @@ export default function AuthPage() {
 
                 <button
                   onClick={handleGoogleSignIn}
-                  className="w-full flex items-center justify-center gap-3 py-3 border-2 border-gray-200 rounded-full hover:bg-gray-50 hover:border-purple-300 transition font-semibold text-gray-700"
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-3 py-3 border-2 border-gray-200 rounded-full hover:bg-gray-50 hover:border-purple-300 transition font-semibold text-gray-700 disabled:opacity-50"
                 >
                   <svg className="w-6 h-6" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -208,7 +284,7 @@ export default function AuthPage() {
                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                   </svg>
-                  Sign in with Google
+                  {loading ? 'Loading...' : 'Sign in with Google'}
                 </button>
               </div>
             </div>
@@ -228,7 +304,8 @@ export default function AuthPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-purple-50/30"
+                  disabled={loading}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-purple-50/30 disabled:opacity-50"
                 />
               </div>
 
@@ -243,13 +320,15 @@ export default function AuthPage() {
                     id="signup-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Create a password"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition pr-12 bg-purple-50/30"
+                    placeholder="Create a password (min 6 characters)"
+                    disabled={loading}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition pr-12 bg-purple-50/30 disabled:opacity-50"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    disabled={loading}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -271,12 +350,14 @@ export default function AuthPage() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Confirm your password"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition pr-12 bg-purple-50/30"
+                    disabled={loading}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition pr-12 bg-purple-50/30 disabled:opacity-50"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    disabled={loading}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -297,16 +378,18 @@ export default function AuthPage() {
                   value={referralCode}
                   onChange={(e) => setReferralCode(e.target.value)}
                   placeholder="Enter referral code"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-purple-50/30"
+                  disabled={loading}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-purple-50/30 disabled:opacity-50"
                 />
               </div>
 
               {/* Sign Up Button */}
               <button
                 onClick={handleSubmit}
-                className="w-full bg-purple-600 text-white py-3 rounded-full hover:bg-purple-700 transition font-semibold text-lg shadow-lg"
+                disabled={loading}
+                className="w-full bg-purple-600 text-white py-3 rounded-full hover:bg-purple-700 transition font-semibold text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Sign Up
+                {loading ? 'Creating Account...' : 'Sign Up'}
               </button>
 
               {/* Terms Text */}
@@ -327,8 +410,12 @@ export default function AuthPage() {
           <p className="text-center mt-8 text-gray-600">
             {isSignIn ? "Don't have an account? " : "Already have an account? "}
             <button
-              onClick={() => setIsSignIn(!isSignIn)}
-              className="text-purple-600 hover:text-purple-700 font-semibold"
+              onClick={() => {
+                setIsSignIn(!isSignIn);
+                setError('');
+              }}
+              disabled={loading}
+              className="text-purple-600 hover:text-purple-700 font-semibold disabled:opacity-50"
             >
               {isSignIn ? 'Sign Up' : 'Sign In'}
             </button>
