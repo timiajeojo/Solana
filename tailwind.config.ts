@@ -1,3 +1,6 @@
+// ============================================
+// FILE: tailwind.config.ts
+// ============================================
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
@@ -22,8 +25,9 @@ const config: Config = {
           900: "#581c87"
         }
       }
-        }
-      }
-      plugins: [],
-}
+    }
+  },
+  plugins: []
+};
+
 export default config;
