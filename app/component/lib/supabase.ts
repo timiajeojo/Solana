@@ -74,6 +74,7 @@ export async function getUserProfile(userId: string) {
 
 //update user profile
 
-export async function updateUserprofile() {
+export async function updateUserprofile(userId: string, updates: Partial<UserProfile>) {
+  const { data, error } = await supabase;
   
 }
