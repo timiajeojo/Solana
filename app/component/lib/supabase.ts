@@ -84,4 +84,8 @@ export async function updateUserprofile(userId: string, updates: Partial<UserPro
   .eq('id', userId)
   .select()
   .single()
+  
+  if (error) {
+    console.error('Error updating profile:', error)
+  }
 }
