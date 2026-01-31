@@ -17,5 +17,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // Helper functions for investments
 // ============================================
 export interface Investment {
+  id?: number,
+  user_id: string,
   
 }
