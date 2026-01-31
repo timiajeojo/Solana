@@ -50,5 +50,7 @@ export async function createUserProfile(userId:string, firstName:string, lastNam
     
     if (error) {
       console.error('Error creating profile:', error)
+      throw error 
     }
+    return data
 }
