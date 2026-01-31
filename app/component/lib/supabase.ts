@@ -40,7 +40,9 @@ export async function createUserProfile(userId:string, firstName:string, lastNam
   .from('profiles')
   .insert([
     {
-      
+      id: userId,
+      first_name: firstName,
+      last_name: lastName
     }
     ])
 }
