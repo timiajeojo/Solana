@@ -76,5 +76,12 @@ export async function getUserProfile(userId: string) {
 
 export async function updateUserprofile(userId: string, updates: Partial<UserProfile>) {
   const { data, error } = await supabase;
-  
+  .from('profiles')
+  .update({
+    ...updates,
+    updated_at: new Date().tolSOString(),
+  })
+  .eq('id', userId)
+  .select()
+  .single()
 }
