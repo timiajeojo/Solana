@@ -94,6 +94,6 @@ export async function updateUserprofile(userId: string, updates: Partial<UserPro
 
 //Investment functions
 
-export async function getInvestment() {
+export async function getInvestment(userId: string) {
   
 }
