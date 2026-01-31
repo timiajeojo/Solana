@@ -87,5 +87,7 @@ export async function updateUserprofile(userId: string, updates: Partial<UserPro
   
   if (error) {
     console.error('Error updating profile:', error)
+    throw error
   }
+  return data
 }
