@@ -19,5 +19,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 export interface Investment {
   id?: number,
   user_id: string,
-  
+  amount: number,
+  sol_price: number,
+  sol_amount: number,
+  purchase_date: string,
+  created_at: string
 }
