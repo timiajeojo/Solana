@@ -71,3 +71,9 @@ export async function getUserProfile(userId: string) {
   }
   return data
 }
+
+//update user profile
+
+export async function updateUserprofile() {
+  
+}
