@@ -33,3 +33,8 @@ export interface userProfile {
   created_at?: string
   updated_at?:string
 }
+
+//Profile functions
+export async function createUserProfile() {
+  
+}
