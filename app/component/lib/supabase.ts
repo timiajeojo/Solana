@@ -56,3 +56,7 @@ export async function createUserProfile(userId:string, firstName:string, lastNam
 }
 
 //Get user profile
+
+export async function getUserProfile(userId: string) {
+  
+}
