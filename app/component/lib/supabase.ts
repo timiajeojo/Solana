@@ -67,5 +67,7 @@ export async function getUserProfile(userId: string) {
   if (error) {
     console.error('Error fetching profile:', error)
     throw error
+    return null
   }
+  return data
 }
