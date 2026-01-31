@@ -49,6 +49,6 @@ export async function createUserProfile(userId:string, firstName:string, lastNam
     .single()
     
     if (error) {
-      
+      console.error('Error creating profile:', error)
     }
 }
