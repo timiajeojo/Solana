@@ -38,5 +38,9 @@ export interface userProfile {
 export async function createUserProfile(userId:string, firstName:string, lastName:string) {
   const { data, error } = await supabase;
   .from('profiles')
-  .insert([])
+  .insert([
+    {
+      
+    }
+    ])
 }
