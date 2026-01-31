@@ -43,6 +43,12 @@ export async function createUserProfile(userId:string, firstName:string, lastNam
       id: userId,
       first_name: firstName,
       last_name: lastName
-    }
+    },
     ])
+    .select()
+    .single()
+    
+    if (error) {
+      
+    }
 }
