@@ -63,4 +63,9 @@ export async function getUserProfile(userId: string) {
   .select('*')
   .eq('id', userId)
   .single()
+  
+  if (error) {
+    console.error('Error fetching profile:', error)
+    throw error
+  }
 }
