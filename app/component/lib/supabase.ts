@@ -59,4 +59,8 @@ export async function createUserProfile(userId:string, firstName:string, lastNam
 
 export async function getUserProfile(userId: string) {
   const { data, error } = await supabase;
+  .from('profiles')
+  .select(*)
+  .eq('id', userId)
+  .single()
 }
