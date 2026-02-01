@@ -196,6 +196,15 @@ export async function signInWithGoogle() {
 }
 
 export async function signOut() {
-  const { error } = value;
+  const { error } = await supabase.auth.signOut();
+   
+   if (error) {
+     console.error('Error signing out:', error)
+     throw error
+   }
+}
+
+export async function getCurrentUser() {
+  
 }
 
