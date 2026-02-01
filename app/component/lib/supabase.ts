@@ -177,5 +177,13 @@ if (data.user) {
     await createUserProfile(data.user.id, firstName, lastName)
   } catch (profileError) {
     console.error('Error creating profile:', profileError)
+    //
   }
+}
+
+return data
+}
+
+export async function signInWithEmail(email: string, password: string) {
+  
 }
