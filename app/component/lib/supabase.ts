@@ -174,8 +174,13 @@ export async function signUpWithEmail(
 if (data.user) {
   try {
     await createUserProfile(data.user.id, firstName, lastName)
-  } catch (err) {
-    console.error('Error:', err);
+  } catch (profileError) {
+    console.error('Error creating profile:', err);
     
   }
+  return data
+}
+
+export async function signInWithGoogle() {
+  
 }
