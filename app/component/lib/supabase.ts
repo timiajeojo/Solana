@@ -185,5 +185,5 @@ return data
 }
 
 export async function signInWithEmail(email: string, password: string) {
-  const {} = value;
+  
 }
