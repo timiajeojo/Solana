@@ -162,6 +162,7 @@ export async function signUpWithEmail(
   lastName: string
   ) {
   const { data, error } = await supabase.auth.signUp({
-    
+    email,
+    password
   });
 }
