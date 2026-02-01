@@ -166,6 +166,6 @@ export async function signUpWithEmail(
     password
   });
   if (error) {
-    
+    console.error('Error sig')
   }
 }
