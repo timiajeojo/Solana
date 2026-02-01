@@ -167,5 +167,6 @@ export async function signUpWithEmail(
   });
   if (error) {
     console.error('Error signing up:', error)
+    throw error
   }
 }
