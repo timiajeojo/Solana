@@ -169,3 +169,5 @@ export async function signUpWithEmail(
     throw error
   }
 }
+
+// create profile after user is created
