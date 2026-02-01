@@ -165,4 +165,7 @@ export async function signUpWithEmail(
     email,
     password
   });
+  if (error) {
+    
+  }
 }
