@@ -160,5 +160,11 @@ export async function signUpWithEmail(
   firstName: string,
   lastName: string 
   ) {
-  const { data, error } = await supabase.auth.signUp;
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password
+  });
+  if (error) {
+    console.error('Error signing with email:', error)
+  }
 }
