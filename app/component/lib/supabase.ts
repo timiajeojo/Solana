@@ -165,6 +165,7 @@ export async function signUpWithEmail(
     password
   });
   if (error) {
-    console.error('Error signing with email:', error)
+    console.error('Error signing up:', error)
+    throw error
   }
 }
