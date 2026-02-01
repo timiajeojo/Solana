@@ -135,4 +135,5 @@ export async function updateInvestment(id: number, updates: Partial<Investment>)
     console.error('Error updating investment:', error)
     throw error
   }
+  return data
 }
