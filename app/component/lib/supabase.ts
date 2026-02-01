@@ -150,3 +150,7 @@ export async function deleteInvestment(id: number) {
   }
   return true
 }
+
+//authentication functions
+
+//sign up with email, password and profile info
