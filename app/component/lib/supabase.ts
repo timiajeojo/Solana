@@ -106,4 +106,5 @@ export async function getInvestment(userId: string) {
     throw error
     return[]
   }
+  return data
 }
