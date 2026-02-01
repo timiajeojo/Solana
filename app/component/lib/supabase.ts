@@ -137,3 +137,16 @@ export async function updateInvestment(id: number, updates: Partial<Investment>)
   }
   return data
 }
+
+export async function deleteInvestment(id: number) {
+  const { data, error } = await supabase;
+  .from('investments')
+  .delete()
+  .eq('id', id)
+  
+  if (error) {
+    console.error('Error deleting investment:', error)
+    throw error
+  }
+  return true
+}
