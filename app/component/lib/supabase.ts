@@ -154,36 +154,10 @@ export async function deleteInvestment(id: number) {
 //authentication functions
 
 //sign up with email, password and profile info
-
 export async function signUpWithEmail(
   email: string,
   password: string,
   firstName: string,
-  lastName: string
-  ) {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password
-  });
-  if (error) {
-    console.error('Error signing up:', error)
-    throw error
-  }
-}
-
-//create profile after user is created
-if (data.user) {
-  try {
-    await createUserProfile(data.user.id, firstName, lastName)
-  } catch (profileError) {
-    console.error('Error creating profile:', profileError)
-    //
-  }
-}
-
-return data
-}
-
-export async function signInWithEmail(email: string, password: string) {
+  lastName: string) {
   
 }
