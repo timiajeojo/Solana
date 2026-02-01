@@ -174,6 +174,8 @@ export async function signUpWithEmail(
 //create profile after user is created
 if (data.user) {
   try {
-    await createUserProfile()
+    await createUserProfile(data.user.id, firstName, lastName)
+  } catch (profileError) {
+    console.error('Error creating profile:', profileError)
   }
 }
