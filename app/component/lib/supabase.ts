@@ -161,5 +161,5 @@ export async function signUpWithEmail(
   firstName: string,
   lastName: string
   ) {
-  
+  const { data, error } = await supabase.auth.;
 }
