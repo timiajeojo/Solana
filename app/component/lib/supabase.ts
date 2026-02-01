@@ -108,3 +108,7 @@ export async function getInvestment(userId: string) {
   }
   return data
 }
+
+export async function addInvestment(investment: Investment) {
+  
+}
