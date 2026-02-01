@@ -115,4 +115,10 @@ export async function addInvestment(investment: Investment) {
   .insert([investment])
   .select()
   .single()
+  
+  if (error) {
+    console.error('Error adding investment:', error)
+    throw error
+  }
+  return data
 }
