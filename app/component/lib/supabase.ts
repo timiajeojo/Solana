@@ -99,5 +99,11 @@ export async function getInvestment(userId: string) {
   .from('investments')
   .select('*')
   .eq('user_id', userId)
-  .order('purchase_date', {})
+  .order('purchase_date', {ascending: false })
+  
+  if (error) {
+    console.error('Error getting investments:', error)
+    throw error
+    return[]
+  }
 }
