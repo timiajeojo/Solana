@@ -156,5 +156,9 @@ export async function deleteInvestment(id: number) {
 //sign up with email, password and profile info
 
 export async function signUpWithEmail() {
+  email: string,
+  password
+  firstName: string,
+  lastName: string,
   
 }
