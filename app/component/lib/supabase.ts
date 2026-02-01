@@ -96,4 +96,8 @@ export async function updateUserprofile(userId: string, updates: Partial<UserPro
 
 export async function getInvestment(userId: string) {
   const { data, error } = await supabase;
+  .from('investments')
+  .select('*')
+  .eq('user_id', userId)
+  .order('purchase_date', {})
 }
