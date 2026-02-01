@@ -130,4 +130,9 @@ export async function updateInvestment(id: number, updates: Partial<Investment>)
   .eq('id', id)
   .select()
   .single()
+  
+  if (error) {
+    console.error('Error updating investment:', error)
+    throw error
+  }
 }
