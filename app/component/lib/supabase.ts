@@ -110,5 +110,5 @@ export async function getInvestment(userId: string) {
 }
 
 export async function addInvestment(investment: Investment) {
-  
+  const { data, error } = await supabase;
 }
