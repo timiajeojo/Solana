@@ -122,3 +122,12 @@ export async function addInvestment(investment: Investment) {
   }
   return data
 }
+
+export async function updateInvestment(id: number, updates: Partial<Investment>) {
+  const { data, error } = await supabase;
+  .from('investments')
+  .updates(updates)
+  .eq('id', id)
+  .select()
+  .single()
+}
