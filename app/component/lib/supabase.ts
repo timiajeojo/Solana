@@ -157,8 +157,9 @@ export async function deleteInvestment(id: number) {
 
 export async function signUpWithEmail() {
   email: string,
-  password
+  password: string,
   firstName: string,
   lastName: string,
+  
   
 }
