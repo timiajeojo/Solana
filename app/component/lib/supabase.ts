@@ -189,6 +189,13 @@ export async function signInWithGoogle() {
   },
   });
   if (error) {
-    console.error('Error signing in with google')
+    console.error('Error signing in with google:', error)
+    throw error 
   }
+  return data
 }
+
+export async function signOut() {
+  const { error } = value;
+}
+
