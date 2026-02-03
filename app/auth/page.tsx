@@ -45,7 +45,11 @@ try {
     router.push('/dashboard')
   } else {
     //signup 
-    
+    const result = await signUpWithEmail(email, password, firstName, lastName);
+    console.log('successful:', result)
+    alert('Success! check your email to verify yoir account before signing in')
+    //switch to signin tab
+    setIsSignIn()
   }
 } catch (err) {
   console.error('Error:', err);
