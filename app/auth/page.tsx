@@ -75,4 +75,25 @@ export default function AuthPage() {
     }
   };
   
+  const handleWalletSignIn = () => {
+    console.log('Wallet signin not implemented yet')
+    setError('Wallet signin coming soon')
+  };
+  
+  const handleGoogleSignIn = async () => {
+    setError('')
+    setLoading(true)
+    
+    try {
+      await signInWithGoogle
+    } catch (err: any) {
+      console.error('Google auth error:', err);
+      setError(err.message || 'Google signin failed')
+      setLoading(false)
+    }
+  };
+  
+  return (
+    
+    )
 }
