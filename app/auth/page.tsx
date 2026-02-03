@@ -132,6 +132,6 @@ export default function AuthPage() {
         </div>
         
         {isMenuOpen && (
-          <div className=""
+          <div className="md:hidden absolute top-full left-0 right-0 mt-2"
           )}
 }
