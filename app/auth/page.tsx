@@ -62,11 +62,17 @@ export default function AuthPage() {
         // Switch to sigin tab
         setIsSignIn(true)
         setEmail('')
-        
+        setPassword('')
+        setConfirmPassword('')
+        setFirstName('')
+        setLastName('')
       }
-    } catch (err) {
-      console.error('Error:', err);
-      
+    } catch (err: any) {
+      console.error('Auth error:', err);
+      setError(err.message || 'Authentication failed please try again')
+    } } finally {
+      setLoading(false)
     }
   };
+  
 }
