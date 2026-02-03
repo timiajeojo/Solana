@@ -30,4 +30,10 @@ if (!email || !password) {
   setLoading(false)
   return
 }
+
+if (!isSignIn && password.length < 6 ) {
+  setError('Password must be around 6 characters')
+  setLoading(false)
+  return
+}
 };
