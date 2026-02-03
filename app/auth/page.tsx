@@ -36,4 +36,19 @@ if (!isSignIn && password.length < 6 ) {
   setLoading(false)
   return
 }
+
+try {
+  if (!isSignIn) {
+    //signIn 
+    const result = await signInWithEmail(email, password);
+    console.log('successful:', result)
+    router.push('/dashboard')
+  } else {
+    //signup 
+    
+  }
+} catch (err) {
+  console.error('Error:', err);
+  
+}
 };
