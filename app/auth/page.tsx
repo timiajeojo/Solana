@@ -23,7 +23,6 @@ export default function AuthPage() {
 const  handleSubmit = async () => {
   setError('')
   setLoading(true)
-  
 //validation
 if (!email || !password) {
   setError('Please fill all required field')
@@ -49,10 +48,17 @@ try {
     console.log('successful:', result)
     alert('Success! check your email to verify yoir account before signing in')
     //switch to signin tab
-    setIsSignIn()
+    setIsSignIn(true)
+    setEmail('')
+    setPassword('')
+    setConfirmPassword('')
+    setFirstName('')
+    setLastName('')
   }
 } catch (err) {
-  console.error('Error:', err);
-  
+  console.error('Auth error:', err);
+  setError(err.message || 'Authentication failed, please try again.')
+} } finally {
+  setLoading(false)
 }
 };
