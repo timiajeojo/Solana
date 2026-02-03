@@ -71,4 +71,11 @@ const handleWalletSignIn = () => {
 const handleGoogleSignIn = async () => {
   setError('')
   setLoading(true)
+  
+  try {
+    
+  } catch (err) {
+    console.error('Error:', err);
+    
+  }
 };
