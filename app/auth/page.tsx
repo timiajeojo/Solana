@@ -62,3 +62,13 @@ try {
   setLoading(false)
 }
 };
+
+const handleWalletSignIn = () => {
+  console.log('Wallet sign in not implemented yet')
+  setError('Wallet sign in coming soon')
+};
+
+const handleGoogleSignIn = async () => {
+  setError('')
+  setLoading(true)
+};
