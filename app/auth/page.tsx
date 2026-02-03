@@ -14,4 +14,8 @@ export default function AuthPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [referralCode, setReferralCode] = useState('');
+  const [isMenuOpen, setIsMenuOpen] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 }
