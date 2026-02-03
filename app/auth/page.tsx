@@ -19,3 +19,15 @@ export default function AuthPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 }
+
+const  handleSubmit = async () => {
+  setError('')
+  setLoading(true)
+  
+//validation
+if (!email || !password) {
+  setError('Please fill all required field')
+  setLoading(false)
+  return
+}
+};
