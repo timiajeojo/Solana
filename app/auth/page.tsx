@@ -49,7 +49,11 @@ export default function AuthPage() {
     }
     
     try {
-      
+      if (isSignIn) {
+        // Sign In
+        const result = await signInWithEmail(email, password);
+        console.log
+      }
     } catch (err) {
       console.error('Error:', err);
       
