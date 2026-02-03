@@ -123,7 +123,8 @@ export default function AuthPage() {
     >
     <svg className="w-6 h-6 fill="none" stroke="currentColor" viewBox="0 0 24 24">
     {isMenuOpen ? (
-      <path strokeLinecap="round" strokeLinejoin="round" 
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m6 18L18 6m6 6l12 12" />
+      ) : (
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d
       )}
-    )
 }
