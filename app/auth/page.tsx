@@ -118,6 +118,7 @@ export default function AuthPage() {
     </div>
     
     <button
-    onClick={() => setIsMenuOpen(!)}
+    onClick={() => setIsMenuOpen(!isMenuOpen)}
+    className="md:"
     )
 }
