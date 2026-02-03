@@ -119,6 +119,11 @@ export default function AuthPage() {
     
     <button
     onClick={() => setIsMenuOpen(!isMenuOpen)}
-    className="md:"
+    className="md:hidden p-2 text-gray-700 hover:text-purple-600 transition"
+    >
+    <svg className="w-6 h-6 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    {isMenuOpen ? (
+      <path strokeLinecap="round" strokeLinejoin="round" 
+      )}
     )
 }
