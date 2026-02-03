@@ -111,6 +111,13 @@ export default function AuthPage() {
     <a href="#support" className="text-gray-700 hover:text-purple-600 transition">Support</a>
     <button
     onClick={() => router.push(/dashboard)}
-    className="bg-purple-600 text-white px-6 py-2 "
+    className="bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition font-mediuml"
+    >
+    Get Started
+    </button>
+    </div>
+    
+    <button
+    onClick={() => setIsMenuOpen(!)}
     )
 }
