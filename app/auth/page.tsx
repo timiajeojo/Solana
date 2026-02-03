@@ -52,7 +52,17 @@ export default function AuthPage() {
       if (isSignIn) {
         // Sign In
         const result = await signInWithEmail(email, password);
-        console.log
+        console.log('Sign in successful:', result)
+        router.push('/dashboard')
+      } else {
+        //Sign Up
+        const result = await signUpWithEmail(email, password, firstName, lastName);
+        console.log('Sign up successful:', result)
+        alert('success! check your email to verify ypur account before signing in')
+        // Switch to sigin tab
+        setIsSignIn(true)
+        setEmail('')
+        
       }
     } catch (err) {
       console.error('Error:', err);
