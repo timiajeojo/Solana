@@ -132,6 +132,21 @@ export default function AuthPage() {
         </div>
         
         {isMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 mt-2"
+          <div className="md:hidden absolute top-full left-0 right-0 mt-2 mx-6 bg-white rounded-2xl shadow-xl overflow-hidden z-50">
+          <div className="py-2">
+          <a href="/" onClick={() => setIsMenuOpen(false)} className="block px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition">
+          Home
+          </a>
+          <a href="#features" onClick={() => setIsMenuOpen(false)} className="block px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition">
+          Features
+          </a>
+          <a href="#support" onClick={() => setIsMenuOpen(false)} className="block px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition">
+          Support
+          </a>
+          </div>
+          </div>
           )}
+          </nav>
+          
+          
 }
