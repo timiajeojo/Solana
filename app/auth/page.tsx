@@ -99,6 +99,18 @@ export default function AuthPage() {
     <nav className="px-6 py-4 max-w-7xl mx-auto relative">
     <div className="flex items-center justify-between">
     <div className="flex items-center gap-2">
-    <div className=""
+    <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-purple-400 rounded-lg flex items-center justify-center">
+    <div className="w-6 h-1 bg-white rounded-full">
+    </div>
+    <span className="text-xl font-bold text-gray-900">Solana Coins</span>
+    </div>
+    
+    <div className="hidden md:flex items-center gap-8">
+    <a href="/" className="text-gray-700 hover:text-purple-600 transition">Home</a>
+    <a href="#features" className="text-gray-700 hover:text-purple-600 transition">Features</a>
+    <a href="#support" className="text-gray-700 hover:text-purple-600 transition">Support</a>
+    <button
+    onClick={() => router.push(/dashboard)}
+    className="bg-purple-600 text-white px-6 py-2 "
     )
 }
