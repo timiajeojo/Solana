@@ -125,6 +125,10 @@ export default function AuthPage() {
     {isMenuOpen ? (
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m6 18L18 6m6 6l12 12" />
       ) : (
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m4 6h16m4 12h16m4 18h16" />
       )}
+      </svg>
+      </button>
+      </div>
+      
 }
