@@ -205,6 +205,17 @@ export default function AuthPage() {
               {/* Sign In Form */}
               {isSignIn && (
                 <div className="space-y-6">
-                
+                <div>
+                <label htmlFor="email" className="block text-gray-900 font-semibold mb-2">
+                Email:
+                </label>
+                <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                disabled={loading}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:"
                 )}
 }
