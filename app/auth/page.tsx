@@ -175,5 +175,13 @@ export default function AuthPage() {
             setIsSignIn(true)
             setError('')
           }}
-          className=""
+          className={`pb-3 px-2 font-semibold transition relative ${
+            isSignIn ? 'text-purple-600' : 'text-gray-400'
+          }`}
+          disabled={loading}
+          >
+          Sign In
+          {isSignIn && (
+            <div className=""
+            )}
 }
