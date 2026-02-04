@@ -220,6 +220,21 @@ export default function AuthPage() {
                 />
                 </div>
                 
-                
+                <div>
+                <label htmlFor="password" className="block text-gray-900 font-semibold mb-2">
+                Password:
+                </label>
+                <div className="relative">
+                <input
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                disabled={loading}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition pr-12 bg-purple-50/30 disabled:opacity-50"
+                />
+                <button
+                type="button"
                 )}
 }
