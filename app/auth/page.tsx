@@ -190,4 +190,21 @@ export default function AuthPage() {
               setIsSignIn(false)
               setError('')
             }}
+            className={`pb-3 px-2 font-semibold transition relative ${
+              !isSignIn ? 'text-purple-600' : 'text-gray-400'
+            }`}
+            disabled={loading}
+            >
+            Sign up
+            {!isSignIn && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-600"></div>
+              )}
+              </button>
+              </div>
+              
+              {/* Sign In Form */}
+              {isSignIn && (
+                <div className="space-y-6">
+                
+                )}
 }
