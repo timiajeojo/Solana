@@ -268,6 +268,12 @@ export default function AuthPage() {
                 disabled={loading}
                 className="w-full flex items-center justify-center gap-3 py-3 border-2 border-gray-200 rounded-full hover:border-purple-300 transition font-semibold text-gray-700 disabled:opacity-50"
                 >
+                <div className="w-6 h-6 bg-gradient-to-br from-purple-600 to-purple-400 rounded flex items-center justify-center">
+                <div className="w-4 h-0.5 bg-white rounded-full"></div>
+                </div>
+                Sign in with Wallet
+                </button>
+                
                 
                 )}
 }
