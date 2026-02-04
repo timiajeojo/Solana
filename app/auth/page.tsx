@@ -274,6 +274,9 @@ export default function AuthPage() {
                 Sign in with Wallet
                 </button>
                 
-                
+                <button
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+                className=""
                 )}
 }
