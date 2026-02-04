@@ -182,6 +182,12 @@ export default function AuthPage() {
           >
           Sign In
           {isSignIn && (
-            <div className=""
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-600"></div>
             )}
+            </button>
+            <button
+            onClick={() => {
+              setIsSignIn(false)
+              setError('')
+            }}
 }
