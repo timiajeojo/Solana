@@ -148,5 +148,21 @@ export default function AuthPage() {
           )}
           </nav>
           
+          {/* Auth Form*/}
+          <div className="max-w-md mx-auto px-6 py-8 md:py-12">
+          <div className="bg-white rounded-3xl shadow-2xl px-8 md:p-12">
+          <div className="flex items-center justify-center gap-2 mb-8">
+          <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-400 rounded-lg flex items-center justify-center">
+          <div className="w-7 h-1.5 bg-white rounded-full"></div>
+          </div>
+          <span className="text-2xl font-bold text-gray-900">Solana Coins</span>
+          </div>
           
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 text-center mb-8">
+        {isSignIn ? 'Welcome To Solana Coins' : 'Create Your Account'}
+        </h1>
+        
+        {error && (
+          
+          )}
 }
