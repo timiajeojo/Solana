@@ -262,5 +262,12 @@ export default function AuthPage() {
                 <div className="flex-1 h-px bg-gray-200"></div>
                 </div>
                 
+                <div className="space-y-3">
+                <button
+                onClick={handleWalletSignIn}
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-3 py-3 border-2 border-gray-200 rounded-full hover:border-purple-300 transition font-semibold text-gray-700 disabled:opacity-50"
+                >
+                
                 )}
 }
