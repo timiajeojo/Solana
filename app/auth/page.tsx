@@ -163,6 +163,17 @@ export default function AuthPage() {
         </h1>
         
         {error && (
-          
+          <div className="mb-6 bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+          {error}
+          </div>
           )}
+          
+          {/* Tabs */}
+          <div className="flex gap-8 mb-8 border-b border-gray-200">
+          <button
+          onClick={() => {
+            setIsSignIn(true)
+            setError('')
+          }}
+          className=""
 }
