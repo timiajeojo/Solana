@@ -279,6 +279,7 @@ export default function AuthPage() {
                 disabled={loading}
                 className="w-full flex items-center justify-center gap-3 py-3 border-2 border-gray-200 rounded-full hover:border-purple-300 transition font-semibold text-gray-700 disabled:opacity-50"
                 >
-                <svg className="w-6 h-6" 
+                <svg className="w-6 h-6" viewBox="0 0 24 24">
+                
                 )}
 }
