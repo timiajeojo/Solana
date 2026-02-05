@@ -310,10 +310,10 @@ export default function AuthPage() {
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-purple-50/30 disabled:opacity-50"
                   />
                   </div>
-                  </div>
+                  <div>
                   <label htmlFor="last-name" className="block text-gray-900 font-semibold mb-2">
                   Last Name:
-                  </label>
+                  </label
                   <input
                   type="text"
                   id="last-name"
@@ -321,6 +321,12 @@ export default function AuthPage() {
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder="Doe"
                   disabled={loading}
-                  className=""
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-purple-50/30 disabled:opacity-50"
+                  />
+                  </div>
+                  </div>
+                  
+                  <div>
+                  <
                   )}
 }
