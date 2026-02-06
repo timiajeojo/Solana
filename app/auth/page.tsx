@@ -327,6 +327,56 @@ export default function AuthPage() {
                   </div>
                   
                   <div>
-                  <
+                  <label htmlFor="signup-email" className="block text-gray-900 font-semibold mb-2">
+                  Email:
+                  </label>
+                  <input
+                  type="email"
+                  id="signup-email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  disabled={loading}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-purple-50/30 disabled:opacity-50"
+                  />
+                  </div>
+                  
+                  <div>
+                  <label htmlFor="signup-password" className="block text-gray-900 font-semibold mb-2">
+                  password
+                  </label>
+                  <div className="relative">
+                  <input
+                  type={showPassword ? 'text' : 'password'}
+                  id="signup-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Create a password (min of 6 characters)"
+                  disabled={loading}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-purple-50/30 disabled:opacity-50"
+                  />
+                  <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 transform -translate-y-1 text-gray-400 hover:text-gray-600"
+                  disabled={loading}
+                  >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  </button>
+                  </div>
+                  </div>
+                  
+                  <div>
+                  <label htmlFor="confirm-password" className="block text-gray-900 font-semibold mb-2">
+                  Confirm Password:
+                  </label>
+                  <div className="relative">
+                  <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  id="confirm-password"
+                  
                   )}
 }
