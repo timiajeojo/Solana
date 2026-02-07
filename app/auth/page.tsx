@@ -422,6 +422,17 @@ export default function AuthPage() {
                   
                   <p className="text-center text-sm text-gray-600">
                   By creating an account you agree to our {' '}
-                  
+                  <a href="#" className="text-purple-600 hover:text-purple-700 font-semibold">
+                  Terms of service
+                  </a>
+                  {' '}and{' '}
+                  <a href="#" className="text-purple-600 hover:text-purple-700 font-semibold">
+                  Privacy Policy
+                  </a>
+                  </p>
+                  </div>
                   )}
+                  
+                  <p className="text-center mt-8 text-gray-600">
+                  
 }
