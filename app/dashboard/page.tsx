@@ -135,6 +135,11 @@ export default function DashboardPage() {
     <p className="text-3xl font-bold text-black">${totalInvested.toFixed(2)}</p>
     </div>
     
-    <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 "
+    <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
+    <div className="flex items-center gap-2 text-purple-700 mb-2">
+    <TrendingUp className="w-5 h-5" />
+    <span className="text-sm font-medium">Current Value</span>
+    </div>
+    <p className="text-3xl font-bold text-black">
     )
   
