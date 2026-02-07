@@ -377,6 +377,51 @@ export default function AuthPage() {
                   <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   id="confirm-password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="confirm your password"
+                  disabled={loading}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition pr-12 bg-purple-50/30 opacity-50"
+                  />
+                  <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  disabled={loading}
+                  >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  </button>
+                  </div>
+                  </div>
+                  
+                  <div>
+                  <label htmlFor="referral-code" className="block text-gray-900 font-semibold mb-2">
+                  Referral Code(Optional)
+                  </label>
+                  <input
+                  type="text"
+                  id="referral-code"
+                  value={referralCode}
+                  onChange={(e) => setReferralCode(e.target.value)}
+                  placeholder="Enter Your Referral Code"
+                  disabled={loading}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-purple-50/30 disabled:opacity-50"
+                  />
+                  </div>
+                  
+                  <button
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="w-full bg-purple-600 text-white py-3 rounded-full hover:bg-purple-700 transition font-semibold text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                  {loading ? 'Creating Account...' : 'Sign Up'}
+                  </button>
+                  
+                  <p className="text-center text-sm text-gray-600">
+                  By creating an account you agree to our {' '}
                   
                   )}
 }
