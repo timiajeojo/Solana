@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { signUpWithEmail, signInWithEmail, signInWithGoogle } from '.../componenet/lib/supabase'
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { signUpWithEmail, signInWithEmail, signInWithGoogle } from '../component/lib/supabase';
 
 export default function AuthPage() {
   const router = useRouter();
@@ -15,113 +15,113 @@ export default function AuthPage() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [referralCode, setReferralCode] = useState('');
-  const [isMenuOpen, setIsMenuOpen] = useState('');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const handleSubmit = async () => {
-    setError('')
-    setLoading(true)
-    
-    //validation
+    setError('');
+    setLoading(true);
+
+    // Validation
     if (!email || !password) {
-      setError('Please fill in all required fields')
-      setLoading(false)
-      return
+      setError('Please fill in all required fields');
+      setLoading(false);
+      return;
     }
-    
-    if (!isSignIn &&(!firstName || !lastName)) {
-      setError('Please enter your first and last name')
-      setLoading(false)
-      return
+
+    if (!isSignIn && (!firstName || !lastName)) {
+      setError('Please enter your first and last name');
+      setLoading(false);
+      return;
     }
-    
+
     if (!isSignIn && password !== confirmPassword) {
-      setError('Password do not match')
-      setLoading(false)
-      return
+      setError('Passwords do not match!');
+      setLoading(false);
+      return;
     }
-    
+
     if (!isSignIn && password.length < 6) {
-      setError('Password must be at least 6 characters')
-      setLoading(false)
-      return
+      setError('Password must be at least 6 characters');
+      setLoading(false);
+      return;
     }
-    
+
     try {
       if (isSignIn) {
         // Sign In
         const result = await signInWithEmail(email, password);
-        console.log('Sign in successful:', result)
-        router.push('/dashboard')
+        console.log('Sign in successful:', result);
+        router.push('/dashboard');
       } else {
-        //Sign Up
+        // Sign Up
         const result = await signUpWithEmail(email, password, firstName, lastName);
-        console.log('Sign up successful:', result)
-        alert('success! check your email to verify ypur account before signing in')
-        // Switch to sigin tab
-        setIsSignIn(true)
-        setEmail('')
-        setPassword('')
-        setConfirmPassword('')
-        setFirstName('')
-        setLastName('')
+        console.log('Sign up successful:', result);
+        alert('Success! Check your email to verify your account before signing in.');
+        // Switch to sign in tab
+        setIsSignIn(true);
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+        setFirstName('');
+        setLastName('');
       }
     } catch (err: any) {
       console.error('Auth error:', err);
-      setError(err.message || 'Authentication failed please try again')
-    } } finally {
-      setLoading(false)
+      setError(err.message || 'Authentication failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
-  
+
   const handleWalletSignIn = () => {
-    console.log('Wallet signin not implemented yet')
-    setError('Wallet signin coming soon')
+    console.log('Wallet sign in not implemented yet');
+    setError('Wallet sign in coming soon!');
   };
-  
+
   const handleGoogleSignIn = async () => {
-    setError('')
-    setLoading(true)
-    
+    setError('');
+    setLoading(true);
+
     try {
-      await signInWithGoogle
+      await signInWithGoogle();
     } catch (err: any) {
       console.error('Google auth error:', err);
-      setError(err.message || 'Google signin failed')
-      setLoading(false)
+      setError(err.message || 'Google sign-in failed');
+      setLoading(false);
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100">
-    {/*Navigation */}
-    <nav className="px-6 py-4 max-w-7xl mx-auto relative">
-    <div className="flex items-center justify-between">
-    <div className="flex items-center gap-2">
-    <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-purple-400 rounded-lg flex items-center justify-center">
-    <div className="w-6 h-1 bg-white rounded-full">
-    </div>
-    <span className="text-xl font-bold text-gray-900">Solana Coins</span>
-    </div>
-    
-    <div className="hidden md:flex items-center gap-8">
-    <a href="/" className="text-gray-700 hover:text-purple-600 transition">Home</a>
-    <a href="#features" className="text-gray-700 hover:text-purple-600 transition">Features</a>
-    <a href="#support" className="text-gray-700 hover:text-purple-600 transition">Support</a>
-    <button
-    onClick={() => router.push(/dashboard)}
-    className="bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition font-mediuml"
-    >
-    Get Started
-    </button>
-    </div>
-    
-    <button
-    onClick={() => setIsMenuOpen(!isMenuOpen)}
-    className="md:hidden p-2 text-gray-700 hover:text-purple-600 transition"
-    >
-     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {/* Navigation */}
+      <nav className="px-6 py-4 max-w-7xl mx-auto relative">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-purple-400 rounded-lg flex items-center justify-center">
+              <div className="w-6 h-1 bg-white rounded-full"></div>
+            </div>
+            <span className="text-xl font-bold text-gray-900">Solana Coins</span>
+          </div>
+          
+          <div className="hidden md:flex items-center gap-8">
+            <a href="/" className="text-gray-700 hover:text-purple-600 transition">Home</a>
+            <a href="#features" className="text-gray-700 hover:text-purple-600 transition">Features</a>
+            <a href="#support" className="text-gray-700 hover:text-purple-600 transition">Support</a>
+            <button 
+              onClick={() => router.push('/dashboard')}
+              className="bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition font-medium"
+            >
+              Get Started
+            </button>
+          </div>
+
+          <button 
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden p-2 text-gray-700 hover:text-purple-600 transition"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {isMenuOpen ? (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               ) : (
@@ -130,207 +130,207 @@ export default function AuthPage() {
             </svg>
           </button>
         </div>
-        
+
         {isMenuOpen && (
           <div className="md:hidden absolute top-full left-0 right-0 mt-2 mx-6 bg-white rounded-2xl shadow-xl overflow-hidden z-50">
-          <div className="py-2">
-          <a href="/" onClick={() => setIsMenuOpen(false)} className="block px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition">
-          Home
-          </a>
-          <a href="#features" onClick={() => setIsMenuOpen(false)} className="block px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition">
-          Features
-          </a>
-          <a href="#support" onClick={() => setIsMenuOpen(false)} className="block px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition">
-          Support
-          </a>
+            <div className="py-2">
+              <a href="/" onClick={() => setIsMenuOpen(false)} className="block px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition">
+                Home
+              </a>
+              <a href="#features" onClick={() => setIsMenuOpen(false)} className="block px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition">
+                Features
+              </a>
+              <a href="#support" onClick={() => setIsMenuOpen(false)} className="block px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition">
+                Support
+              </a>
+            </div>
           </div>
-          </div>
-          )}
-          </nav>
-          
-          {/* Auth Form*/}
-          <div className="max-w-md mx-auto px-6 py-8 md:py-12">
-          <div className="bg-white rounded-3xl shadow-2xl px-8 md:p-12">
+        )}
+      </nav>
+
+      {/* Auth Form */}
+      <div className="max-w-md mx-auto px-6 py-8 md:py-12">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
           <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-400 rounded-lg flex items-center justify-center">
-          <div className="w-7 h-1.5 bg-white rounded-full"></div>
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-400 rounded-lg flex items-center justify-center">
+              <div className="w-7 h-1.5 bg-white rounded-full"></div>
+            </div>
+            <span className="text-2xl font-bold text-gray-900">Solana Coins</span>
           </div>
-          <span className="text-2xl font-bold text-gray-900">Solana Coins</span>
-          </div>
-          
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 text-center mb-8">
-        {isSignIn ? 'Welcome To Solana Coins' : 'Create Your Account'}
-        </h1>
-        
-        {error && (
-          <div className="mb-6 bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
-          {error}
-          </div>
+
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 text-center mb-8">
+            {isSignIn ? 'Welcome to Solana Coins' : 'Create Your Account'}
+          </h1>
+
+          {error && (
+            <div className="mb-6 bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+              {error}
+            </div>
           )}
-          
+
           {/* Tabs */}
           <div className="flex gap-8 mb-8 border-b border-gray-200">
-          <button
-          onClick={() => {
-            setIsSignIn(true)
-            setError('')
-          }}
-          className={`pb-3 px-2 font-semibold transition relative ${
-            isSignIn ? 'text-purple-600' : 'text-gray-400'
-          }`}
-          disabled={loading}
-          >
-          Sign In
-          {isSignIn && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-600"></div>
-            )}
+            <button
+              onClick={() => {
+                setIsSignIn(true);
+                setError('');
+              }}
+              className={`pb-3 px-2 font-semibold transition relative ${
+                isSignIn ? 'text-purple-600' : 'text-gray-400'
+              }`}
+              disabled={loading}
+            >
+              Sign In
+              {isSignIn && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-600"></div>
+              )}
             </button>
             <button
-            onClick={() => {
-              setIsSignIn(false)
-              setError('')
-            }}
-            className={`pb-3 px-2 font-semibold transition relative ${
-              !isSignIn ? 'text-purple-600' : 'text-gray-400'
-            }`}
-            disabled={loading}
+              onClick={() => {
+                setIsSignIn(false);
+                setError('');
+              }}
+              className={`pb-3 px-2 font-semibold transition relative ${
+                !isSignIn ? 'text-purple-600' : 'text-gray-400'
+              }`}
+              disabled={loading}
             >
-            Sign up
-            {!isSignIn && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-600"></div>
+              Sign Up
+              {!isSignIn && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-600"></div>
               )}
-              </button>
-              </div>
-              
-              {/* Sign In Form */}
-              {isSignIn && (
-                <div className="space-y-6">
-                <div>
+            </button>
+          </div>
+
+          {/* Sign In Form */}
+          {isSignIn && (
+            <div className="space-y-6">
+              <div>
                 <label htmlFor="email" className="block text-gray-900 font-semibold mb-2">
-                Email:
+                  Email:
                 </label>
                 <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                disabled={loading}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-purple-50/30 disabled:opacity-50"
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  disabled={loading}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-purple-50/30 disabled:opacity-50"
                 />
-                </div>
-                
-                <div>
+              </div>
+
+              <div>
                 <label htmlFor="password" className="block text-gray-900 font-semibold mb-2">
-                Password:
+                  Password:
                 </label>
                 <div className="relative">
-                <input
-                type={showPassword ? 'text' : 'password'}
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                disabled={loading}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition pr-12 bg-purple-50/30 disabled:opacity-50"
-                />
-                <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                disabled={loading}
-                >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 oz" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                </button>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    disabled={loading}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition pr-12 bg-purple-50/30 disabled:opacity-50"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    disabled={loading}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  </button>
                 </div>
-                </div>
-                
-                <button
+              </div>
+
+              <button
                 onClick={handleSubmit}
                 disabled={loading}
                 className="w-full bg-purple-600 text-white py-3 rounded-full hover:bg-purple-700 transition font-semibold text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                >
+              >
                 {loading ? 'Signing In...' : 'Sign In'}
-                </button>
-                
-                <div className="flex items-center gap-4 my-6">
+              </button>
+
+              <div className="flex items-center gap-4 my-6">
                 <div className="flex-1 h-px bg-gray-200"></div>
                 <span className="text-gray-400 text-sm font-medium">OR</span>
                 <div className="flex-1 h-px bg-gray-200"></div>
-                </div>
-                
-                <div className="space-y-3">
+              </div>
+
+              <div className="space-y-3">
                 <button
-                onClick={handleWalletSignIn}
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-3 py-3 border-2 border-gray-200 rounded-full hover:border-purple-300 transition font-semibold text-gray-700 disabled:opacity-50"
+                  onClick={handleWalletSignIn}
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-3 py-3 border-2 border-gray-200 rounded-full hover:bg-gray-50 hover:border-purple-300 transition font-semibold text-gray-700 disabled:opacity-50"
                 >
-                <div className="w-6 h-6 bg-gradient-to-br from-purple-600 to-purple-400 rounded flex items-center justify-center">
-                <div className="w-4 h-0.5 bg-white rounded-full"></div>
-                </div>
-                Sign in with Wallet
+                  <div className="w-6 h-6 bg-gradient-to-br from-purple-600 to-purple-400 rounded flex items-center justify-center">
+                    <div className="w-4 h-0.5 bg-white rounded-full"></div>
+                  </div>
+                  Sign in with Wallet
                 </button>
-                
+
                 <button
-                onClick={handleGoogleSignIn}
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-3 py-3 border-2 border-gray-200 rounded-full hover:border-purple-300 transition font-semibold text-gray-700 disabled:opacity-50"
+                  onClick={handleGoogleSignIn}
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-3 py-3 border-2 border-gray-200 rounded-full hover:bg-gray-50 hover:border-purple-300 transition font-semibold text-gray-700 disabled:opacity-50"
                 >
-                <svg className="w-6 h-6" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z&" />
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                </svg>
-                {loading ? 'Loading...' : 'Sign In With Google'}
+                  <svg className="w-6 h-6" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  </svg>
+                  {loading ? 'Loading...' : 'Sign in with Google'}
                 </button>
-                </div>
-                </div>
-                )}
-                
-                {/* Sign Up Form */}
-                {!isSignIn && (
-                  <div className="space-y-6">
-                  {/* Name Fields- Side by side*/}
-                  <div className="grid grid-cols-2 gap-4">
-                  <div>
+              </div>
+            </div>
+          )}
+
+          {/* Sign Up Form */}
+          {!isSignIn && (
+            <div className="space-y-6">
+              {/* Name Fields - Side by Side */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
                   <label htmlFor="first-name" className="block text-gray-900 font-semibold mb-2">
-                  First name
+                    First Name:
                   </label>
                   <input
-                  type="text"
-                  id="first-name"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="John"
-                  disabled={loading}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-purple-50/30 disabled:opacity-50"
+                    type="text"
+                    id="first-name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="John"
+                    disabled={loading}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-purple-50/30 disabled:opacity-50"
                   />
-                  </div>
-                  <div>
+                </div>
+                <div>
                   <label htmlFor="last-name" className="block text-gray-900 font-semibold mb-2">
-                  Last Name:
-                  </label
-                  <input
-                  type="text"
-                  id="last-name"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  placeholder="Doe"
-                  disabled={loading}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-purple-50/30 disabled:opacity-50"
-                  />
-                  </div>
-                  </div>
-                  
-                  <div>
-                  <label htmlFor="signup-email" className="block text-gray-900 font-semibold mb-2">
-                  Email:
+                    Last Name:
                   </label>
                   <input
+                    type="text"
+                    id="last-name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Doe"
+                    disabled={loading}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-purple-50/30 disabled:opacity-50"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="signup-email" className="block text-gray-900 font-semibold mb-2">
+                  Email:
+                </label>
+                <input
                   type="email"
                   id="signup-email"
                   value={email}
@@ -338,101 +338,107 @@ export default function AuthPage() {
                   placeholder="Enter your email"
                   disabled={loading}
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-purple-50/30 disabled:opacity-50"
-                  />
-                  </div>
-                  
-                  <div>
-                  <label htmlFor="signup-password" className="block text-gray-900 font-semibold mb-2">
-                  password
-                  </label>
-                  <div className="relative">
+                />
+              </div>
+
+              <div>
+                <label htmlFor="signup-password" className="block text-gray-900 font-semibold mb-2">
+                  Password:
+                </label>
+                <div className="relative">
                   <input
-                  type={showPassword ? 'text' : 'password'}
-                  id="signup-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Create a password (min of 6 characters)"
-                  disabled={loading}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-purple-50/30 disabled:opacity-50"
+                    type={showPassword ? 'text' : 'password'}
+                    id="signup-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Create a password (min 6 characters)"
+                    disabled={loading}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition pr-12 bg-purple-50/30 disabled:opacity-50"
                   />
                   <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 transform -translate-y-1 text-gray-400 hover:text-gray-600"
-                  disabled={loading}
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    disabled={loading}
                   >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
                   </button>
-                  </div>
-                  </div>
-                  
-                  <div>
-                  <label htmlFor="confirm-password" className="block text-gray-900 font-semibold mb-2">
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="confirm-password" className="block text-gray-900 font-semibold mb-2">
                   Confirm Password:
-                  </label>
-                  <div className="relative">
+                </label>
+                <div className="relative">
                   <input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  id="confirm-password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="confirm your password"
-                  disabled={loading}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition pr-12 bg-purple-50/30 opacity-50"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    id="confirm-password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm your password"
+                    disabled={loading}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition pr-12 bg-purple-50/30 disabled:opacity-50"
                   />
                   <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  disabled={loading}
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    disabled={loading}
                   >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
                   </button>
-                  </div>
-                  </div>
-                  
-                  <div>
-                  <label htmlFor="referral-code" className="block text-gray-900 font-semibold mb-2">
-                  Referral Code(Optional)
-                  </label>
-                  <input
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="referral-code" className="block text-gray-900 font-semibold mb-2">
+                  Referral Code (Optional):
+                </label>
+                <input
                   type="text"
                   id="referral-code"
                   value={referralCode}
                   onChange={(e) => setReferralCode(e.target.value)}
-                  placeholder="Enter Your Referral Code"
+                  placeholder="Enter referral code"
                   disabled={loading}
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition bg-purple-50/30 disabled:opacity-50"
-                  />
-                  </div>
-                  
-                  <button
-                  onClick={handleSubmit}
-                  disabled={loading}
-                  className="w-full bg-purple-600 text-white py-3 rounded-full hover:bg-purple-700 transition font-semibold text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                  {loading ? 'Creating Account...' : 'Sign Up'}
-                  </button>
-                  
-                  <p className="text-center text-sm text-gray-600">
-                  By creating an account you agree to our {' '}
-                  <a href="#" className="text-purple-600 hover:text-purple-700 font-semibold">
-                  Terms of service
-                  </a>
-                  {' '}and{' '}
-                  <a href="#" className="text-purple-600 hover:text-purple-700 font-semibold">
+                />
+              </div>
+
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="w-full bg-purple-600 text-white py-3 rounded-full hover:bg-purple-700 transition font-semibold text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Creating Account...' : 'Sign Up'}
+              </button>
+
+              <p className="text-center text-sm text-gray-600">
+                By creating an account, you agree to our{' '}
+                <a href="#" className="text-purple-600 hover:text-purple-700 font-semibold">
+                  Terms of Service
+                </a>
+                {' '}and{' '}
+                <a href="#" className="text-purple-600 hover:text-purple-700 font-semibold">
                   Privacy Policy
-                  </a>
-                  </p>
-                  </div>
-                  )}
-                  
-                  <p className="text-center mt-8 text-gray-600">
-                  
+                </a>
+              </p>
+            </div>
+          )}
+
+          <p className="text-center mt-8 text-gray-600">
+            {isSignIn ? 'Sign Up' : 'Sign In'}
+            </button>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
