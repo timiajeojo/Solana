@@ -101,5 +101,32 @@ export default function DashboardPage() {
   const totalSolCoins = investments.reduce((sum, inv) => sum + inv.sol_amount, 0);
   const currentValue = totalSolCoins * currentSolPrice;
   const profitLoss = currentValue - totalInvested;
+  const profitLossPercent = totalInvested > 0 ((profitLoss / totalInvested) * 100).toFixed(2) : '0.00';
   
+  return (
+    <div className="min-h-screen bg-white">
+    <Navigation />
+    
+    <div className="max-w-6xl max-auto p-8">
+    {/* Header */}
+    <div className="flex items-center justify-between mb-8">
+    <div>
+    <h1 className="text-3xl font-bold text-black">Dashboard</h1>
+    <p className="text-gray-600 mt-1">
+    Welcome back, {userProfile ? `${userProfile.first_name} ${userProfile.last_name}` : user?.email}
+    </p>
+    </div>
+    <button
+    onClick={() => setShowAddModel(true)}
+    className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+    >
+    <plus className="w-5 h-5" />
+    Add investment
+    </button>
+    </div>
+    
+    {/* portfolio summary card */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200"
+    )
   
