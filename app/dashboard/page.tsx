@@ -135,6 +135,6 @@ export default function DashboardPage() {
     <p className="text-3xl font-bold text-black">${totalInvested.toFixed(2)}</p>
     </div>
     
-    
+    <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 "
     )
   
