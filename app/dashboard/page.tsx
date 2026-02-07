@@ -98,4 +98,8 @@ export default function DashboardPage() {
   
   //Calculate portfolio metrics
   const totalInvested = investments.reduce((sum, inv) => sum + inv.amount, 0);
+  const totalSolCoins = investments.reduce((sum, inv) => sum + inv.sol_amount, 0);
+  const currentValue = totalSolCoins * currentSolPrice;
+  const profitLoss = currentValue - totalInvested;
+  
   
