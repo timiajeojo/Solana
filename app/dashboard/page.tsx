@@ -154,13 +154,28 @@ export default function DashboardPage() {
       <ArrowUpRight className="w-5 h-5 text-green-700" />
       <span className="text-sm font-medium text-red-700">Loss</span>
       </>
+      ) : (
+        <>
+        <ArrowDownRight className="w-5 h-5 text-red-700" />
+        <span className="text-sm font-medium text-red-700">Loss</span>
+        </>
       )}
       </div>
-      <p className={`text-3xl font-bold ${profitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-      {profitLoss >= 0 ? '+' : ''}{profitLossPercent}%
+      <p className={`text-3xl font-bold ${profitLoss >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+      ${Math.abs(profitLoss).toFixed(2)}
+      </p>
+      <p className={`text-sm mt-1 ${profitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+    {profitLoss >= 0 ? '+' : ''}{profitLossPercent}%
       </p>
       </div>
       </div>
+      {/* Portfolio Stats */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <h2 className="text-xl font-bold text-black mb-4">Portfolio Overview</h2>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div>
+      <p className="text-sm text-gray-600 mb-1">Total SOL Coins</p>
+      <p className="text-2xl font-bold text-purple-600">{totalSolCoins.toFixed(4)}</p>
       
-    )
-  
+      
+      
