@@ -18,7 +18,7 @@ export default function AuthForm() {
 
     try {
       if (isSignUp) {
-        const result = await signUpWithEmail(email, password);
+        const result = await signUpWithEmail(email, password, '', '');
         console.log('Sign up successful:', result);
         alert('Check your email for verification link!');
       } else {
