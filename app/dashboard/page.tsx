@@ -227,5 +227,22 @@ export default function DashboardPage() {
        step="0.01"
        />
        </div>
-       
+       <div className="flex gap-3 mt-6">
+       <button
+       onClick={() => setShowAddModel(false)}
+       className="flex-1 px-4 py-2 border border-gray-300 text-black rounded-lg hover:bg-gray-50 transition-colors"
+       >
+       Cancel
+       </button>
+       <button
+       onClick={handleAddInvestments}
+       className="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+       >
+       Add Investment
+       </button>
+       </div>
+       </div>
+       </div>
+       </div>
         )}
+        </div>
