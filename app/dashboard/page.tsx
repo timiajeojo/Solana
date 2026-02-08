@@ -152,7 +152,10 @@ export default function DashboardPage() {
     {profitLoss >= 0 ? (
       <>
       <ArrowUpRight className="w-5 h-5 text-green-700" />
-      
+      <span className="text-sm font-medium text-red-700">Loss</span>
+      </>
       )}
+      </div>
+      <p className={``}
     )
   
