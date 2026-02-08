@@ -1,17 +1,17 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { TrendingUp, Wallet, ArrowUpRight, ArrowDownRight, Plus } from 'lucide-react'
-import { getCurrentUser, getInvestments, addInvestment, getUserProfile } from '../component/lib/supabase'
-import Navigation from '../../component/Navigation'
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { TrendingUp, Wallet, ArrowUpRight, ArrowDownRight, Plus } from 'lucide-react';
+import { getCurrentUser, getInvestments, addInvestment, getUserProfile } from '../component/lib/supabase';
+import Navigation from '../../components/Navigation';
 
 interface Investment {
-  id?: number
-  amount: number
-  sol_price: number
-  sol_amount: number
-  purchase_date: string
+  id?: number;
+  amount: number;
+  sol_price: number;
+  sol_amount: number;
+  purchase_date: string;
 }
 
 export default function DashboardPage() {
@@ -20,53 +20,53 @@ export default function DashboardPage() {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [investments, setInvestments] = useState<Investment[]>([]);
-  const [showAddModal, setShowAddModel] = useState(false);
-  const [newInvestment, setNewInvestment] = useState({amount: '', solPrice: ''});
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newInvestment, setNewInvestment] = useState({ amount: '', solPrice: '' });
   const [currentSolPrice] = useState(102.30);
-  
+
   useEffect(() => {
     checkUser();
-  }, [])
-  
-  const checkUser = async function getCurrentUser() {
+  }, []);
+
+  const checkUser = async () => {
     try {
       const currentUser = await getCurrentUser();
       if (!currentUser) {
-        router.push('/auth')
-        return
+        router.push('/auth');
+        return;
       }
-      setUser(currentUser)
+      setUser(currentUser);
       
-      //Fetch User Profile
+      // Fetch user profile
       const profile = await getUserProfile(currentUser.id);
-      setUserProfile(profile)
+      setUserProfile(profile);
       
-      await loadInvestments(currentUser.id)
+      await loadInvestments(currentUser.id);
     } catch (error) {
-      console.error('Error Checking User:', error);
-      router.push('/auth')
+      console.error('Error checking user:', error);
+      router.push('/auth');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   };
-  
+
   const loadInvestments = async (userId: string) => {
     try {
       const data = await getInvestments(userId);
-      setInvestments(data || [])
+      setInvestments(data || []);
     } catch (error) {
       console.error('Error loading investments:', error);
     }
   };
-  
-  const handleAddInvestments = async () => {
-    if (!newInvestment.amount || !newInvestment.solPrice || !user) return
-    
+
+  const handleAddInvestment = async () => {
+    if (!newInvestment.amount || !newInvestment.solPrice || !user) return;
+
     try {
       const amount = parseFloat(newInvestment.amount);
       const solPrice = parseFloat(newInvestment.solPrice);
-      const solAmount = amount / solPrice
-      
+      const solAmount = amount / solPrice;
+
       const investment = {
         user_id: user.id,
         amount,
@@ -74,175 +74,178 @@ export default function DashboardPage() {
         sol_amount: solAmount,
         purchase_date: new Date().toISOString(),
       };
-      
-      await addInvestment(investment)
-      await loadInvestments(user.id)
-      setNewInvestment({ amount: '', solPrice: '' })
-      setShowAddModel(false)
+
+      await addInvestment(investment);
+      await loadInvestments(user.id);
+      setNewInvestment({ amount: '', solPrice: '' });
+      setShowAddModal(false);
     } catch (error) {
-      console.error('Error adding investments:', error);
-      alert('Field to add investment')
+      console.error('Error adding investment:', error);
+      alert('Failed to add investment');
     }
-  }
-  
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="text-center">
-      <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent  rounded-full animate-spin mx-auto mb-4"></div>
-      <p className="text-gray-600">Loading...</p>
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
       </div>
-      </div>
-      )
+    );
   }
-  
-  //Calculate portfolio metrics
+
+  // Calculate portfolio metrics
   const totalInvested = investments.reduce((sum, inv) => sum + inv.amount, 0);
   const totalSolCoins = investments.reduce((sum, inv) => sum + inv.sol_amount, 0);
   const currentValue = totalSolCoins * currentSolPrice;
   const profitLoss = currentValue - totalInvested;
-  const profitLossPercent = totalInvested > 0 ((profitLoss / totalInvested) * 100).toFixed(2) : '0.00';
-  
+  const profitLossPercent = totalInvested > 0 ? ((profitLoss / totalInvested) * 100).toFixed(2) : '0.00';
+
   return (
     <div className="min-h-screen bg-white">
-    <Navigation />
-    
-    <div className="max-w-6xl max-auto p-8">
-    {/* Header */}
-    <div className="flex items-center justify-between mb-8">
-    <div>
-    <h1 className="text-3xl font-bold text-black">Dashboard</h1>
-    <p className="text-gray-600 mt-1">
-    Welcome back, {userProfile ? `${userProfile.first_name} ${userProfile.last_name}` : user?.email}
-    </p>
-    </div>
-    <button
-    onClick={() => setShowAddModel(true)}
-    className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-    >
-    <plus className="w-5 h-5" />
-    Add investment
-    </button>
-    </div>
-    
-    {/* portfolio summary card */}
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-    <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
-    <div className="flex items-center gap-2 text-purple-700 mb-2">
-    <Wallet className="w-5 h-5" />
-    <span className="text-sm font-medium">Current Value </span>
-    </div>
-    <p className="text-3xl font-bold text-black">${totalInvested.toFixed(2)}</p>
-    </div>
-    
-    <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
-    <div className="flex items-center gap-2 text-purple-700 mb-2">
-    <TrendingUp className="w-5 h-5" />
-    <span className="text-sm font-medium">Current Value</span>
-    </div>
-    <p className="text-3xl font-bold text-black">${currentValue.toFixed(2)}</p>
-    </div>
-    
-    <div className={`rounded-xl p-6 border ${
-      profitLoss >= 0
-      ? 'bg-gradient-to-br from-green-50 to-green-100 border-green-200'
-      : 'bg-gradient-to-br from-red-50 to-red-100 border-red-200'
-    }`}>
-    <div className="flex items-center gap-2 mb-2">
-    {profitLoss >= 0 ? (
-      <>
-      <ArrowUpRight className="w-5 h-5 text-green-700" />
-      <span className="text-sm font-medium text-red-700">Loss</span>
-      </>
-      ) : (
-        <>
-        <ArrowDownRight className="w-5 h-5 text-red-700" />
-        <span className="text-sm font-medium text-red-700">Loss</span>
-        </>
-      )}
-      </div>
-      <p className={`text-3xl font-bold ${profitLoss >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-      ${Math.abs(profitLoss).toFixed(2)}
-      </p>
-      <p className={`text-sm mt-1 ${profitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-    {profitLoss >= 0 ? '+' : ''}{profitLossPercent}%
-      </p>
-      </div>
-      </div>
-      {/* Portfolio Stats */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-      <h2 className="text-xl font-bold text-black mb-4">Portfolio Overview</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div>
-      <p className="text-sm text-gray-600 mb-1">Total SOL Coins</p>
-      <p className="text-2xl font-bold text-purple-600">{totalSolCoins.toFixed(4)}</p>
-      </div>
-      <div>
-      <p className="text-sm text-gray-600 mb-1">Avg. Buy Price</p>
-      <p className="text-2xl font-bold text-black">
-      ${totalSolCoins > 0 ? (totalInvested / totalSolCoins).toFixed(2) : '0.00'}
-      </p>
-      </div>
-      <div>
-      <p className="text-sm text-gray-600 mb-1">Current Price</p>
-      <p className="text-2xl font-bold text-black">${currentSolPrice.toFixed(2)}</p>
-      </div>
-      <div>
-      <p className="text-sm text-gray-600 mb-1">Total investments</p>
-      <p className="text-2xl font-bold text-purple-600">{investments.length}</p>
-      </div>
-      </div>
-      </div>
-      </div>
+      <Navigation />
       
-      {/*Add Investment Modal*/}
+      <div className="max-w-6xl mx-auto p-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-black">Dashboard</h1>
+            <p className="text-gray-600 mt-1">
+              Welcome back, {userProfile ? `${userProfile.first_name} ${userProfile.last_name}` : user?.email}
+            </p>
+          </div>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            Add Investment
+          </button>
+        </div>
+
+        {/* Portfolio Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
+            <div className="flex items-center gap-2 text-purple-700 mb-2">
+              <Wallet className="w-5 h-5" />
+              <span className="text-sm font-medium">Total Invested</span>
+            </div>
+            <p className="text-3xl font-bold text-black">${totalInvested.toFixed(2)}</p>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
+            <div className="flex items-center gap-2 text-purple-700 mb-2">
+              <TrendingUp className="w-5 h-5" />
+              <span className="text-sm font-medium">Current Value</span>
+            </div>
+            <p className="text-3xl font-bold text-black">${currentValue.toFixed(2)}</p>
+          </div>
+
+          <div className={`rounded-xl p-6 border ${
+            profitLoss >= 0 
+              ? 'bg-gradient-to-br from-green-50 to-green-100 border-green-200' 
+              : 'bg-gradient-to-br from-red-50 to-red-100 border-red-200'
+          }`}>
+            <div className="flex items-center gap-2 mb-2">
+              {profitLoss >= 0 ? (
+                <>
+                  <ArrowUpRight className="w-5 h-5 text-green-700" />
+                  <span className="text-sm font-medium text-green-700">Profit</span>
+                </>
+              ) : (
+                <>
+                  <ArrowDownRight className="w-5 h-5 text-red-700" />
+                  <span className="text-sm font-medium text-red-700">Loss</span>
+                </>
+              )}
+            </div>
+            <p className={`text-3xl font-bold ${profitLoss >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+              ${Math.abs(profitLoss).toFixed(2)}
+            </p>
+            <p className={`text-sm mt-1 ${profitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {profitLoss >= 0 ? '+' : ''}{profitLossPercent}%
+            </p>
+          </div>
+        </div>
+
+        {/* Portfolio Stats */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h2 className="text-xl font-bold text-black mb-4">Portfolio Overview</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Total SOL Coins</p>
+              <p className="text-2xl font-bold text-purple-600">{totalSolCoins.toFixed(4)}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Avg. Buy Price</p>
+              <p className="text-2xl font-bold text-black">
+                ${totalSolCoins > 0 ? (totalInvested / totalSolCoins).toFixed(2) : '0.00'}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Current Price</p>
+              <p className="text-2xl font-bold text-black">${currentSolPrice.toFixed(2)}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Total Investments</p>
+              <p className="text-2xl font-bold text-purple-600">{investments.length}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Add Investment Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-xl max-w-md w-full p-6">
-        <h3 className="text-xl font-bold text-black mb-4">Add New Investment</h3>
-        <div className="space-y-4">
-        <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-        Investment Amount ($)
-        </label>
-        <input
-        type="number"
-        value={newInvestment.amount}
-        onChange={(e) => setNewInvestment({...newInvestment, amount: e.target.value })}
-        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 text-black"
-        placeholder="100.00"
-        step="0.01"
-        />
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-black mb-4">Add New Investment</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Investment Amount ($)
+                </label>
+                <input
+                  type="number"
+                  value={newInvestment.amount}
+                  onChange={(e) => setNewInvestment({ ...newInvestment, amount: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 text-black"
+                  placeholder="100.00"
+                  step="0.01"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  SOL Price at Purchase ($)
+                </label>
+                <input
+                  type="number"
+                  value={newInvestment.solPrice}
+                  onChange={(e) => setNewInvestment({ ...newInvestment, solPrice: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 text-black"
+                  placeholder="98.50"
+                  step="0.01"
+                />
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-black rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAddInvestment}
+                  className="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+                >
+                  Add Investment
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-       <div>
-       <label className="block text-sm font-medium text-gray-700 mb-1">
-       SOL Price at purchase ($)
-       </label>
-       <input
-       type="number"
-       value={newInvestment.solPrice}
-       onChange={(e) => setNewInvestment({ ...newInvestment, solPrice: e.target.value })}
-       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 text-black"
-       placeholder="98.50"
-       step="0.01"
-       />
-       </div>
-       <div className="flex gap-3 mt-6">
-       <button
-       onClick={() => setShowAddModel(false)}
-       className="flex-1 px-4 py-2 border border-gray-300 text-black rounded-lg hover:bg-gray-50 transition-colors"
-       >
-       Cancel
-       </button>
-       <button
-       onClick={handleAddInvestments}
-       className="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
-       >
-       Add Investment
-       </button>
-       </div>
-       </div>
-       </div>
-       </div>
-        )}
-        </div>
+      )}
+    </div>
+  );
+}
