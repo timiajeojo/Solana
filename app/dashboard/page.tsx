@@ -176,6 +176,22 @@ export default function DashboardPage() {
       <div>
       <p className="text-sm text-gray-600 mb-1">Total SOL Coins</p>
       <p className="text-2xl font-bold text-purple-600">{totalSolCoins.toFixed(4)}</p>
-      
-      
+      </div>
+      <div>
+      <p className="text-sm text-gray-600 mb-1">Avg. Buy Price</p>
+      <p className="text-2xl font-bold text-black">
+      ${totalSolCoins > 0 ? (totalInvested / totalSolCoins).toFixed(2) : '0.00'}
+      </p>
+      </div>
+      <div>
+      <p className="text-sm text-gray-600 mb-1">Current Price</p>
+      <p className="text-2xl font-bold text-black">${currentSolPrice.toFixed(2)}</p>
+      </div>
+      <div>
+      <p className="text-sm text-gray-600 mb-1">Total investments</p>
+      <p className="text-2xl font-bold text-purple-600">{investments.length}</p>
+      </div>
+      </div>
+      </div>
+      </div>
       
