@@ -1,221 +1,243 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// FIXED: Environment variables need to be strings with proper names
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// Validate that environment variables exist
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables. Please check your .env.local file.');
 }
 
-// Create and export the Supabase client
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // ============================================
-// Helper functions for investments
+// Types
 // ============================================
+
 export interface Investment {
-  id?: number
-  user_id: string
-  amount: number
-  sol_price: number
-  sol_amount: number
-  purchase_date: string
-  created_at?: string
+  id?: number;
+  user_id: string;
+  amount: number;
+  sol_price: number;
+  sol_amount: number;
+  purchase_date: string;
+  created_at?: string;
 }
 
-export interface userProfile {
-  id: string
-  first_name: string
-  last_name: string
-  created_at?: string
-  updated_at?:string
+export interface UserProfile {
+  id: string;
+  first_name: string;
+  last_name: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
-//Profile functions
-export async function createUserProfile(userId:string, firstName:string, lastName:string) {
-  const { data, error } = await supabase;
-  .from('profiles')
-  .insert([
-    {
-      id: userId,
-      first_name: firstName,
-      last_name: lastName
-    },
+// ============================================
+// Profile Functions
+// ============================================
+
+export async function createUserProfile(userId: string, firstName: string, lastName: string) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .insert([
+      {
+        id: userId,
+        first_name: firstName,
+        last_name: lastName,
+      },
     ])
     .select()
-    .single()
-    
-    if (error) {
-      console.error('Error creating profile:', error)
-      throw error 
-    }
-    return data
-}
+    .single();
 
-//Get user profile
+  if (error) {
+    console.error('Error creating profile:', error);
+    throw error;
+  }
+
+  return data;
+}
 
 export async function getUserProfile(userId: string) {
-  const { data, error } = await supabase;
-  .from('profiles')
-  .select('*')
-  .eq('id', userId)
-  .single()
-  
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single();
+
   if (error) {
-    console.error('Error fetching profile:', error)
-    throw error
-    return null
+    console.error('Error fetching profile:', error);
+    return null;
   }
-  return data
+
+  return data;
 }
 
-//update user profile
+export async function updateUserProfile(userId: string, updates: Partial<UserProfile>) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userId)
+    .select()
+    .single();
 
-export async function updateUserprofile(userId: string, updates: Partial<UserProfile>) {
-  const { data, error } = await supabase;
-  .from('profiles')
-  .update({
-    ...updates,
-    updated_at: new Date().tolSOString(),
-  })
-  .eq('id', userId)
-  .select()
-  .single()
-  
   if (error) {
-    console.error('Error updating profile:', error)
-    throw error
+    console.error('Error updating profile:', error);
+    throw error;
   }
-  return data
+
+  return data;
 }
 
-//Investment functions
+// ============================================
+// Investment Functions
+// ============================================
 
-export async function getInvestment(userId: string) {
-  const { data, error } = await supabase;
-  .from('investments')
-  .select('*')
-  .eq('user_id', userId)
-  .order('purchase_date', {ascending: false })
-  
+export async function getInvestments(userId: string) {
+  const { data, error } = await supabase
+    .from('investments')
+    .select('*')
+    .eq('user_id', userId)
+    .order('purchase_date', { ascending: false });
+
   if (error) {
-    console.error('Error getting investments:', error)
-    throw error
-    return[]
+    console.error('Error fetching investments:', error);
+    return [];
   }
-  return data
+
+  return data;
 }
 
 export async function addInvestment(investment: Investment) {
-  const { data, error } = await supabase;
-  .from('investments')
-  .insert([investment])
-  .select()
-  .single()
-  
+  const { data, error } = await supabase
+    .from('investments')
+    .insert([investment])
+    .select()
+    .single();
+
   if (error) {
-    console.error('Error adding investment:', error)
-    throw error
+    console.error('Error adding investment:', error);
+    throw error;
   }
-  return data
+
+  return data;
 }
 
 export async function updateInvestment(id: number, updates: Partial<Investment>) {
-  const { data, error } = await supabase;
-  .from('investments')
-  .updates(updates)
-  .eq('id', id)
-  .select()
-  .single()
-  
+  const { data, error } = await supabase
+    .from('investments')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
   if (error) {
-    console.error('Error updating investment:', error)
-    throw error
+    console.error('Error updating investment:', error);
+    throw error;
   }
-  return data
+
+  return data;
 }
 
 export async function deleteInvestment(id: number) {
-  const { data, error } = await supabase;
-  .from('investments')
-  .delete()
-  .eq('id', id)
-  
+  const { error } = await supabase
+    .from('investments')
+    .delete()
+    .eq('id', id);
+
   if (error) {
-    console.error('Error deleting investment:', error)
-    throw error
+    console.error('Error deleting investment:', error);
+    throw error;
   }
-  return true
+
+  return true;
 }
 
-//authentication functions
+// ============================================
+// Authentication Functions
+// ============================================
 
-//sign up with email, password and profile info
 export async function signUpWithEmail(
-  email: string,
-  password: string,
-  firstName: string,
-  lastName: string 
-  ) {
+  email: string, 
+  password: string, 
+  firstName: string, 
+  lastName: string
+) {
   const { data, error } = await supabase.auth.signUp({
     email,
-    password
+    password,
   });
+
   if (error) {
-    console.error('Error signing up:', error)
-    throw error
+    console.error('Error signing up:', error);
+    throw error;
   }
+
+  if (data.user) {
+    try {
+      await createUserProfile(data.user.id, firstName, lastName);
+    } catch (profileError) {
+      console.error('Error creating profile:', profileError);
+    }
+  }
+
+  return data;
 }
 
-// create profile after user is created
-if (data.user) {
-  try {
-    await createUserProfile(data.user.id, firstName, lastName)
-  } catch (profileError) {
-    console.error('Error creating profile:', err);
-    
+export async function signInWithEmail(email: string, password: string) {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    console.error('Error signing in:', error);
+    throw error;
   }
-  return data
+
+  return data;
 }
 
 export async function signInWithGoogle() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-    redirectTo: `${window.location.origin}/dashboard`,
-  },
+      redirectTo: `${window.location.origin}/dashboard`,
+    },
   });
+
   if (error) {
-    console.error('Error signing in with google:', error)
-    throw error 
+    console.error('Error signing in with Google:', error);
+    throw error;
   }
-  return data
+
+  return data;
 }
 
 export async function signOut() {
   const { error } = await supabase.auth.signOut();
-   
-   if (error) {
-     console.error('Error signing out:', error)
-     throw error
-   }
+
+  if (error) {
+    console.error('Error signing out:', error);
+    throw error;
+  }
 }
 
 export async function getCurrentUser() {
   const { data: { user }, error } = await supabase.auth.getUser();
-  if (error) {
-    console.error('Error getting current user:', error)
-    return null
-  }
-  return user
-}
 
+  if (error) {
+    console.error('Error getting user:', error);
+    return null;
+  }
+
+  return user;
+}
 
 export function onAuthStateChange(callback: (user: any) => void) {
   return supabase.auth.onAuthStateChange((event, session) => {
-    callback(session?.user ?? null)
-  })
+    callback(session?.user ?? null);
+  });
 }
