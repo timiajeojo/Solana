@@ -140,6 +140,19 @@ export default function DashboardPage() {
     <TrendingUp className="w-5 h-5" />
     <span className="text-sm font-medium">Current Value</span>
     </div>
-    <p className="text-3xl font-bold text-black">
+    <p className="text-3xl font-bold text-black">${currentValue.toFixed(2)}</p>
+    </div>
+    
+    <div className={`rounded-xl p-6 border ${
+      profitLoss >= 0
+      ? 'bg-gradient-to-br from-green-50 to-green-100 border-green-200'
+      : 'bg-gradient-to-br from-red-50 to-red-100 border-red-200'
+    }`}>
+    <div className="flex items-center gap-2 mb-2">
+    {profitLoss >= 0 ? (
+      <>
+      <ArrowUpRight className="w-5 h-5 text-green-700" />
+      
+      )}
     )
   
