@@ -195,3 +195,37 @@ export default function DashboardPage() {
       </div>
       </div>
       
+      {/*Add Investment Modal*/}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl max-w-md w-full p-6">
+        <h3 className="text-xl font-bold text-black mb-4">Add New Investment</h3>
+        <div className="space-y-4">
+        <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+        Investment Amount ($)
+        </label>
+        <input
+        type="number"
+        value={newInvestment.amount}
+        onChange={(e) => setNewInvestment({...newInvestment, amount: e.target.value })}
+        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 text-black"
+        placeholder="100.00"
+        step="0.01"
+        />
+        </div>
+       <div>
+       <label className="block text-sm font-medium text-gray-700 mb-1">
+       SOL Price at purchase ($)
+       </label>
+       <input
+       type="number"
+       value={newInvestment.solPrice}
+       onChange={(e) => setNewInvestment({ ...newInvestment, solPrice: e.target.value })}
+       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 text-black"
+       placeholder="98.50"
+       step="0.01"
+       />
+       </div>
+       
+        )}
