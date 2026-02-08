@@ -156,6 +156,11 @@ export default function DashboardPage() {
       </>
       )}
       </div>
-      <p className={``}
+      <p className={`text-3xl font-bold ${profitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+      {profitLoss >= 0 ? '+' : ''}{profitLossPercent}%
+      </p>
+      </div>
+      </div>
+      
     )
   
