@@ -23,7 +23,6 @@ export default function AuthPage() {
     setError('');
     setLoading(true);
 
-    // Validation
     if (!email || !password) {
       setError('Please fill in all required fields');
       setLoading(false);
@@ -50,16 +49,13 @@ export default function AuthPage() {
 
     try {
       if (isSignIn) {
-        // Sign In
         const result = await signInWithEmail(email, password);
         console.log('Sign in successful:', result);
         router.push('/dashboard');
       } else {
-        // Sign Up
         const result = await signUpWithEmail(email, password, firstName, lastName);
         console.log('Sign up successful:', result);
         alert('Success! Check your email to verify your account before signing in.');
-        // Switch to sign in tab
         setIsSignIn(true);
         setEmail('');
         setPassword('');
@@ -95,7 +91,6 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100">
-      {/* Navigation */}
       <nav className="px-6 py-4 max-w-7xl mx-auto relative">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -148,7 +143,6 @@ export default function AuthPage() {
         )}
       </nav>
 
-      {/* Auth Form */}
       <div className="max-w-md mx-auto px-6 py-8 md:py-12">
         <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
           <div className="flex items-center justify-center gap-2 mb-8">
@@ -168,7 +162,6 @@ export default function AuthPage() {
             </div>
           )}
 
-          {/* Tabs */}
           <div className="flex gap-8 mb-8 border-b border-gray-200">
             <button
               onClick={() => {
@@ -202,7 +195,6 @@ export default function AuthPage() {
             </button>
           </div>
 
-          {/* Sign In Form */}
           {isSignIn && (
             <div className="space-y-6">
               <div>
@@ -291,10 +283,8 @@ export default function AuthPage() {
             </div>
           )}
 
-          {/* Sign Up Form */}
           {!isSignIn && (
             <div className="space-y-6">
-              {/* Name Fields - Side by Side */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="first-name" className="block text-gray-900 font-semibold mb-2">
@@ -434,7 +424,16 @@ export default function AuthPage() {
           )}
 
           <p className="text-center mt-8 text-gray-600">
-            {isSignIn ? 'Sign Up' : 'Sign In'}
+            {isSignIn ? "Don't have an account? " : "Already have an account? "}
+            <button
+              onClick={() => {
+                setIsSignIn(!isSignIn);
+                setError('');
+              }}
+              disabled={loading}
+              className="text-purple-600 hover:text-purple-700 font-semibold disabled:opacity-50"
+            >
+              {isSignIn ? 'Sign Up' : 'Sign In'}
             </button>
           </p>
         </div>
