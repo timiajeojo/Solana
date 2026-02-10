@@ -210,8 +210,26 @@ return (
     
     <button
     onClick={() => {
-      
+    setShowDropDown(false)
+    router.push('/settings')
     }}
+    className="w-full px-4 py-3 text-white hover:bg-purple-50 transition-colors flex items-center gap-3 text-gray-700"
+    >
+    <settings className="w-5 h-5 text-purple-600" />
+    <span className="font-medium">Settings</span>
+    </button>
+    
+    <div className="border-t border-gray-100 mt-2 pt-2">
+    <button
+    onClick={() => {
+      setShowDropDown(false)
+      handleLogout()
+    }}
+    className="w-full px-4 py-3 text-left hover:bg-red-50 transition-colors flex items-center gap-3 text-red-600"
+    >
+    <logOut className="w-5 h-5" />
+    <span className="font-medium">Logout</span>
+    
     )}
   )
 }
