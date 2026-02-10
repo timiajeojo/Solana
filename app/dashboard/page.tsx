@@ -60,15 +60,44 @@ const loadInvestments = async (userId: string) => {
     console.error('Error loading investments:', error);
   }
 };
+
 const handleInvestment     = async () => {
   if (!newInvestment.solAmount || !newInvestment.pricePerSol || !user) return
+  
   try {
+    const solAmount = parseFloat(newInvestment.solAmount);
+    const pricePerSol = parseFloat(,newInvestment.pricePerSol);
+    const totalAmount = solAmount * pricePerSol;
     
-  } catch (err) {
-    console.error('Error:', err);
+    const investment = {
+      user_id: user.id,
+      amount: totalAmount,
+      sol_price: pricePerSol,
+      sol_amount: solAmount,
+      purchase_date: new Date().toISOString(),
+    };
     
+    await addInvestment(investment)
+    await loadInvestments(user.id)
+    setNewInvestment({ solAmount: '', pricePerSol: ''})
+    setShowAddModal(false)
+  } catch (error) {
+    console.error('Error adding invesents:', error);
+    alert('failed to add investment')
   }
-  {
+}
+
+const handleLogout = async () => {
+  try {
+    await signOut
+    router.push('/auth')
+  } catch (error) {
+    console.error('Logout error:', error);
+  }
+};
+
+const getInitials = async () => {
+  if (!userProfile?.first_name && userProfile?.last_name) {
     
   }
 }
