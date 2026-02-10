@@ -158,7 +158,60 @@ return (
   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-purple-400 flex items-center justify-center text-white font-bold text-lg shadow-lg">
   {getInitials()}
   </div>
-  </div>
+  </button>
   
+  {/* Dropdown Menu */}
+  {showDropDown &&(
+    <>
+    <div
+    className="fixed inset-0 z-10"
+    onClick={() => setShowDropDown(false)}
+    ></div>
+    <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-20">
+    <div className="px-4 py-3 border-b border-gray-100">
+    <p className="text-sm font-semibold text-gray-900">
+    {userProfile ? `${userProfile.first_name} ${userProfile.last_name}` : 'user'}
+    </p>
+    <p className="text-xs text-gray-500">{user?.email}</p>
+    </div>
+    
+    <button
+    onClick={() => {
+      setShowDropDown(false)
+      router.push('/auth')
+    }}
+    className="w-full px-4 py-3 text-left hover:bg-purple-50 transition-colors flex items-center gap-3 text-gray-700"
+    >
+    <User className="w-5 h-5 text-purple-600" />
+    <span className="font-medium">Profile</span>
+    </button>
+    
+    <button
+    onClick={() => {
+      setShowDropDown(false)
+      router.push('/wallets')
+    }}
+    className="w-full px-4 py-3 text-left hover:bg-purple-50 transition-colors flex items-center gap-3.text-gray-700"
+    >
+    <CreditCard className="w-5 h-5 text-purple-600" />
+    <span className="font-medium">Wallets</span>
+    </button>
+    
+    <button
+    onClick={() => {
+      setShowDropDown(false)
+      router.push('/history')
+    }}
+    className="w-full px-4 py-3 text-left hover:bg-purple-50 transition-colors flex items-center gap-3 text-gray-700"
+    >
+    <History className="w-5 h-5 text-purple-600" />
+    <span className="font-medium">History</span>
+    </button>
+    
+    <button
+    onClick={() => {
+      
+    }}
+    )}
   )
 }
