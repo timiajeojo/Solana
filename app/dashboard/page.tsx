@@ -111,7 +111,24 @@ const calculateTotalInvestment = () => {
 
 if (loading) {
   return (
-    
+    <div className="min-h-screen bg-white flex items-center justify-center">
+    <div className="text-center">
+    <div className="w-16 h-16 border border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+    <p className="text-gray-600">Loading...</p>
+    </div>
+    </div>
     )
 }
+
+const totalInvested = investments.reduce((sum, inv) => sum + inv.amount, 0);
+const totalSolCoins = investments.reduce((sum, inv) => sum + inv.sol_amount, 0);
+const currentValue = totalSolCoins * currentSolPrice;
+const profitLoss = currentValue - totalInvested;
+const profitLossPercent = totalInvested > 0 ?((profitLoss / totalInvested) * 100).toFixed(2) : '0.00';
+
+return (
+  <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100">
+  {/* Header With User Profile Dropdown*/}
+  <div className=""
+  )
 }
