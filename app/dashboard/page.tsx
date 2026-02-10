@@ -250,6 +250,16 @@ return (
     </div>
     
     {/* Add investment button */}
+    <div className="mb-6 flex justify-end">
+    <button
+    onClick={() => setShowAddModal(true)}
+    className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl flex items-center gap-2 transition-colors shadow-lg hover:shadow-xl"
+    >
+    <Plus className="w-5 h-5" />
+    Add Investment
+    </button>
+    </div>
+    
     
   )
 }
