@@ -260,6 +260,14 @@ return (
     </button>
     </div>
     
+    {/* Portfolio summary cards */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div className="bg-white rounded-2xl p-6 shadow-lg border border-purple-100">
+    <div className="flex items-center gap-3 mb-4">
+    <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
+    <wallet className="w-6 h-6 text-purple-600" />
+    </div>
+    <div>
     
   )
 }
