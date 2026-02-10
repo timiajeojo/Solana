@@ -98,7 +98,20 @@ const handleLogout = async () => {
 
 const getInitials = async () => {
   if (!userProfile?.first_name && userProfile?.last_name) {
-    
+    return `${userProfile.first_name[0]}${userProfile.last_name[0]}`.toUpperCase()
   }
+  return user?.email?.[0]?.toUpperCase() || 'U'
+}
+
+const calculateTotalInvestment = () => {
+  const solAmt = parseFloat(newInvestment.solAmount) || 0;
+  const price = parseFloat(newInvestment.pricePerSol) || 0;
+  return (solAmt * price).toFixed(2)
+};
+
+if (loading) {
+  return (
+    
+    )
 }
 }
