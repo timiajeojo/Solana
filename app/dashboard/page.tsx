@@ -143,5 +143,9 @@ return (
   </div>
   </div>
   
+  {/* User profile with Dropdown */}
+  <div className="relative">
+  <button
+  onClick={() => setShowDropDown(!showDropDown)}
   )
 }
