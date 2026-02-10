@@ -134,6 +134,14 @@ return (
   <div className="flex items-center justify-between h-20">
   {/* Logo */}
   <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100">
-  <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-400"
+  <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-400 rounded-lg flex items-center justify-center">
+  <div className="w-6 h-6 text-white" />
+  </div>
+  <div>
+  <h1 className="text-xl font-bold text-gray-900">Solana Tracker</h1>
+  <p className="text-xs text-gray-500">Investment Dashboard</p>
+  </div>
+  </div>
+  
   )
 }
