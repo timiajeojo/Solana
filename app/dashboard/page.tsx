@@ -60,5 +60,16 @@ const loadInvestments = async (userId: string) => {
     console.error('Error loading investments:', error);
   }
 };
-
+const handleInvestment     = async () => {
+  if (!newInvestment.solAmount || !newInvestment.pricePerSol || !user) return
+  try {
+    
+  } catch (err) {
+    console.error('Error:', err);
+    
+  }
+  {
+    
+  }
+}
 }
