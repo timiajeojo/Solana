@@ -129,6 +129,7 @@ const profitLossPercent = totalInvested > 0 ?((profitLoss / totalInvested) * 100
 return (
   <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100">
   {/* Header With User Profile Dropdown*/}
+  <div className="bg-white border-b border-gray-200 sticky top-0 z-20 shadow-sm">
   <div className=""
   )
 }
