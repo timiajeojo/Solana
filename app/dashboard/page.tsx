@@ -130,6 +130,10 @@ return (
   <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100">
   {/* Header With User Profile Dropdown*/}
   <div className="bg-white border-b border-gray-200 sticky top-0 z-20 shadow-sm">
-  <div className=""
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div className="flex items-center justify-between h-20">
+  {/* Logo */}
+  <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100">
+  <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-400"
   )
 }
