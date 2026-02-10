@@ -268,6 +268,14 @@ return (
     <wallet className="w-6 h-6 text-purple-600" />
     </div>
     <div>
+    <p className="text-sm text-gray-600 font-medium">Total Invested</p>
+    <p className="text-2xl fontbold text-gray-900">${totalInvested.toFixed(2)}</p>
+    </div>
+    </div>
+    </div>
+    
+    <div className="bg-white rounded-2xl p-6 shadow-lg border- border-purple-100">
+    <div className="flex items-center gap-3 mb-4">
     
   )
 }
