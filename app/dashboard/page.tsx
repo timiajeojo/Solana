@@ -332,5 +332,22 @@ return (
     </div>
     <div>
     <p className="text-sm text-gray-600 mb-2">Avg. Buy Price</p>
-    <p className=""
+    <p className="text-3xl font-bold text-black">
+    ${totalSolCoins > 0 ? (totalInvested / totalSolCoins).toFixed(2) : '0.00'}
+    </p>
+    </div>
+    <div>
+    <p className="text-sm text-gray-600 mb-2">Current Price</p>
+    <p className="text-3xl font-bold text-purple-600">{currentSolPrice.toFixed(2)}</p>
+    </div>
+    <div>
+    <p className="text-sm text-gray-600 mb-2">Total Investments</p>
+    <p className="text-3xl font-bold text-purple-600">{investments.length}</p>
+    </div>
+    </div>
+    </div>
+    </div>
+    
+    
+    
 }
