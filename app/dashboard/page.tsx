@@ -286,5 +286,24 @@ return (
     </div>
     </div>
     
+    <div className={`rounded-2xl p-6 shadow-lg border ${
+      profitLoss >= 0
+      ? 'bg-green-50 border-green-200'
+      : 'bg-red-50 border-red-200'
+    }`>
+    <div className="flex items-center gap-3 mb-4">
+    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+      profitLoss >= 0 ? 'bg-green-100' : 'bg-red-100'
+    }`}>
+    {profitLoss >= 0 ? (
+      <ArrowUpRight className="w-6 h-6 text-green-600" />
+      ) : (
+      <ArrowDownRight className="w-6 h-6 text-red-600" />
+      )}
+      </div>
+      <div>
+      <p className={`text-sm font-medium ${
+        profitLoss >= 0 ? 'text-green-700' : 'text-red-700'
+      }`}>
   )
 }
