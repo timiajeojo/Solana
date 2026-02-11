@@ -314,6 +314,14 @@ return (
       </p>
       </div>
       </div>
-      
+      <p className={`text-sm ${
+        profitLoss >= 0 ? 'text-green-600' : 'text-red-600'
+      }`}>
+      {profitLoss >= 0 ? '+' : ''}{profitLossPercent}% from invested
+      </p>
+      </div>
+      </div>
+    
+    {/* Portfolio stats */}
   )
 }
