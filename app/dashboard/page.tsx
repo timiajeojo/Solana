@@ -277,6 +277,14 @@ return (
     <div className="bg-white rounded-2xl p-6 shadow-lg border- border-purple-100">
     <div className="flex items-center gap-3 mb-4">
     <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
-    <TrendingUp className="w-6 h-6 bg-purple-100"
+    <TrendingUp className="w-6 h-6 text-purple-600" />
+    </div>
+    <div>
+    <p className="text-sm text-gray-600 font-medium"> Current Value</p>
+    <p className="text-2xl font-bold text-gray-900">${currentValue.toFixed(2)}</p>
+    </div>
+    </div>
+    </div>
+    
   )
 }
