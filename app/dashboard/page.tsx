@@ -351,6 +351,22 @@ return (
     {/* Add Investment Modals */}
     {showAddModal && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl">
+      <h3 className="text-2xl font-bold text-black mb-6">Add New Investment</h3>
+      <div className="space-y-5">
+      <div>
+      <label className="block text-sm font-semibold text-gray-700 mb-2">
+      SOL Amount
+      </label>
+      <input
+      type="number"
+      value={newInvestment.solAmount}
+      onChange={(e) => setNewInvestment({ ...newInvestment, solAmount: e.target.value })}
+      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2  focus:ring-purple-500 focus:border-transparent text-black text-lg"
+      placeholder="0.00"
+      step="0.0001"
+      />
+      </div>
       
       )}
     
