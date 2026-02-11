@@ -305,5 +305,15 @@ return (
       <p className={`text-sm font-medium ${
         profitLoss >= 0 ? 'text-green-700' : 'text-red-700'
       }`}>
+      {profitLoss >= 0 'Profit' : 'Loss'}
+      </p>
+      <p className={`text-2xl font-bold ${
+        profitLoss >= 0 ? 'text-green-700' : 'text-red-700'
+      }`}>
+      ${Math.abs(profitLoss).toFixed(2)}
+      </p>
+      </div>
+      </div>
+      
   )
 }
