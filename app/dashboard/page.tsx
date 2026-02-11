@@ -323,5 +323,14 @@ return (
       </div>
     
     {/* Portfolio stats */}
-  )
+    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-lg">
+    <h2 className="text-xl font-bold text-black mb-6">Portfolio Overview</h2>
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+    <div>
+    <p className="text-sm text-gray-600 mb-2">Total SOL Coins</p>
+    <p className="text-3xl font-bold text-purple-600">{totalSolCoins.toFixed(4)}</p>
+    </div>
+    <div>
+    <p className="text-sm text-gray-600 mb-2">Avg. Buy Price</p>
+    <p className=""
 }
