@@ -1,0 +1,201 @@
+'use client'
+
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, TrendingUp, Calendar, DollarSign, Check } from 'lucide-react';
+
+const plans = [
+  {
+    id: 1,
+    name: 'Starter Plan',
+    amount: 100,
+    dailyReturn: 6,
+    duration: '30 Days',
+    totalReturn: 180,
+    features: ['6% Daily Returns', 'Minimum Investment', 'Beginner Friendly', '24/7 Support']
+  },
+  {
+    id: 2,
+    name: 'Growth Plan',
+    amount: 250,
+    dailyReturn: 15,
+    duration: '30 Days',
+    totalReturn: 450,
+    features: ['6% Daily Returns', 'Medium Investment', 'Priority Support', 'Monthly Reports'],
+    popular: true
+  },
+  {
+    id: 3,
+    name: 'Pro Plan',
+    amount: 500,
+    dailyReturn: 30,
+    duration: '30 Days',
+    totalReturn: 900,
+    features: ['6% Daily Returns', 'High Returns', 'Premium Support', 'Weekly Reports']
+  },
+  {
+    id: 4,
+    name: 'Premium Plan',
+    amount: 750,
+    dailyReturn: 45,
+    duration: '30 Days',
+    totalReturn: 1350,
+    features: ['6% Daily Returns', 'Very High Returns', 'VIP Support', 'Daily Reports']
+  },
+  {
+    id: 5,
+    name: 'Elite Plan',
+    amount: 1000,
+    dailyReturn: 60,
+    duration: '30 Days',
+    totalReturn: 1800,
+    features: ['6% Daily Returns', 'Maximum Returns', 'Dedicated Manager', 'Real-time Analytics']
+  }
+];
+
+export default function PlansPage() {
+  const router = useRouter();
+  const [selectedPlan, setSelectedPlan] = useState<number | null>(null);
+
+  const handleInvest = (planId: number) => {
+    setSelectedPlan(planId);
+    // TODO: Add investment logic with Supabase
+    alert(`Investment in plan ${planId} initiated! (Connect to payment system)`);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="flex items-center gap-2 text-gray-600 hover:text-purple-600 transition-colors mb-4"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Back to Dashboard
+          </button>
+          <h1 className="text-3xl font-bold text-gray-900">Investment Plans</h1>
+          <p className="text-gray-600 mt-2">Choose the perfect plan for your investment goals</p>
+        </div>
+      </div>
+
+      {/* Plans Grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {plans.map((plan) => (
+            <div
+              key={plan.id}
+              className={`relative bg-white rounded-2xl shadow-lg border-2 transition-all hover:shadow-2xl ${
+                plan.popular ? 'border-purple-500' : 'border-gray-200'
+              }`}
+            >
+              {plan.popular && (
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-purple-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                    Most Popular
+                  </span>
+                </div>
+              )}
+
+              <div className="p-8">
+                {/* Plan Header */}
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                  <div className="flex items-baseline justify-center gap-2">
+                    <span className="text-4xl font-bold text-purple-600">${plan.amount}</span>
+                  </div>
+                  <p className="text-gray-500 mt-2">Minimum Investment</p>
+                </div>
+
+                {/* Daily Return */}
+                <div className="bg-purple-50 rounded-xl p-4 mb-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-purple-600" />
+                      <span className="text-sm font-medium text-gray-700">Daily Return</span>
+                    </div>
+                    <span className="text-xl font-bold text-purple-600">${plan.dailyReturn}</span>
+                  </div>
+                </div>
+
+                {/* Duration */}
+                <div className="flex items-center justify-between mb-6 p-4 bg-gray-50 rounded-xl">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-gray-600" />
+                    <span className="text-sm font-medium text-gray-700">Duration</span>
+                  </div>
+                  <span className="font-semibold text-gray-900">{plan.duration}</span>
+                </div>
+
+                {/* Total Return */}
+                <div className="bg-green-50 rounded-xl p-4 mb-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="w-5 h-5 text-green-600" />
+                      <span className="text-sm font-medium text-gray-700">Total Return</span>
+                    </div>
+                    <span className="text-xl font-bold text-green-600">${plan.totalReturn}</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">After 30 days</p>
+                </div>
+
+                {/* Features */}
+                <div className="space-y-3 mb-8">
+                  {plan.features.map((feature, index) => (
+                    <div key={index} className="flex items-center gap-3">
+                      <div className="w-5 h-5 rounded-full bg-purple-100 flex items-center justify-center">
+                        <Check className="w-3 h-3 text-purple-600" />
+                      </div>
+                      <span className="text-sm text-gray-700">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Invest Button */}
+                <button
+                  onClick={() => handleInvest(plan.id)}
+                  className={`w-full py-3 rounded-xl font-semibold transition-all ${
+                    plan.popular
+                      ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-lg hover:shadow-xl'
+                      : 'bg-gray-900 hover:bg-gray-800 text-white'
+                  }`}
+                >
+                  Invest Now
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Info Section */}
+        <div className="mt-12 bg-white rounded-2xl shadow-lg p-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">How It Works</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-xl font-bold text-purple-600">1</span>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">Choose Your Plan</h3>
+              <p className="text-sm text-gray-600">Select an investment plan that fits your budget</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-xl font-bold text-purple-600">2</span>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">Make Investment</h3>
+              <p className="text-sm text-gray-600">Invest your chosen amount securely</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-xl font-bold text-purple-600">3</span>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">Earn Daily</h3>
+              <p className="text-sm text-gray-600">Receive 6% daily returns for 30 days</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
