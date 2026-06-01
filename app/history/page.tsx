@@ -10,7 +10,7 @@ export default function HistoryPage() {
     { id:2, type:'earning', amount:6, status:'completed', date:'2024-01-16', plan: 'starter' },
     { id:3, type: 'deposit', amount: 250, status: 'completed', date: '2024-01-20', plan: 'Bronze' },
     { id: 4, type: 'earning', amount: 15, status: 'completed', date: '2024-01-21', plan: 'Bronze' },
-    { id: 5, type: 'withdrawal', amount: 50, status: 'pending', date: '2024-01-22', plan: '-' }
+    { id: 5, type: 'withdrawal', amount: 50, status: 'pending', date: '2024-01-22', plan: '-' },
     ])
     
     const getStatusColor = (status: string) => {
