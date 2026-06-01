@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { History, ArrowUpRight, ArrowDownRight, ArrowLeft, Filter } from 'lucide-react'
 
 export default function HistoryPage() {
+  const router = useRouter()
   const [transactions] = useState([
     { id: 1, type:'deposit', amount:100, status:'completed', date: '2024-01-15', plan:'starter' },
     { id:2, type:'earning', amount:6, status:'completed', date:'2024-01-16', plan: 'starter' },
