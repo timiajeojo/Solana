@@ -61,7 +61,7 @@ export default function HistoryPage() {
       <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200">
       <div className="overflow-x-hidden">
       <table className="w-full">
-      <thread className="bg-gray-50 border-b border-gray-200">
+      <thead className="bg-gray-50 border-b border-gray-200">
       <tr>
       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Type</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Amount</th>
