@@ -187,7 +187,7 @@ function NotificationPanel() {
         <Toggle checked={prefs.productUpdates} onChange={() => toggle("productUpdates")} />
         </Row>
         <Row label="security Alerts" description="Sign-ins from new devices or locations">
-        <Toggle checked={prefs.securityAlerts} onChange={() => toggle("security Alerts")} />
+        <Toggle checked={prefs.securityAlerts} onChange={() => toggle("securityAlerts")} />
         </Row>
         </Card>
         </div>
