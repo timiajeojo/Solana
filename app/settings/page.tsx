@@ -161,7 +161,7 @@ function ProfilePanel({ onSave }: { onSave: () => void }) {
 function NotificationPanel() {
   const [prefs, setPrefs] = useState({
     email: true, push: false, sms: false,
-    weeklyDigest: true, priductUpdates: true, securityAlerts: true,
+    weeklyDigest: true, productUpdates: true, securityAlerts: true,
   });
   const toggle = (key: keyof typeof prefs) => setPrefs((p) => ({ ...p, [key]: !p[key] }));
   
