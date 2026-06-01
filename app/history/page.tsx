@@ -24,8 +24,7 @@ export default function HistoryPage() {
     
     const getTypeIcon = (type: string) => {
       switch (type) {
-        cash 'deposit':
-      }
+        case 'deposit':
         return <ArrowDownRight className="w-5 h-5 text-green-600" />
         case 'withdrawal':
           return <ArrowUpRight className="w-5 h-5 text-red-600" />
