@@ -4,7 +4,7 @@ import { useState, ReactNode } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Section = "profile" | "notifications" | "security" | "appearance" | "billing";
+type Section = "profile" | "notifications" | "security" | "appearance";
 
 interface SectionItem {
   id: Section;
@@ -29,15 +29,13 @@ interface CardProps {
   children: ReactNode;
 }
 
-// ─── Palette (white / purple / black)
-// bg:       #ffffff  (white)
-// surface:  #faf9ff  (off-white tint)
-// border:   #e8e2ff  (light purple border)
-// muted:    #6b6b80  (muted text)
-// accent:   #7c3aed  (purple-700)
-// accent-h: #6d28d9  (purple-800 hover)
-// accent-l: #ede9fe  (purple-100 light bg)
-// black:    #0a0a0a
+// ─── Shared styles ────────────────────────────────────────────────────────────
+
+const ghostBtn =
+  "rounded-lg border border-[#e8e2ff] bg-white hover:bg-[#faf9ff] hover:border-violet-300 px-3 py-1.5 text-xs font-semibold text-[#0a0a0a] transition cursor-pointer";
+
+const inputCls =
+  "w-full sm:w-52 rounded-lg bg-white border border-[#e8e2ff] px-3 py-2 text-sm text-[#0a0a0a] placeholder:text-[#6b6b80] focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition";
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -52,7 +50,7 @@ function Toggle({ checked, onChange }: ToggleProps) {
       }`}
     >
       <span
-        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ${
+        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition duration-200 ${
           checked ? "translate-x-5" : "translate-x-0"
         }`}
       />
@@ -62,8 +60,8 @@ function Toggle({ checked, onChange }: ToggleProps) {
 
 function Row({ label, description, children }: RowProps) {
   return (
-    <div className="flex items-center justify-between py-4 px-6 border-b border-[#e8e2ff] last:border-0">
-      <div className="pr-6">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-4 px-4 sm:px-6 border-b border-[#e8e2ff] last:border-0">
+      <div className="min-w-0">
         <p className="text-sm font-medium text-[#0a0a0a]">{label}</p>
         <p className="text-xs text-[#6b6b80] mt-0.5 leading-relaxed">{description}</p>
       </div>
@@ -75,7 +73,7 @@ function Row({ label, description, children }: RowProps) {
 function Card({ title, description, children }: CardProps) {
   return (
     <div className="rounded-2xl border border-[#e8e2ff] bg-white overflow-hidden shadow-sm">
-      <div className="px-6 py-5 border-b border-[#e8e2ff] bg-[#faf9ff]">
+      <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-[#e8e2ff] bg-[#faf9ff]">
         <h2 className="text-sm font-semibold text-[#0a0a0a] tracking-tight">{title}</h2>
         <p className="text-xs text-[#6b6b80] mt-1">{description}</p>
       </div>
@@ -84,15 +82,7 @@ function Card({ title, description, children }: CardProps) {
   );
 }
 
-// ─── Shared button styles ─────────────────────────────────────────────────────
-
-const ghostBtn =
-  "rounded-lg border border-[#e8e2ff] bg-white hover:bg-[#faf9ff] hover:border-violet-300 px-3 py-1.5 text-xs font-semibold text-[#0a0a0a] transition";
-
-const inputCls =
-  "w-52 rounded-lg bg-white border border-[#e8e2ff] px-3 py-1.5 text-sm text-[#0a0a0a] placeholder:text-[#6b6b80] focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition";
-
-// ─── Icons ───────────────────────────────────────────────────────────────────
+// ─── Icons ────────────────────────────────────────────────────────────────────
 
 function ProfileIcon() {
   return (
@@ -124,13 +114,6 @@ function PaletteIcon() {
     </svg>
   );
 }
-function BillingIcon() {
-  return (
-    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="1" y="4" width="22" height="16" rx="2" ry="2" /><line x1="1" y1="10" x2="23" y2="10" />
-    </svg>
-  );
-}
 
 // ─── Section Panels ───────────────────────────────────────────────────────────
 
@@ -148,16 +131,12 @@ function ProfilePanel({ onSave }: { onSave: () => void }) {
           <input className={inputCls} defaultValue="@alexj" />
         </Row>
         <Row label="Bio" description="A short description about yourself">
-          <textarea
-            rows={2}
-            className={`${inputCls} resize-none`}
-            defaultValue="Product designer & developer."
-          />
+          <textarea rows={2} className={`${inputCls} resize-none`} defaultValue="Product designer & developer." />
         </Row>
-        <div className="flex justify-end px-6 py-4 bg-[#faf9ff] border-t border-[#e8e2ff]">
+        <div className="flex justify-end px-4 sm:px-6 py-4 bg-[#faf9ff] border-t border-[#e8e2ff]">
           <button
             onClick={onSave}
-            className="rounded-lg bg-violet-700 hover:bg-violet-800 text-white text-sm font-semibold px-5 py-2 transition shadow-sm"
+            className="rounded-lg bg-violet-700 hover:bg-violet-800 text-white text-sm font-semibold px-5 py-2 transition shadow-sm cursor-pointer"
           >
             Save Changes
           </button>
@@ -165,7 +144,7 @@ function ProfilePanel({ onSave }: { onSave: () => void }) {
       </Card>
 
       <Card title="Avatar" description="Upload a photo for your profile.">
-        <div className="flex items-center gap-5 px-6 py-5">
+        <div className="flex items-center gap-5 px-4 sm:px-6 py-5">
           <div className="h-16 w-16 rounded-full bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-xl font-bold text-white shrink-0 shadow-md">
             AJ
           </div>
@@ -246,7 +225,7 @@ function SecurityPanel({ onAction }: { onAction: (msg: string) => void }) {
         <Row label="Delete Account" description="Permanently remove your account and all data">
           <button
             onClick={() => onAction("Deletion requires email confirmation")}
-            className="rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-600 transition"
+            className="rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-600 transition cursor-pointer"
           >
             Delete account
           </button>
@@ -276,12 +255,12 @@ function AppearancePanel() {
     <div className="space-y-4">
       <Card title="Theme" description="Control the overall look of the interface.">
         <Row label="Color Scheme" description="Choose dark, light, or follow system">
-          <div className="flex gap-1.5">
+          <div className="flex flex-wrap gap-1.5">
             {themes.map((t) => (
               <button
                 key={t}
                 onClick={() => setTheme(t)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold capitalize transition border ${
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold capitalize transition border cursor-pointer ${
                   theme === t
                     ? "bg-violet-700 border-violet-700 text-white shadow-sm"
                     : "bg-white border-[#e8e2ff] text-[#6b6b80] hover:border-violet-300 hover:text-[#0a0a0a]"
@@ -298,7 +277,7 @@ function AppearancePanel() {
               <button
                 key={a.id}
                 onClick={() => setAccent(a.id)}
-                className={`h-6 w-6 rounded-full ${a.color} transition ring-offset-2 ring-offset-white ${
+                className={`h-6 w-6 rounded-full ${a.color} transition ring-offset-2 ring-offset-white cursor-pointer ${
                   accent === a.id ? "ring-2 ring-[#0a0a0a] scale-110" : "hover:scale-105"
                 }`}
               />
@@ -332,71 +311,6 @@ function AppearancePanel() {
   );
 }
 
-function BillingPanel({ onAction }: { onAction: (msg: string) => void }) {
-  return (
-    <div className="space-y-4">
-      <Card title="Current Plan" description="You're on the Pro plan.">
-        <div className="px-6 py-5 flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-base font-bold text-[#0a0a0a]">Pro</span>
-              <span className="rounded-full bg-violet-100 border border-violet-200 text-violet-700 text-xs font-semibold px-2.5 py-0.5">
-                Active
-              </span>
-            </div>
-            <p className="text-xs text-[#6b6b80] mt-1">$12 / month · Renews May 21, 2026</p>
-          </div>
-          <button
-            onClick={() => onAction("Upgrade options opened")}
-            className="rounded-lg bg-violet-700 hover:bg-violet-800 text-white text-xs font-semibold px-3 py-1.5 transition shadow-sm"
-          >
-            Upgrade
-          </button>
-        </div>
-        <div className="border-t border-[#e8e2ff]">
-          {["Unlimited projects", "5 team members", "Advanced analytics", "Priority support"].map((f) => (
-            <div key={f} className="flex items-center gap-2.5 px-6 py-2.5 text-xs text-[#0a0a0a]">
-              <svg className="w-3.5 h-3.5 text-violet-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              {f}
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      <Card title="Payment Method" description="Manage your billing details.">
-        <Row label="Card on file" description="Visa ending in 4242 · Expires 08/27">
-          <button onClick={() => onAction("Payment portal opened")} className={ghostBtn}>Update</button>
-        </Row>
-        <Row label="Billing email" description="invoices@example.com">
-          <button onClick={() => onAction("Billing email updated")} className={ghostBtn}>Edit</button>
-        </Row>
-      </Card>
-
-      <Card title="Invoices" description="Download your billing history.">
-        {[
-          { date: "Apr 1, 2026", amount: "$12.00" },
-          { date: "Mar 1, 2026", amount: "$12.00" },
-          { date: "Feb 1, 2026", amount: "$12.00" },
-        ].map((inv) => (
-          <Row key={inv.date} label={inv.date} description={inv.amount}>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-emerald-600 font-semibold">Paid</span>
-              <button
-                onClick={() => onAction("Invoice downloaded")}
-                className="rounded border border-[#e8e2ff] bg-white hover:bg-[#faf9ff] px-2 py-1 text-xs text-[#6b6b80] transition"
-              >
-                PDF
-              </button>
-            </div>
-          </Row>
-        ))}
-      </Card>
-    </div>
-  );
-}
-
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
@@ -413,7 +327,6 @@ export default function SettingsPage() {
     { id: "notifications", label: "Notifications", icon: <BellIcon /> },
     { id: "security",      label: "Security",      icon: <ShieldIcon /> },
     { id: "appearance",    label: "Appearance",    icon: <PaletteIcon /> },
-    { id: "billing",       label: "Billing",       icon: <BillingIcon /> },
   ];
 
   const titles: Record<Section, string> = {
@@ -421,7 +334,6 @@ export default function SettingsPage() {
     notifications: "Notifications",
     security:      "Security",
     appearance:    "Appearance",
-    billing:       "Billing",
   };
 
   return (
@@ -429,28 +341,47 @@ export default function SettingsPage() {
       <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap');`}</style>
 
       {/* ── Page header ── */}
-      <div className="border-b border-[#e8e2ff] px-8 py-6 bg-[#faf9ff]">
-        <h1
-          style={{ fontFamily: "'Syne', sans-serif" }}
-          className="text-2xl font-extrabold tracking-tight text-[#0a0a0a]"
-        >
+      <div className="border-b border-[#e8e2ff] px-4 sm:px-8 py-5 sm:py-6 bg-[#faf9ff]">
+        <h1 style={{ fontFamily: "'Syne', sans-serif" }} className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#0a0a0a]">
           Settings
         </h1>
-        <p className="mt-1 text-sm text-[#6b6b80]">Manage your account, preferences and billing.</p>
+        <p className="mt-1 text-sm text-[#6b6b80]">Manage your account and preferences.</p>
+      </div>
+
+      {/* ── Mobile tab bar (visible < md) ── */}
+      <div className="md:hidden border-b border-[#e8e2ff] bg-white overflow-x-auto">
+        <div className="flex min-w-max px-4">
+          {sections.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => setSection(s.id)}
+              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition cursor-pointer ${
+                section === s.id
+                  ? "border-violet-700 text-violet-700"
+                  : "border-transparent text-[#6b6b80] hover:text-[#0a0a0a]"
+              }`}
+            >
+              <span className={section === s.id ? "text-violet-600" : "text-[#6b6b80]"}>
+                {s.icon}
+              </span>
+              {s.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* ── Body ── */}
-      <div className="mx-auto max-w-5xl px-8 py-8">
+      <div className="mx-auto max-w-5xl px-4 sm:px-8 py-6 sm:py-8">
         <div className="flex gap-8 items-start">
 
-          {/* ── Left nav ── */}
-          <nav className="w-52 shrink-0 sticky top-8">
+          {/* ── Sidebar nav (visible >= md) ── */}
+          <nav className="hidden md:block w-52 shrink-0 sticky top-8">
             <ul className="space-y-0.5">
               {sections.map((s) => (
                 <li key={s.id}>
                   <button
                     onClick={() => setSection(s.id)}
-                    className={`w-full flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all border ${
+                    className={`w-full flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all border cursor-pointer ${
                       section === s.id
                         ? "bg-violet-50 text-violet-700 border-violet-200 shadow-sm"
                         : "text-[#6b6b80] hover:text-[#0a0a0a] hover:bg-[#faf9ff] border-transparent"
@@ -464,19 +395,36 @@ export default function SettingsPage() {
                 </li>
               ))}
             </ul>
-
-            {/* purple accent strip at bottom of nav */}
-            <div className="mt-6 rounded-xl bg-violet-700 p-4 text-white">
-              <p className="text-xs font-semibold mb-1">Need help?</p>
-              <p className="text-[11px] opacity-80 leading-relaxed">Check our docs or reach out to support anytime.</p>
-              <button className="mt-3 text-[11px] font-semibold bg-white text-violet-700 rounded-lg px-3 py-1.5 hover:bg-violet-50 transition w-full">
-                View docs →
-              </button>
-            </div>
           </nav>
 
-          {/* ── Right panel ── */}
+          {/* ── Content panel ── */}
           <div className="flex-1 min-w-0">
+            {/* Section title — shown on desktop only (mobile has the tab bar) */}
             <h2
               style={{ fontFamily: "'Syne', sans-serif" }}
-      
+              className="hidden md:block text-lg font-bold text-[#0a0a0a] mb-5"
+            >
+              {titles[section]}
+            </h2>
+
+            <div key={section} className="animate-in fade-in slide-in-from-bottom-1 duration-200">
+              {section === "profile"       && <ProfilePanel onSave={() => showToast("Profile saved!")} />}
+              {section === "notifications" && <NotificationsPanel />}
+              {section === "security"      && <SecurityPanel onAction={showToast} />}
+              {section === "appearance"    && <AppearancePanel />}
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* ── Toast ── */}
+      {toast && (
+        <div className="fixed bottom-5 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-2.5 rounded-xl border border-[#e8e2ff] bg-white px-4 py-3 text-sm font-medium text-[#0a0a0a] shadow-lg animate-in slide-in-from-bottom-2 duration-200">
+          <span className="h-2 w-2 rounded-full bg-violet-600 shrink-0" />
+          {toast}
+        </div>
+      )}
+    </div>
+  );
+}

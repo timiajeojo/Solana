@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { History, ArrowUpRight, ArrowDownRight, ArrowLeft Filter } from 'lucide-react'
+import { History, ArrowUpRight, ArrowDownRight, ArrowLeft, Filter } from 'lucide-react'
 
 export default function HistoryPage() {
   const [transactions] = useState([
