@@ -200,7 +200,178 @@ function SecurityPanel({ onAction }: { onAction: (msg: string) => void }) {
   
   return (
     <div className="space-y-4">
-    <Card title="Authentication" description="Strengthen your account access.">
-    <Row label="Two-Factor Authentication" description=""
-    )
+      <Card title="Theme" description="Control the overall look of the interface.">
+        <Row label="Color Scheme" description="Choose dark, light, or follow system">
+          <div className="flex flex-wrap gap-1.5">
+            {themes.map((t) => (
+              <button
+                key={t}
+                onClick={() => setTheme(t)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold capitalize transition border cursor-pointer ${
+                  theme === t
+                    ? "bg-violet-700 border-violet-700 text-white shadow-sm"
+                    : "bg-white border-[#e8e2ff] text-[#6b6b80] hover:border-violet-300 hover:text-[#0a0a0a]"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        </Row>
+        <Row label="Accent Color" description="Highlight color used across the UI">
+          <div className="flex gap-2 items-center">
+            {accents.map((a) => (
+              <button
+                key={a.id}
+                onClick={() => setAccent(a.id)}
+                className={`h-6 w-6 rounded-full ${a.color} transition ring-offset-2 ring-offset-white cursor-pointer ${
+                  accent === a.id ? "ring-2 ring-[#0a0a0a] scale-110" : "hover:scale-105"
+                }`}
+              />
+            ))}
+          </div>
+        </Row>
+      </Card>
+
+      <Card title="Layout" description="Adjust density and motion settings.">
+        <Row label="Compact Mode" description="Reduce padding and spacing in lists">
+          <Toggle checked={compact} onChange={() => setCompact((v) => !v)} />
+        </Row>
+        <Row label="Animations" description="Enable transitions and micro-interactions">
+          <Toggle checked={animations} onChange={() => setAnimations((v) => !v)} />
+        </Row>
+        <Row label="Language" description="Interface display language">
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="rounded-lg bg-white border border-[#e8e2ff] px-3 py-1.5 text-sm text-[#0a0a0a] focus:outline-none focus:ring-2 focus:ring-violet-500 transition appearance-none cursor-pointer"
+          >
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+            <option value="ja">日本語</option>
+          </select>
+        </Row>
+      </Card>
+    </div>
+  );
+}
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
+
+export default function SettingsPage() {
+  const [section, setSection] = useState<Section>("profile");
+  const [toast, setToast] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 2500);
+  };
+
+  const sections: SectionItem[] = [
+    { id: "profile",       label: "Profile",       icon: <ProfileIcon /> },
+    { id: "notifications", label: "Notifications", icon: <BellIcon /> },
+    { id: "security",      label: "Security",      icon: <ShieldIcon /> },
+    { id: "appearance",    label: "Appearance",    icon: <PaletteIcon /> },
+  ];
+
+  const titles: Record<Section, string> = {
+    profile:       "Profile",
+    notifications: "Notifications",
+    security:      "Security",
+    appearance:    "Appearance",
+  };
+
+  return (
+    <div className="min-h-screen bg-white text-[#0a0a0a]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap');`}</style>
+
+      {/* ── Page header ── */}
+      <div className="border-b border-[#e8e2ff] px-4 sm:px-8 py-5 sm:py-6 bg-[#faf9ff]">
+        <h1 style={{ fontFamily: "'Syne', sans-serif" }} className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#0a0a0a]">
+          Settings
+        </h1>
+        <p className="mt-1 text-sm text-[#6b6b80]">Manage your account and preferences.</p>
+      </div>
+
+      {/* ── Mobile tab bar (visible < md) ── */}
+      <div className="md:hidden border-b border-[#e8e2ff] bg-white overflow-x-auto">
+        <div className="flex min-w-max px-4">
+          {sections.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => setSection(s.id)}
+              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition cursor-pointer ${
+                section === s.id
+                  ? "border-violet-700 text-violet-700"
+                  : "border-transparent text-[#6b6b80] hover:text-[#0a0a0a]"
+              }`}
+            >
+              <span className={section === s.id ? "text-violet-600" : "text-[#6b6b80]"}>
+                {s.icon}
+              </span>
+              {s.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Body ── */}
+      <div className="mx-auto max-w-5xl px-4 sm:px-8 py-6 sm:py-8">
+        <div className="flex gap-8 items-start">
+
+          {/* ── Sidebar nav (visible >= md) ── */}
+          <nav className="hidden md:block w-52 shrink-0 sticky top-8">
+            <ul className="space-y-0.5">
+              {sections.map((s) => (
+                <li key={s.id}>
+                  <button
+                    onClick={() => setSection(s.id)}
+                    className={`w-full flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all border cursor-pointer ${
+                      section === s.id
+                        ? "bg-violet-50 text-violet-700 border-violet-200 shadow-sm"
+                        : "text-[#6b6b80] hover:text-[#0a0a0a] hover:bg-[#faf9ff] border-transparent"
+                    }`}
+                  >
+                    <span className={section === s.id ? "text-violet-600" : "text-[#6b6b80]"}>
+                      {s.icon}
+                    </span>
+                    {s.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* ── Content panel ── */}
+          <div className="flex-1 min-w-0">
+            {/* Section title — shown on desktop only (mobile has the tab bar) */}
+            <h2
+              style={{ fontFamily: "'Syne', sans-serif" }}
+              className="hidden md:block text-lg font-bold text-[#0a0a0a] mb-5"
+            >
+              {titles[section]}
+            </h2>
+
+            <div key={section} className="animate-in fade-in slide-in-from-bottom-1 duration-200">
+              {section === "profile"       && <ProfilePanel onSave={() => showToast("Profile saved!")} />}
+              {section === "notifications" && <NotificationsPanel />}
+              {section === "security"      && <SecurityPanel onAction={showToast} />}
+              {section === "appearance"    && <AppearancePanel />}
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* ── Toast ── */}
+      {toast && (
+        <div className="fixed bottom-5 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center gap-2.5 rounded-xl border border-[#e8e2ff] bg-white px-4 py-3 text-sm font-medium text-[#0a0a0a] shadow-lg animate-in slide-in-from-bottom-2 duration-200">
+          <span className="h-2 w-2 rounded-full bg-violet-600 shrink-0" />
+          {toast}
+        </div>
+      )}
+    </div>
+  );
 }
