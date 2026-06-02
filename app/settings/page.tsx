@@ -163,6 +163,7 @@ function NotificationPanel() {
     email: true, push: false, sms: false,
     weeklyDigest: true, productUpdates: true, securityAlerts: true,
   });
+  const themes = ["light", "dark", "system"]
   const toggle = (key: keyof typeof prefs) => setPrefs((p) => ({ ...p, [key]: !p[key] }));
   
   return (
