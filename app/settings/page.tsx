@@ -163,7 +163,6 @@ function NotificationPanel() {
     email: true, push: false, sms: false,
     weeklyDigest: true, productUpdates: true, securityAlerts: true,
   });
-  const themes = ["light", "dark", "system"]
   const toggle = (key: keyof typeof prefs) => setPrefs((p) => ({ ...p, [key]: !p[key] }));
   
   return (
@@ -283,6 +282,9 @@ export default function SettingsPage() {
     security:      "Security",
     appearance:    "Appearance",
   };
+  
+  const [theme, setTheme] = useState("light")
+  const themes = ["light", "dark", "system"]
 
   return (
     <div className="min-h-screen bg-white text-[#0a0a0a]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
