@@ -82,28 +82,28 @@ function Card({ title, description, children }: CardProps) {
   );
 }
 
+// ─── Icons ────────────────────────────────────────────────────────────────────
 
 function ProfileIcon() {
   return (
     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M-20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" />
+      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" />
     </svg>
-    )
+  );
 }
-
 function BellIcon() {
-return (
-  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-  <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 01-3.46 0" />
-  </svg>
-  )  
+  return (
+    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 01-3.46 0" />
+    </svg>
+  );
 }
-function ShildIcon() {
+function ShieldIcon() {
   return (
     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
     </svg>
-    )
+  );
 }
 function PaletteIcon() {
   return (
@@ -115,7 +115,7 @@ function PaletteIcon() {
   );
 }
 
-{/* section panels */}
+// ─── Section Panels ───────────────────────────────────────────────────────────
 
 function ProfilePanel({ onSave }: { onSave: () => void }) {
   return (
@@ -158,13 +158,13 @@ function ProfilePanel({ onSave }: { onSave: () => void }) {
   );
 }
 
-function NotificationPanel() {
+function NotificationsPanel() {
   const [prefs, setPrefs] = useState({
     email: true, push: false, sms: false,
     weeklyDigest: true, productUpdates: true, securityAlerts: true,
   });
   const toggle = (key: keyof typeof prefs) => setPrefs((p) => ({ ...p, [key]: !p[key] }));
-  
+
   return (
     <div className="space-y-4">
       <Card title="Delivery Channels" description="Choose how you receive notifications.">
@@ -172,32 +172,85 @@ function NotificationPanel() {
           <Toggle checked={prefs.email} onChange={() => toggle("email")} />
         </Row>
         <Row label="Push Notifications" description="Browser and mobile push alerts">
-        <Toggle checked={prefs.push} onChange={() => toggle("push")} />
+          <Toggle checked={prefs.push} onChange={() => toggle("push")} />
         </Row>
         <Row label="SMS Notifications" description="Text messages for important events">
-        <Toggle checked={prefs.sms} onChange={() => toggle("sms")} />
+          <Toggle checked={prefs.sms} onChange={() => toggle("sms")} />
         </Row>
-        </Card>
-        
-        <Card title="Notification Types" description="Fine-tune which events trigger alerts.">
-        <Row label="Weekly Digest" description="A summary of your week every monday">
-        <Toggle checked={prefs.weeklyDigest} onChange={() => toggle("weeklyDigest")} />
+      </Card>
+
+      <Card title="Notification Types" description="Fine-tune which events trigger alerts.">
+        <Row label="Weekly Digest" description="A summary of your week every Monday">
+          <Toggle checked={prefs.weeklyDigest} onChange={() => toggle("weeklyDigest")} />
         </Row>
         <Row label="Product Updates" description="New features and announcements">
-        <Toggle checked={prefs.productUpdates} onChange={() => toggle("productUpdates")} />
+          <Toggle checked={prefs.productUpdates} onChange={() => toggle("productUpdates")} />
         </Row>
-        <Row label="security Alerts" description="Sign-ins from new devices or locations">
-        <Toggle checked={prefs.securityAlerts} onChange={() => toggle("securityAlerts")} />
+        <Row label="Security Alerts" description="Sign-ins from new devices or locations">
+          <Toggle checked={prefs.securityAlerts} onChange={() => toggle("securityAlerts")} />
         </Row>
-        </Card>
-        </div>
-    )
+      </Card>
+    </div>
+  );
 }
 
 function SecurityPanel({ onAction }: { onAction: (msg: string) => void }) {
   const [twoFactor, setTwoFactor] = useState(true);
   const [activityLog, setActivityLog] = useState(false);
-  
+
+  return (
+    <div className="space-y-4">
+      <Card title="Authentication" description="Strengthen your account access.">
+        <Row label="Two-Factor Authentication" description="Require a code on every sign-in">
+          <Toggle checked={twoFactor} onChange={() => { setTwoFactor((v) => !v); onAction("2FA updated"); }} />
+        </Row>
+        <Row label="Change Password" description="Last updated 30 days ago">
+          <button onClick={() => onAction("Password reset email sent")} className={ghostBtn}>Update</button>
+        </Row>
+        <Row label="Passkeys" description="Sign in without a password">
+          <button onClick={() => onAction("Passkey setup launched")} className={ghostBtn}>Set up</button>
+        </Row>
+      </Card>
+
+      <Card title="Sessions & Activity" description="Manage where you're signed in.">
+        <Row label="Activity Log" description="Track sign-ins and account changes">
+          <Toggle checked={activityLog} onChange={() => setActivityLog((v) => !v)} />
+        </Row>
+        <Row label="Active Sessions" description="Currently signed in on 2 devices">
+          <button onClick={() => onAction("All other sessions revoked")} className={ghostBtn}>Revoke all</button>
+        </Row>
+      </Card>
+
+      <Card title="Danger Zone" description="Irreversible account actions.">
+        <Row label="Delete Account" description="Permanently remove your account and all data">
+          <button
+            onClick={() => onAction("Deletion requires email confirmation")}
+            className="rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-600 transition cursor-pointer"
+          >
+            Delete account
+          </button>
+        </Row>
+      </Card>
+    </div>
+  );
+}
+
+function AppearancePanel() {
+  const [compact, setCompact] = useState(false);
+  const [animations, setAnimations] = useState(true);
+  const [theme, setTheme] = useState<"dark" | "light" | "system">("light");
+  const [accent, setAccent] = useState("violet");
+  const [language, setLanguage] = useState("en");
+
+  const themes = ["dark", "light", "system"] as const;
+  const accents = [
+    { id: "violet",  color: "bg-violet-600" },
+    { id: "sky",     color: "bg-sky-500"    },
+    { id: "emerald", color: "bg-emerald-500"},
+    { id: "rose",    color: "bg-rose-500"   },
+    { id: "amber",   color: "bg-amber-500"  },
+  ];
+
   return (
     <div className="space-y-4">
       <Card title="Theme" description="Control the overall look of the interface.">
@@ -282,9 +335,6 @@ export default function SettingsPage() {
     security:      "Security",
     appearance:    "Appearance",
   };
-  
-  const [theme, setTheme] = useState("light")
-  const themes = ["light", "dark", "system"]
 
   return (
     <div className="min-h-screen bg-white text-[#0a0a0a]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
