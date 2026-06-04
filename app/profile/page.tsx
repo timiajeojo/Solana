@@ -1,184 +1,173 @@
-'use client'
+// app/profile/page.tsx
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, User, Mail, Save, Camera } from 'lucide-react';
-import { getCurrentUser, getUserProfile, updateUserProfile } from '../component/lib/supabase';
+import Link from "next/link";
+import { useUser } from "@/context/UserContext";
 
 export default function ProfilePage() {
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [profile, setProfile] = useState({
-    first_name: '',
-    last_name: '',
-    email: ''
-  });
+  const { user } = useUser();
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
-    try {
-      const currentUser = await getCurrentUser();
-      if (!currentUser) {
-        router.push('/auth');
-        return;
-      }
-      setUser(currentUser);
-
-      const userProfile = await getUserProfile(currentUser.id);
-      if (userProfile) {
-        setProfile({
-          first_name: userProfile.first_name || '',
-          last_name: userProfile.last_name || '',
-          email: currentUser.email || ''
-        });
-      }
-    } catch (error) {
-      console.error('Error loading profile:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSave = async () => {
-    if (!user) return;
-    setSaving(true);
-
-    try {
-      await updateUserProfile(user.id, {
-        first_name: profile.first_name,
-        last_name: profile.last_name
-      });
-      alert('Profile updated successfully!');
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      alert('Failed to update profile');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const getInitials = () => {
-    return `${profile.first_name[0] || ''}${profile.last_name[0] || ''}`.toUpperCase() || 'U';
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+  const initials = [user.firstName[0], user.lastName[0]]
+    .filter(Boolean)
+    .join("")
+    .toUpperCase();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="flex items-center gap-2 text-gray-600 hover:text-purple-600 transition-colors mb-4"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Back to Dashboard
-          </button>
-          <h1 className="text-3xl font-bold text-gray-900">Profile Settings</h1>
-          <p className="text-gray-600 mt-2">Manage your personal information</p>
-        </div>
+    <main
+      className="min-h-screen bg-white text-[#0a0a0a]"
+      style={{ fontFamily: "'DM Sans', sans-serif" }}
+    >
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Syne:wght@700;800&display=swap');`}</style>
+
+      {/* ── Top nav ── */}
+      <div className="sticky top-0 z-10 bg-white border-b border-[#e8e2ff] px-4 sm:px-8 h-14 flex items-center justify-between">
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-[#6b6b80] hover:text-[#0a0a0a] transition-colors"
+        >
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Back to Dashboard
+        </Link>
+        <Link
+          href="/settings"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-violet-700 hover:text-violet-800 transition-colors"
+        >
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </svg>
+          Edit in Settings
+        </Link>
       </div>
 
-      {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-          {/* Profile Picture Section */}
-          <div className="bg-gradient-to-r from-purple-600 to-purple-400 px-8 py-12">
-            <div className="flex flex-col items-center">
+      {/* ── Heading ── */}
+      <div className="px-4 sm:px-8 pt-6 pb-5">
+        <h1
+          style={{ fontFamily: "'Syne', sans-serif" }}
+          className="text-2xl sm:text-3xl font-extrabold tracking-tight"
+        >
+          Profile Settings
+        </h1>
+        <p className="mt-1 text-sm text-[#6b6b80]">Manage your personal information</p>
+      </div>
+
+      {/* ── Purple-tinted body ── */}
+      <div className="bg-[#f5f3ff] min-h-[calc(100vh-160px)] px-4 sm:px-8 pb-16 pt-2">
+        <div className="max-w-lg mx-auto">
+
+          {/* ── Avatar banner ── */}
+          <div className="rounded-2xl overflow-hidden shadow-md">
+            <div className="bg-gradient-to-b from-violet-600 to-violet-400 pt-10 pb-5 flex flex-col items-center gap-3">
               <div className="relative">
-                <div className="w-32 h-32 rounded-full bg-white flex items-center justify-center text-purple-600 font-bold text-4xl shadow-xl">
-                  {getInitials()}
+                <div className="h-24 w-24 rounded-full bg-white shadow-lg flex items-center justify-center">
+                  <span className="text-3xl font-bold text-violet-600">{initials}</span>
                 </div>
-                <button className="absolute bottom-0 right-0 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-50 transition-colors">
-                  <Camera className="w-5 h-5 text-purple-600" />
-                </button>
+                <Link
+                  href="/settings"
+                  title="Change photo in Settings"
+                  className="absolute bottom-0.5 right-0.5 h-7 w-7 rounded-full bg-white border border-violet-100 shadow flex items-center justify-center hover:bg-violet-50 transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5 text-violet-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+                    <circle cx="12" cy="13" r="4" />
+                  </svg>
+                </Link>
               </div>
-              <h2 className="text-2xl font-bold text-white mt-4">
-                {profile.first_name} {profile.last_name}
-              </h2>
-              <p className="text-purple-100">{profile.email}</p>
+              <div className="text-center">
+                <p
+                  style={{ fontFamily: "'Syne', sans-serif" }}
+                  className="text-white text-lg font-bold tracking-tight"
+                >
+                  {user.firstName} {user.lastName}
+                </p>
+                {user.username && (
+                  <p className="text-violet-200 text-sm mt-0.5">{user.username}</p>
+                )}
+              </div>
             </div>
+            {user.bio && (
+              <div className="bg-white px-5 py-4">
+                <p className="text-sm text-[#6b6b80] text-center leading-relaxed">{user.bio}</p>
+              </div>
+            )}
           </div>
 
-          {/* Form Section */}
-          <div className="p-8">
-            <div className="space-y-6">
-              {/* First Name */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  First Name
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    value={profile.first_name}
-                    onChange={(e) => setProfile({ ...profile, first_name: e.target.value })}
-                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-black"
-                    placeholder="Enter your first name"
-                  />
-                </div>
-              </div>
-
-              {/* Last Name */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Last Name
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    value={profile.last_name}
-                    onChange={(e) => setProfile({ ...profile, last_name: e.target.value })}
-                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-black"
-                    placeholder="Enter your last name"
-                  />
-                </div>
-              </div>
-
-              {/* Email (Read Only) */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="email"
-                    value={profile.email}
-                    disabled
-                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-500 cursor-not-allowed"
-                  />
-                </div>
-                <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
-              </div>
-
-              {/* Save Button */}
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-              >
-                <Save className="w-5 h-5" />
-                {saving ? 'Saving...' : 'Save Changes'}
-              </button>
-            </div>
+          {/* ── Read-only fields ── */}
+          <div className="mt-6 space-y-4">
+            <Field label="First Name"    value={user.firstName} icon="person" />
+            <Field label="Last Name"     value={user.lastName}  icon="person" />
+            <Field label="Username"      value={user.username}  icon="at" />
+            <Field label="Email Address" value={user.email}     icon="mail"   note="Email cannot be changed" muted />
+            {user.bio && <Field label="Bio" value={user.bio} icon="text" />}
           </div>
+
+          {/* ── CTA ── */}
+          <Link
+            href="/settings"
+            className="mt-8 flex items-center justify-center gap-2 w-full rounded-xl bg-violet-700 hover:bg-violet-800 active:bg-violet-900 text-white text-sm font-semibold py-3.5 transition-colors shadow-sm"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41 1.41M12 2v2M12 20v2M2 12h2M20 12h2" />
+            </svg>
+            Go to Settings
+          </Link>
         </div>
       </div>
+    </main>
+  );
+}
+
+// ─── Read-only field ──────────────────────────────────────────────────────────
+
+type IconType = "person" | "at" | "mail" | "text";
+
+interface FieldProps {
+  label: string;
+  value: string;
+  icon: IconType;
+  note?: string;
+  muted?: boolean;
+}
+
+function Field({ label, value, icon, note, muted }: FieldProps) {
+  return (
+    <div>
+      <label className="block text-sm font-semibold text-[#0a0a0a] mb-1.5">{label}</label>
+      <div className={`flex items-center gap-3 rounded-xl border border-[#e8e2ff] px-4 py-3 bg-white text-sm ${muted ? "text-[#6b6b80]" : "text-[#0a0a0a]"}`}>
+        <span className="text-[#6b6b80] shrink-0"><FieldIcon type={icon} /></span>
+        <span className="flex-1 truncate">{value || "—"}</span>
+      </div>
+      {note && <p className="mt-1.5 text-xs text-[#6b6b80]">{note}</p>}
     </div>
+  );
+}
+
+function FieldIcon({ type }: { type: IconType }) {
+  const cls = "w-4 h-4";
+  if (type === "mail") return (
+    <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+      <polyline points="22,6 12,13 2,6" />
+    </svg>
+  );
+  if (type === "at") return (
+    <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M16 8v5a3 3 0 006 0v-1a10 10 0 10-3.92 7.94" />
+    </svg>
+  );
+  if (type === "text") return (
+    <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="17" y1="10" x2="3" y2="10" /><line x1="21" y1="6" x2="3" y2="6" />
+      <line x1="21" y1="14" x2="3" y2="14" /><line x1="17" y1="18" x2="3" y2="18" />
+    </svg>
+  );
+  return (
+    <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" />
+    </svg>
   );
 }
