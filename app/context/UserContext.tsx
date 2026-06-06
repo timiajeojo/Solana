@@ -12,7 +12,7 @@ import {
   supabase,
   getUserProfile,
   updateUserProfile,
-} from "@/component/lib/supabase";
+} from "@/app/component/lib/supabase";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
