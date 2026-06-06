@@ -1,45 +1,95 @@
-
+// context/UserContext.tsx
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import {
+  supabase,
+  getUserProfile,
+  updateUserProfile,
+} from "@/component/lib/supabase";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface UserData {
   firstName: string;
   lastName:  string;
-  email:     string;
-  username:  string;
-  bio:       string;
+  email:     string; // from auth.users — never editable
 }
 
 interface UserContextValue {
-  user: UserData;
-  updateUser: (patch: Partial<UserData>) => void;
+  user:       UserData;
+  loading:    boolean;
+  updateUser: (patch: { firstName?: string; lastName?: string }) => Promise<void>;
 }
-
-// ─── Default "signed-up" user ─────────────────────────────────────────────────
-
-const defaultUser: UserData = {
-  firstName: "Alex",
-  lastName:  "Johnson",
-  email:     "alex@example.com",
-  username:  "@alexj",
-  bio:       "Product designer & developer.",
-};
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 
 const UserContext = createContext<UserContextValue | null>(null);
 
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<UserData>(defaultUser);
+  const [user, setUser] = useState<UserData>({
+    firstName: "",
+    lastName:  "",
+    email:     "",
+  });
+  const [loading, setLoading] = useState(true);
 
-  const updateUser = (patch: Partial<UserData>) =>
-    setUser((prev) => ({ ...prev, ...patch }));
+  useEffect(() => {
+    async function loadUser(supabaseUser: any) {
+      if (!supabaseUser) {
+        setLoading(false);
+        return;
+      }
+
+      const email   = supabaseUser.email ?? "";
+      const profile = await getUserProfile(supabaseUser.id);
+
+      setUser({
+        firstName: profile?.first_name ?? "",
+        lastName:  profile?.last_name  ?? "",
+        email,
+      });
+      setLoading(false);
+    }
+
+    // Load immediately from current session
+    supabase.auth.getUser().then(({ data: { user } }) => loadUser(user));
+
+    // Stay in sync on login/logout
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => loadUser(session?.user ?? null)
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Writes only to the profiles table — email is never touched
+  async function updateUser(patch: { firstName?: string; lastName?: string }) {
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (!authUser) return;
+
+    const dbPatch: Record<string, string> = {};
+    if (patch.firstName !== undefined) dbPatch.first_name = patch.firstName;
+    if (patch.lastName  !== undefined) dbPatch.last_name  = patch.lastName;
+
+    await updateUserProfile(authUser.id, dbPatch as any);
+
+    // Optimistic local update
+    setUser((prev) => ({
+      ...prev,
+      firstName: patch.firstName ?? prev.firstName,
+      lastName:  patch.lastName  ?? prev.lastName,
+    }));
+  }
 
   return (
-    <UserContext.Provider value={{ user, updateUser }}>
+    <UserContext.Provider value={{ user, loading, updateUser }}>
       {children}
     </UserContext.Provider>
   );

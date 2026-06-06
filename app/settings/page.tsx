@@ -92,70 +92,111 @@ const PaletteIcon = () => (
 // ─── Profile Panel ────────────────────────────────────────────────────────────
 
 function ProfilePanel({ onSave }: { onSave: () => void }) {
-  const { user, updateUser } = useUser();
+  const { user, loading, updateUser } = useUser();
 
-  // Local draft — only flushed to context on Save
   const [draft, setDraft] = useState({
     firstName: user.firstName,
     lastName:  user.lastName,
-    username:  user.username,
-    bio:       user.bio,
   });
-  const [dirty, setDirty] = useState(false);
+  const [dirty,   setDirty]   = useState(false);
+  const [saving,  setSaving]  = useState(false);
+
+  // Keep draft in sync if context loads after mount
+  // (happens on first render before Supabase responds)
+  useState(() => {
+    setDraft({ firstName: user.firstName, lastName: user.lastName });
+  });
 
   function set(key: keyof typeof draft) {
-    return (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    return (e: ChangeEvent<HTMLInputElement>) => {
       setDraft((p) => ({ ...p, [key]: e.target.value }));
       setDirty(true);
     };
   }
 
-  function handleSave() {
-    updateUser(draft);   // writes back to UserContext
-    setDirty(false);
-    onSave();
+  async function handleSave() {
+    setSaving(true);
+    try {
+      await updateUser(draft); // writes to Supabase profiles table
+      setDirty(false);
+      onSave();
+    } finally {
+      setSaving(false);
+    }
   }
 
   function handleDiscard() {
-    setDraft({ firstName: user.firstName, lastName: user.lastName, username: user.username, bio: user.bio });
+    setDraft({ firstName: user.firstName, lastName: user.lastName });
     setDirty(false);
   }
 
-  const initials = [draft.firstName[0], draft.lastName[0]].filter(Boolean).join("").toUpperCase();
+  const initials = [draft.firstName[0], draft.lastName[0]]
+    .filter(Boolean).join("").toUpperCase() || "?";
+
+  if (loading) {
+    return (
+      <div className="rounded-2xl border border-[#e8e2ff] bg-white p-6 animate-pulse space-y-4">
+        <div className="h-4 bg-gray-100 rounded w-1/3" />
+        <div className="h-10 bg-gray-100 rounded" />
+        <div className="h-4 bg-gray-100 rounded w-1/3" />
+        <div className="h-10 bg-gray-100 rounded" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
-      {/* Avatar */}
-      <Card title="Avatar" description="Your profile picture shown across the app.">
+      {/* Avatar preview */}
+      <Card title="Avatar" description="Your initials are generated from your name.">
         <div className="flex items-center gap-4 px-4 sm:px-6 py-5">
           <div className="h-16 w-16 rounded-full bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-xl font-bold text-white shrink-0 shadow-md">
-            {initials || "?"}
+            {initials}
           </div>
-          <div className="space-y-1.5">
-            <button className={GHOST}>Upload photo</button>
-            <p className="text-xs text-[#6b6b80]">JPG, PNG or GIF · max 2 MB</p>
+          <div>
+            <p className="text-sm font-medium text-[#0a0a0a]">{draft.firstName} {draft.lastName}</p>
+            <p className="text-xs text-[#6b6b80] mt-0.5">{user.email}</p>
           </div>
         </div>
       </Card>
 
-      {/* Editable fields */}
-      <Card title="Personal Information" description="This information appears on your profile page.">
+      {/* Editable name fields */}
+      <Card
+        title="Personal Information"
+        description="Update your first and last name. This is shown on your profile."
+      >
         <Row label="First Name" description="Your given name">
-          <input className={INPUT} value={draft.firstName} onChange={set("firstName")} placeholder="Enter your first name" />
-        </Row>
-        <Row label="Last Name" description="Your family name">
-          <input className={INPUT} value={draft.lastName} onChange={set("lastName")} placeholder="Enter your last name" />
-        </Row>
-        <Row label="Username" description="Your unique @handle">
-          <input className={INPUT} value={draft.username} onChange={set("username")} placeholder="@handle" />
-        </Row>
-        <Row label="Bio" description="Short description shown on your profile">
-          <textarea className={`${INPUT} resize-none`} rows={2} value={draft.bio} onChange={set("bio")} placeholder="Tell people about yourself" />
+          <input
+            className={INPUT}
+            value={draft.firstName}
+            onChange={set("firstName")}
+            placeholder="Enter your first name"
+          />
         </Row>
 
-        {/* Email — always read-only, never passed to updateUser */}
-        <Row label="Email Address" description="Tied to your account — cannot be changed">
-          <input className={INPUT_DISABLED} value={user.email} disabled readOnly tabIndex={-1} />
+        <Row label="Last Name" description="Your family name">
+          <input
+            className={INPUT}
+            value={draft.lastName}
+            onChange={set("lastName")}
+            placeholder="Enter your last name"
+          />
+        </Row>
+
+        {/* Email — always read-only, comes from Supabase auth */}
+        <Row
+          label="Email Address"
+          description="Tied to your account — cannot be changed"
+        >
+          <div className="space-y-1">
+            <input
+              className={INPUT_DISABLED}
+              value={user.email}
+              disabled
+              readOnly
+              tabIndex={-1}
+            />
+            <p className="text-xs text-[#6b6b80]">Email cannot be changed</p>
+          </div>
         </Row>
 
         {/* Footer */}
@@ -165,14 +206,20 @@ function ProfilePanel({ onSave }: { onSave: () => void }) {
           </p>
           <div className="flex items-center gap-2">
             {dirty && (
-              <button onClick={handleDiscard} className={GHOST}>Discard</button>
+              <button onClick={handleDiscard} className={GHOST}>
+                Discard
+              </button>
             )}
             <button
               onClick={handleSave}
-              disabled={!dirty}
-              className={`rounded-lg px-5 py-2 text-sm font-semibold transition-colors ${dirty ? "bg-violet-700 hover:bg-violet-800 text-white cursor-pointer shadow-sm" : "bg-violet-100 text-violet-300 cursor-not-allowed"}`}
+              disabled={!dirty || saving}
+              className={`rounded-lg px-5 py-2 text-sm font-semibold transition-colors ${
+                dirty && !saving
+                  ? "bg-violet-700 hover:bg-violet-800 text-white cursor-pointer shadow-sm"
+                  : "bg-violet-100 text-violet-300 cursor-not-allowed"
+              }`}
             >
-              Save Changes
+              {saving ? "Saving…" : "Save Changes"}
             </button>
           </div>
         </div>
@@ -184,7 +231,10 @@ function ProfilePanel({ onSave }: { onSave: () => void }) {
 // ─── Notifications Panel ──────────────────────────────────────────────────────
 
 function NotificationsPanel() {
-  const [prefs, setPrefs] = useState({ email: true, push: false, sms: false, weeklyDigest: true, productUpdates: true, securityAlerts: true });
+  const [prefs, setPrefs] = useState({
+    email: true, push: false, sms: false,
+    weeklyDigest: true, productUpdates: true, securityAlerts: true,
+  });
   const toggle = (key: keyof typeof prefs) => setPrefs((p) => ({ ...p, [key]: !p[key] }));
 
   return (
@@ -227,7 +277,7 @@ function SecurityPanel({ onAction }: { onAction: (msg: string) => void }) {
         <Row label="Two-Factor Authentication" description="Require a verification code on every sign-in">
           <Toggle checked={twoFactor} onChange={() => { setTwoFactor((v) => !v); onAction("2FA updated"); }} />
         </Row>
-        <Row label="Change Password" description="Last updated 30 days ago">
+        <Row label="Change Password" description="Update your account password">
           <button className={GHOST} onClick={() => onAction("Password reset email sent")}>Update</button>
         </Row>
         <Row label="Passkeys" description="Sign in securely without a password">
@@ -280,11 +330,8 @@ function AppearancePanel() {
         <Row label="Color Scheme" description="Switch between light, dark, or system default">
           <div className="flex flex-wrap gap-1.5">
             {themes.map((t) => (
-              <button
-                key={t}
-                onClick={() => setTheme(t)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold capitalize transition-colors border cursor-pointer ${theme === t ? "bg-violet-700 border-violet-700 text-white shadow-sm" : "bg-white border-[#e8e2ff] text-[#6b6b80] hover:border-violet-300 hover:text-[#0a0a0a]"}`}
-              >
+              <button key={t} onClick={() => setTheme(t)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold capitalize transition-colors border cursor-pointer ${theme === t ? "bg-violet-700 border-violet-700 text-white shadow-sm" : "bg-white border-[#e8e2ff] text-[#6b6b80] hover:border-violet-300 hover:text-[#0a0a0a]"}`}>
                 {t}
               </button>
             ))}
@@ -293,12 +340,8 @@ function AppearancePanel() {
         <Row label="Accent Color" description="Primary highlight colour across the UI">
           <div className="flex items-center gap-2">
             {accents.map((a) => (
-              <button
-                key={a.id}
-                onClick={() => setAccent(a.id)}
-                title={a.id}
-                className={`h-6 w-6 rounded-full ${a.color} transition-transform ring-offset-2 ring-offset-white cursor-pointer ${accent === a.id ? "ring-2 ring-[#0a0a0a] scale-110" : "hover:scale-105"}`}
-              />
+              <button key={a.id} onClick={() => setAccent(a.id)} title={a.id}
+                className={`h-6 w-6 rounded-full ${a.color} transition-transform ring-offset-2 ring-offset-white cursor-pointer ${accent === a.id ? "ring-2 ring-[#0a0a0a] scale-110" : "hover:scale-105"}`} />
             ))}
           </div>
         </Row>
@@ -311,11 +354,8 @@ function AppearancePanel() {
           <Toggle checked={animations} onChange={() => setAnimations((v) => !v)} />
         </Row>
         <Row label="Language" description="Display language for the entire interface">
-          <select
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-            className="rounded-lg bg-white border border-[#e8e2ff] px-3 py-2 text-sm text-[#0a0a0a] focus:outline-none focus:ring-2 focus:ring-violet-500 transition-shadow appearance-none cursor-pointer"
-          >
+          <select value={language} onChange={(e) => setLanguage(e.target.value)}
+            className="rounded-lg bg-white border border-[#e8e2ff] px-3 py-2 text-sm text-[#0a0a0a] focus:outline-none focus:ring-2 focus:ring-violet-500 transition-shadow appearance-none cursor-pointer">
             <option value="en">English</option>
             <option value="es">Español</option>
             <option value="fr">Français</option>
@@ -347,12 +387,13 @@ export default function SettingsPage() {
   ];
 
   const titles: Record<Section, string> = {
-    profile: "Profile", notifications: "Notifications", security: "Security", appearance: "Appearance",
+    profile: "Profile", notifications: "Notifications",
+    security: "Security", appearance: "Appearance",
   };
 
   return (
     <main className="min-h-screen bg-white text-[#0a0a0a]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Syne:wght@700;800&display=swap');`}</style>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Syne:wght@700;800&display=swap');`}</style>
 
       {/* ── Header ── */}
       <div className="border-b border-[#e8e2ff] bg-[#faf9ff] px-4 sm:px-8 py-5 sm:py-6">
@@ -376,11 +417,8 @@ export default function SettingsPage() {
       <div className="md:hidden border-b border-[#e8e2ff] bg-white overflow-x-auto">
         <div className="flex min-w-max px-2">
           {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setSection(item.id)}
-              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors cursor-pointer ${section === item.id ? "border-violet-700 text-violet-700" : "border-transparent text-[#6b6b80] hover:text-[#0a0a0a]"}`}
-            >
+            <button key={item.id} onClick={() => setSection(item.id)}
+              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors cursor-pointer ${section === item.id ? "border-violet-700 text-violet-700" : "border-transparent text-[#6b6b80] hover:text-[#0a0a0a]"}`}>
               <span className={section === item.id ? "text-violet-600" : ""}>{item.icon}</span>
               {item.label}
             </button>
@@ -392,15 +430,13 @@ export default function SettingsPage() {
       <div className="mx-auto max-w-5xl px-4 sm:px-8 py-6 sm:py-8">
         <div className="flex gap-8 items-start">
 
-          {/* ── Desktop sidebar ── */}
+          {/* Desktop sidebar */}
           <nav className="hidden md:block w-52 shrink-0 sticky top-6">
             <ul className="space-y-0.5">
               {navItems.map((item) => (
                 <li key={item.id}>
-                  <button
-                    onClick={() => setSection(item.id)}
-                    className={`w-full flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium border transition-all cursor-pointer ${section === item.id ? "bg-violet-50 text-violet-700 border-violet-200 shadow-sm" : "border-transparent text-[#6b6b80] hover:text-[#0a0a0a] hover:bg-[#faf9ff]"}`}
-                  >
+                  <button onClick={() => setSection(item.id)}
+                    className={`w-full flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium border transition-all cursor-pointer ${section === item.id ? "bg-violet-50 text-violet-700 border-violet-200 shadow-sm" : "border-transparent text-[#6b6b80] hover:text-[#0a0a0a] hover:bg-[#faf9ff]"}`}>
                     <span className={section === item.id ? "text-violet-600" : "text-[#9ca3af]"}>{item.icon}</span>
                     {item.label}
                   </button>
@@ -409,7 +445,7 @@ export default function SettingsPage() {
             </ul>
           </nav>
 
-          {/* ── Content ── */}
+          {/* Content */}
           <div className="flex-1 min-w-0">
             <h2 style={{ fontFamily: "'Syne', sans-serif" }} className="hidden md:block text-lg font-bold text-[#0a0a0a] mb-5">
               {titles[section]}
@@ -421,7 +457,6 @@ export default function SettingsPage() {
               {section === "appearance"    && <AppearancePanel />}
             </div>
           </div>
-
         </div>
       </div>
 
