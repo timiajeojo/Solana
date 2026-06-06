@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { useUser } from "@/context/UserContext";
+import { useUser } from "@/UserContext";
 
 export default function ProfilePage() {
   const { user, loading } = useUser();
