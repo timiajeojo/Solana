@@ -3,7 +3,7 @@
 
 import { useState, ChangeEvent, ReactNode } from "react";
 import Link from "next/link";
-import { useUser } from "@app/context/UserContext";
+import { useUser } from "@/app/context/UserContext";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
