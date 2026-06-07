@@ -11,4 +11,10 @@
 body {
   background-color: #ffffff;
   color: #000000;
+  font-family: var(--font-dm-sans), sans-serif;
+}
+
+:root {
+  --font-dm-sans: 'DM Sans', sans-serif;
+  --font-syne:    'Syne', sans-serif;
 }
