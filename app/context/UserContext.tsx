@@ -12,14 +12,15 @@ import {
   supabase,
   getUserProfile,
   updateUserProfile,
-} from "@/app/component/lib/supabase";
+  createUserProfile,
+} from "@/component/lib/supabase";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface UserData {
   firstName: string;
   lastName:  string;
-  email:     string; // from auth.users — never editable
+  email:     string;
 }
 
 interface UserContextValue {
@@ -28,40 +29,58 @@ interface UserContextValue {
   updateUser: (patch: { firstName?: string; lastName?: string }) => Promise<void>;
 }
 
-// ─── Context ──────────────────────────────────────────────────────────────────
-
 const UserContext = createContext<UserContextValue | null>(null);
 
+// ─── Provider ─────────────────────────────────────────────────────────────────
+
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<UserData>({
-    firstName: "",
-    lastName:  "",
-    email:     "",
-  });
+  const [user,    setUser]    = useState<UserData>({ firstName: "", lastName: "", email: "" });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function loadUser(supabaseUser: any) {
-      if (!supabaseUser) {
-        setLoading(false);
-        return;
-      }
-
-      const email   = supabaseUser.email ?? "";
-      const profile = await getUserProfile(supabaseUser.id);
-
-      setUser({
-        firstName: profile?.first_name ?? "",
-        lastName:  profile?.last_name  ?? "",
-        email,
-      });
+  async function loadUser(supabaseUser: any) {
+    if (!supabaseUser) {
       setLoading(false);
+      return;
     }
 
-    // Load immediately from current session
+    const email = supabaseUser.email ?? "";
+
+    // 1️⃣ Try the profiles table first
+    let profile = await getUserProfile(supabaseUser.id);
+
+    // 2️⃣ If no profile row exists, try to create one from user_metadata
+    //    (populated by Google OAuth or if metadata was set on sign-up)
+    if (!profile) {
+      const meta       = supabaseUser.user_metadata ?? {};
+      const firstName  = meta.first_name  ?? meta.given_name  ?? meta.full_name?.split(" ")[0] ?? "";
+      const lastName   = meta.last_name   ?? meta.family_name ?? meta.full_name?.split(" ").slice(1).join(" ") ?? "";
+
+      try {
+        profile = await createUserProfile(supabaseUser.id, firstName, lastName);
+      } catch {
+        // Profile may already exist (race condition) — try fetching again
+        profile = await getUserProfile(supabaseUser.id);
+      }
+    }
+
+    // 3️⃣ Final fallback: derive something displayable from the email
+    const emailPrefix   = email.split("@")[0] ?? "";
+    const fallbackFirst = profile?.first_name || emailPrefix;
+    const fallbackLast  = profile?.last_name  || "";
+
+    setUser({
+      firstName: fallbackFirst,
+      lastName:  fallbackLast,
+      email,
+    });
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    // Load from current session immediately
     supabase.auth.getUser().then(({ data: { user } }) => loadUser(user));
 
-    // Stay in sync on login/logout
+    // Stay in sync on login / logout
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => loadUser(session?.user ?? null)
     );
@@ -69,7 +88,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Writes only to the profiles table — email is never touched
+  // Persists edits to the profiles table — email is never touched
   async function updateUser(patch: { firstName?: string; lastName?: string }) {
     const { data: { user: authUser } } = await supabase.auth.getUser();
     if (!authUser) return;
