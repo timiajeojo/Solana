@@ -173,6 +173,7 @@ export async function signUpWithEmail(
         first_name: firstName,
         last_name:  lastName,
       },
+    },
   });
 
   if (error) {

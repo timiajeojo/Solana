@@ -238,7 +238,7 @@ function signUpWithEmail(email, password, firstName, lastName) {
                                 first_name: firstName,
                                 last_name: lastName,
                             },
-                        }
+                        },
                     })];
                 case 1:
                     _a = _b.sent(), data = _a.data, error = _a.error;
