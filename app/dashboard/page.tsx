@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { TrendingUp, Wallet, ArrowUpRight, ArrowDownRight, Plus, User, Settings, History, LogOut, CreditCard } from 'lucide-react';
 import { getCurrentUser, getInvestments, addInvestment, getUserProfile, signOut } from '../component/lib/supabase';
+import { useBalance } from '@/app/context/BalanceContext';
 
 interface Investment {
   id?: number;
@@ -21,6 +22,7 @@ export default function DashboardPage() {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const { setBalance } = useBalance();
   const [newInvestment, setNewInvestment] = useState({ 
     solAmount: '', 
     pricePerSol: '' 
@@ -56,6 +58,15 @@ export default function DashboardPage() {
     try {
       const data = await getInvestments(userId);
       setInvestments(data || []);
+      const solCoins     = (data || []).reduce((s: number, inv: Investment) => s + inv.sol_amount, 0);
+      const invested     = (data || []).reduce((s: number, inv: Investment) => s + inv.amount, 0);
+      const value        = solCoins * currentSolPrice;
+
+      setBalance({
+      currentValue:  value,
+      totalSolCoins: solCoins,
+      totalInvested: invested,
+    });
     } catch (error) {
       console.error('Error loading investments:', error);
     }
@@ -194,7 +205,7 @@ export default function DashboardPage() {
                       className="w-full px-4 py-3 text-left hover:bg-purple-50 transition-colors flex items-center gap-3 text-gray-700"
                     >
                       <CreditCard className="w-5 h-5 text-purple-600" />
-                      <span className="font-medium">Wallets</span>
+                      <span className="font-medium">Withdraw</span>
                     </button>
 
                     <button

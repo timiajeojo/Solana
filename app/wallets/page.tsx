@@ -4,20 +4,23 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Wallet, Plus, Copy, ArrowLeft, Trash2, ArrowDownToLine, CheckCircle2 } from 'lucide-react';
+import { useBalance } from '@/context/BalanceContext';
 
 interface WalletItem {
-  id: number;
-  name: string;
+  id:      number;
+  name:    string;
   address: string;
-  balance: number;
 }
 
 export default function WithdrawPage() {
   const router = useRouter();
 
+  // Real balance from dashboard via context
+  const { currentValue, totalSolCoins } = useBalance();
+
   const [wallets, setWallets] = useState<WalletItem[]>([
-    { id: 1, name: 'Main Wallet',  address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb', balance: 2.5 },
-    { id: 2, name: 'Savings',      address: '0x8d12A197cB00D4747a1fe03395095ce2A5CC6819', balance: 5.2 },
+    { id: 1, name: 'Main Wallet', address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb' },
+    { id: 2, name: 'Savings',     address: '0x8d12A197cB00D4747a1fe03395095ce2A5CC6819' },
   ]);
 
   const [showAddModal,      setShowAddModal]      = useState(false);
@@ -38,7 +41,7 @@ export default function WithdrawPage() {
 
   function handleAddWallet() {
     if (!newWallet.name || !newWallet.address) return;
-    setWallets([...wallets, { id: Date.now(), name: newWallet.name, address: newWallet.address, balance: 0 }]);
+    setWallets([...wallets, { id: Date.now(), name: newWallet.name, address: newWallet.address }]);
     setNewWallet({ name: '', address: '' });
     setShowAddModal(false);
   }
@@ -57,8 +60,6 @@ export default function WithdrawPage() {
     setAmount('');
     setSelectedWallet(null);
   }
-
-  const totalBalance = wallets.reduce((s, w) => s + w.balance, 0);
 
   // ── UI ────────────────────────────────────────────────────────────────────
 
@@ -90,14 +91,19 @@ export default function WithdrawPage() {
           </button>
         </div>
 
-        {/* Balance summary */}
+        {/* Balance summary — real data from dashboard */}
         <div className="bg-gradient-to-r from-purple-600 to-purple-400 rounded-2xl p-6 mb-6 text-white shadow-lg">
           <p className="text-purple-100 text-sm font-medium mb-1">Available Balance</p>
-          <p className="text-4xl font-bold">{totalBalance.toFixed(2)} <span className="text-2xl font-semibold text-purple-200">SOL</span></p>
-          <p className="text-purple-200 text-sm mt-2">{wallets.length} wallet{wallets.length !== 1 ? 's' : ''} connected</p>
+          <p className="text-4xl font-bold">
+            ${currentValue.toFixed(2)}
+            <span className="text-xl font-semibold text-purple-200 ml-2">USD</span>
+          </p>
+          <p className="text-purple-200 text-sm mt-1">
+            {totalSolCoins.toFixed(4)} SOL
+          </p>
         </div>
 
-        {/* Wallet list — tap to select */}
+        {/* Wallet list */}
         {wallets.length === 0 ? (
           <div className="bg-white rounded-2xl border-2 border-dashed border-gray-200 p-12 text-center">
             <Wallet className="w-10 h-10 text-gray-300 mx-auto mb-3" />
@@ -124,14 +130,14 @@ export default function WithdrawPage() {
                   }`}
                 >
                   <div className="flex items-center gap-4">
-                    {/* Radio indicator */}
+                    {/* Radio */}
                     <div className={`w-5 h-5 rounded-full border-2 shrink-0 flex items-center justify-center transition-colors ${
                       isSelected ? 'border-purple-600 bg-purple-600' : 'border-gray-300'
                     }`}>
                       {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
                     </div>
 
-                    {/* Wallet icon */}
+                    {/* Icon */}
                     <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-600 to-purple-400 flex items-center justify-center shrink-0">
                       <Wallet className="w-5 h-5 text-white" />
                     </div>
@@ -153,9 +159,6 @@ export default function WithdrawPage() {
                             : <Copy className="w-3.5 h-3.5 text-gray-400" />}
                         </button>
                       </div>
-                      <p className="text-xs text-gray-400 mt-1">
-                        Balance: <span className="font-semibold text-purple-600">{wallet.balance} SOL</span>
-                      </p>
                     </div>
 
                     {/* Delete */}
@@ -206,9 +209,7 @@ export default function WithdrawPage() {
             <code className="text-xs">{selectedWallet.address.slice(0, 14)}…{selectedWallet.address.slice(-6)}</code>
           </div>
 
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Amount (SOL)
-          </label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Amount (USD)</label>
           <input
             type="number"
             min="0"
@@ -219,7 +220,7 @@ export default function WithdrawPage() {
             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 text-lg mb-1"
           />
           <p className="text-xs text-gray-400 mb-6">
-            Available: <span className="font-semibold text-purple-600">{selectedWallet.balance} SOL</span>
+            Available: <span className="font-semibold text-purple-600">${currentValue.toFixed(2)}</span>
           </p>
 
           <div className="flex gap-3">
@@ -307,8 +308,6 @@ export default function WithdrawPage() {
     </div>
   );
 }
-
-// ── Reusable modal wrapper ─────────────────────────────────────────────────────
 
 function Modal({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
   return (
