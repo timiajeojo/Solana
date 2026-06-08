@@ -46,7 +46,7 @@ export default function ProfilePage() {
       <div className="px-4 sm:px-8 pt-6 pb-5">
         <h1
           style={{ fontFamily: "'Syne', sans-serif" }}
-          className="text-2xl sm:text-3xl font-extrabold tracking-tight"
+          className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#0a0a0a]"
         >
           Profile Settings
         </h1>
