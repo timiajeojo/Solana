@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Wallet, Plus, Copy, ArrowLeft, Trash2, ArrowDownToLine, CheckCircle2 } from 'lucide-react';
-import { useBalance } from '@/context/BalanceContext';
+import { useBalance } from '@/app/context/BalanceContext';
 
 interface WalletItem {
   id:      number;

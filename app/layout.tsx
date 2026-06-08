@@ -7,7 +7,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { DM_Sans, Syne } from 'next/font/google';
 import { UserProvider }    from '@/context/UserContext';
-import { BalanceProvider } from '@/context/BalanceContext';
+import { BalanceProvider } from '@/app/context/BalanceContext';
 
 const dmSans = DM_Sans({
   subsets:  ['latin'],
