@@ -4,7 +4,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Wallet, Plus, Copy, ArrowLeft, Trash2, ArrowDownToLine, CheckCircle2 } from 'lucide-react';
-import { useBalance } from '@/app/context/BalanceContext';
+import { useBalance } from '@/context/BalanceContext';
+import { getCurrentUser, addWithdrawal } from '../component/lib/supabase';
 
 interface WalletItem {
   id:      number;
@@ -14,8 +15,6 @@ interface WalletItem {
 
 export default function WithdrawPage() {
   const router = useRouter();
-
-  // Real balance from dashboard via context
   const { currentValue, totalSolCoins } = useBalance();
 
   const [wallets, setWallets] = useState<WalletItem[]>([
@@ -30,6 +29,8 @@ export default function WithdrawPage() {
   const [selectedWallet,    setSelectedWallet]    = useState<WalletItem | null>(null);
   const [amount,            setAmount]            = useState('');
   const [copied,            setCopied]            = useState<number | null>(null);
+  const [submitting,        setSubmitting]        = useState(false);
+  const [submitError,       setSubmitError]       = useState<string | null>(null);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -53,12 +54,33 @@ export default function WithdrawPage() {
     }
   }
 
-  function handleWithdraw() {
+  async function handleWithdraw() {
     if (!selectedWallet || !amount) return;
-    setShowWithdrawModal(false);
-    setShowSuccessModal(true);
-    setAmount('');
-    setSelectedWallet(null);
+    setSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const user = await getCurrentUser();
+      if (!user) { router.push('/auth'); return; }
+
+      await addWithdrawal({
+        user_id:        user.id,
+        amount:         parseFloat(amount),
+        wallet_name:    selectedWallet.name,
+        wallet_address: selectedWallet.address,
+        status:         'pending',
+      });
+
+      setShowWithdrawModal(false);
+      setShowSuccessModal(true);
+      setAmount('');
+      setSelectedWallet(null);
+    } catch (e) {
+      console.error(e);
+      setSubmitError('Failed to submit withdrawal. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   // ── UI ────────────────────────────────────────────────────────────────────
@@ -91,16 +113,14 @@ export default function WithdrawPage() {
           </button>
         </div>
 
-        {/* Balance summary — real data from dashboard */}
+        {/* Balance — from dashboard context */}
         <div className="bg-gradient-to-r from-purple-600 to-purple-400 rounded-2xl p-6 mb-6 text-white shadow-lg">
           <p className="text-purple-100 text-sm font-medium mb-1">Available Balance</p>
           <p className="text-4xl font-bold">
             ${currentValue.toFixed(2)}
             <span className="text-xl font-semibold text-purple-200 ml-2">USD</span>
           </p>
-          <p className="text-purple-200 text-sm mt-1">
-            {totalSolCoins.toFixed(4)} SOL
-          </p>
+          <p className="text-purple-200 text-sm mt-1">{totalSolCoins.toFixed(4)} SOL</p>
         </div>
 
         {/* Wallet list */}
@@ -124,25 +144,18 @@ export default function WithdrawPage() {
                   key={wallet.id}
                   onClick={() => setSelectedWallet(isSelected ? null : wallet)}
                   className={`bg-white rounded-2xl p-5 border-2 cursor-pointer transition-all shadow-sm ${
-                    isSelected
-                      ? 'border-purple-500 shadow-purple-100 shadow-md'
-                      : 'border-gray-100 hover:border-purple-200'
+                    isSelected ? 'border-purple-500 shadow-purple-100 shadow-md' : 'border-gray-100 hover:border-purple-200'
                   }`}
                 >
                   <div className="flex items-center gap-4">
-                    {/* Radio */}
                     <div className={`w-5 h-5 rounded-full border-2 shrink-0 flex items-center justify-center transition-colors ${
                       isSelected ? 'border-purple-600 bg-purple-600' : 'border-gray-300'
                     }`}>
                       {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
                     </div>
-
-                    {/* Icon */}
                     <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-600 to-purple-400 flex items-center justify-center shrink-0">
                       <Wallet className="w-5 h-5 text-white" />
                     </div>
-
-                    {/* Info */}
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-gray-900">{wallet.name}</p>
                       <div className="flex items-center gap-1.5 mt-0.5">
@@ -152,7 +165,6 @@ export default function WithdrawPage() {
                         <button
                           onClick={(e) => { e.stopPropagation(); handleCopy(wallet.address, wallet.id); }}
                           className="p-1 hover:bg-gray-100 rounded transition-colors shrink-0"
-                          title="Copy address"
                         >
                           {copied === wallet.id
                             ? <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
@@ -160,8 +172,6 @@ export default function WithdrawPage() {
                         </button>
                       </div>
                     </div>
-
-                    {/* Delete */}
                     <button
                       onClick={(e) => { e.stopPropagation(); handleDelete(wallet.id); }}
                       className="p-2 hover:bg-red-50 rounded-lg transition-colors group shrink-0"
@@ -180,9 +190,7 @@ export default function WithdrawPage() {
           onClick={() => selectedWallet && setShowWithdrawModal(true)}
           disabled={!selectedWallet}
           className={`w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg ${
-            selectedWallet
-              ? 'bg-purple-600 hover:bg-purple-700 text-white'
-              : 'bg-gray-100 text-gray-300 cursor-not-allowed'
+            selectedWallet ? 'bg-purple-600 hover:bg-purple-700 text-white' : 'bg-gray-100 text-gray-300 cursor-not-allowed'
           }`}
         >
           <ArrowDownToLine className="w-5 h-5" />
@@ -191,9 +199,9 @@ export default function WithdrawPage() {
 
       </div>
 
-      {/* ── Withdraw amount modal ─────────────────────────────────────────── */}
+      {/* ── Withdraw modal ──────────────────────────────────────────────────── */}
       {showWithdrawModal && selectedWallet && (
-        <Modal onClose={() => setShowWithdrawModal(false)}>
+        <Modal onClose={() => { setShowWithdrawModal(false); setSubmitError(null); }}>
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-purple-400 flex items-center justify-center">
               <ArrowDownToLine className="w-5 h-5 text-white" />
@@ -205,7 +213,7 @@ export default function WithdrawPage() {
           </div>
 
           <div className="bg-purple-50 rounded-xl px-4 py-3 mb-5 text-sm text-gray-600">
-            <span className="font-medium">Wallet:</span>{' '}
+            <span className="font-medium">Wallet: </span>
             <code className="text-xs">{selectedWallet.address.slice(0, 14)}…{selectedWallet.address.slice(-6)}</code>
           </div>
 
@@ -219,23 +227,27 @@ export default function WithdrawPage() {
             placeholder="0.00"
             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 text-lg mb-1"
           />
-          <p className="text-xs text-gray-400 mb-6">
+          <p className="text-xs text-gray-400 mb-4">
             Available: <span className="font-semibold text-purple-600">${currentValue.toFixed(2)}</span>
           </p>
 
+          {submitError && (
+            <p className="text-sm text-red-500 mb-3">{submitError}</p>
+          )}
+
           <div className="flex gap-3">
             <button
-              onClick={() => setShowWithdrawModal(false)}
+              onClick={() => { setShowWithdrawModal(false); setSubmitError(null); }}
               className="flex-1 py-3 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-semibold"
             >
               Cancel
             </button>
             <button
               onClick={handleWithdraw}
-              disabled={!amount || Number(amount) <= 0}
+              disabled={!amount || Number(amount) <= 0 || submitting}
               className="flex-1 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-200 disabled:cursor-not-allowed text-white rounded-xl transition-colors font-semibold shadow-md"
             >
-              Confirm
+              {submitting ? 'Submitting…' : 'Confirm'}
             </button>
           </div>
         </Modal>
@@ -267,10 +279,7 @@ export default function WithdrawPage() {
               />
             </div>
             <div className="flex gap-3 pt-2">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="flex-1 py-3 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-semibold"
-              >
+              <button onClick={() => setShowAddModal(false)} className="flex-1 py-3 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-semibold">
                 Cancel
               </button>
               <button
@@ -294,14 +303,22 @@ export default function WithdrawPage() {
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">Withdrawal Submitted</h3>
             <p className="text-gray-500 text-sm mb-6">
-              Your withdrawal request has been submitted and is being processed.
+              Your withdrawal is being processed. Check History for updates.
             </p>
-            <button
-              onClick={() => setShowSuccessModal(false)}
-              className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold transition-colors"
-            >
-              Done
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                className="flex-1 py-3 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-semibold"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => router.push('/history')}
+                className="flex-1 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold transition-colors"
+              >
+                View History
+              </button>
+            </div>
           </div>
         </Modal>
       )}

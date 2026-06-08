@@ -14,23 +14,127 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // Types
 // ============================================
 
-export interface Investment {
-  id?: number;
-  user_id: string;
-  amount: number;
-  sol_price: number;
-  sol_amount: number;
-  purchase_date: string;
+export interface Withdrawal {
+  id?:            number;
+  user_id:        string;
+  amount:         number;
+  wallet_name:    string;
+  wallet_address: string;
+  status?:        'pending' | 'completed' | 'failed';
+  created_at?:    string;
+}
+
+export interface Deposit {
+  id?:         number;
+  user_id:     string;
+  amount:      number;
+  plan:        string;
+  status?:     'pending' | 'completed' | 'failed';
   created_at?: string;
 }
 
-export interface UserProfile {
-  id: string;
-  first_name: string;
-  last_name: string;
-  created_at?: string;
-  updated_at?: string;
+// withdrwal function
+
+export async function addWithdrawal(withdrawal: Withdrawal) {
+  const { data, error } = await supabase
+    .from('withdrawals')
+    .insert([withdrawal])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error adding withdrawal:', error);
+    throw error;
+  }
+  return data;
 }
+
+export async function getWithdrawals(userId: string) {
+  const { data, error } = await supabase
+    .from('withdrawals')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching withdrawals:', error);
+    return [];
+  }
+  return data;
+}
+
+// ─── Deposit Functions ────────────────────────────────────────────────────────
+
+export async function addDeposit(deposit: Deposit) {
+  const { data, error } = await supabase
+    .from('deposits')
+    .insert([deposit])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error adding deposit:', error);
+    throw error;
+  }
+  return data;
+}
+
+export async function getDeposits(userId: string) {
+  const { data, error } = await supabase
+    .from('deposits')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching deposits:', error);
+    return [];
+  }
+  return data;
+}
+
+
+// ─── Combined History ─────────────────────────────────────────────────────────
+// Fetches investments, withdrawals, and deposits in parallel
+// and returns them merged and sorted newest-first.
+
+export async function getFullHistory(userId: string) {
+  const [investments, withdrawals, deposits] = await Promise.all([
+    getInvestments(userId),
+    getWithdrawals(userId),
+    getDeposits(userId),
+  ]);
+
+  const mapped = [
+    ...(investments ?? []).map((i: any) => ({
+      id:         `inv-${i.id}`,
+      type:       'investment' as const,
+      amount:     i.amount,
+      sol_amount: i.sol_amount,
+      sol_price:  i.sol_price,
+      status:     'completed' as const,
+      plan:       '-',
+      date:       i.purchase_date ?? i.created_at,
+    })),
+    ...(withdrawals ?? []).map((w: any) => ({
+      id:            `wd-${w.id}`,
+      type:          'withdrawal' as const,
+      amount:        w.amount,
+      wallet_name:   w.wallet_name,
+      wallet_address:w.wallet_address,
+      status:        w.status,
+      plan:          '-',
+      date:          w.created_at,
+    })),
+    ...(deposits ?? []).map((d: any) => ({
+      id:     `dep-${d.id}`,
+      type:   'deposit' as const,
+      amount: d.amount,
+      status: d.status,
+      plan:   d.plan,
+      date:   d.created_at,
+    })),
+  ];
 
 // ============================================
 // Profile Functions
@@ -246,4 +350,10 @@ export function onAuthStateChange(callback: (user: any) => void) {
   return supabase.auth.onAuthStateChange((event, session) => {
     callback(session?.user ?? null);
   });
+  
+  // Sort newest first
+  return mapped.sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+}
 }

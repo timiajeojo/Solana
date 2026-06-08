@@ -46,8 +46,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.onAuthStateChange = exports.getCurrentUser = exports.signOut = exports.signInWithGoogle = exports.signInWithEmail = exports.signUpWithEmail = exports.deleteInvestment = exports.updateInvestment = exports.addInvestment = exports.getInvestments = exports.updateUserProfile = exports.getUserProfile = exports.createUserProfile = exports.supabase = void 0;
+exports.getFullHistory = exports.getDeposits = exports.addDeposit = exports.getWithdrawals = exports.addWithdrawal = exports.supabase = void 0;
 var supabase_js_1 = require("@supabase/supabase-js");
 var supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 var supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -55,29 +64,21 @@ if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Missing Supabase environment variables. Please check your .env.local file.');
 }
 exports.supabase = (0, supabase_js_1.createClient)(supabaseUrl, supabaseAnonKey);
-// ============================================
-// Profile Functions
-// ============================================
-function createUserProfile(userId, firstName, lastName) {
+// withdrwal function
+function addWithdrawal(withdrawal) {
     return __awaiter(this, void 0, void 0, function () {
         var _a, data, error;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0: return [4 /*yield*/, exports.supabase
-                        .from('profiles')
-                        .insert([
-                        {
-                            id: userId,
-                            first_name: firstName,
-                            last_name: lastName,
-                        },
-                    ])
+                        .from('withdrawals')
+                        .insert([withdrawal])
                         .select()
                         .single()];
                 case 1:
                     _a = _b.sent(), data = _a.data, error = _a.error;
                     if (error) {
-                        console.error('Error creating profile:', error);
+                        console.error('Error adding withdrawal:', error);
                         throw error;
                     }
                     return [2 /*return*/, data];
@@ -85,69 +86,21 @@ function createUserProfile(userId, firstName, lastName) {
         });
     });
 }
-exports.createUserProfile = createUserProfile;
-function getUserProfile(userId) {
+exports.addWithdrawal = addWithdrawal;
+function getWithdrawals(userId) {
     return __awaiter(this, void 0, void 0, function () {
         var _a, data, error;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0: return [4 /*yield*/, exports.supabase
-                        .from('profiles')
-                        .select('*')
-                        .eq('id', userId)
-                        .single()];
-                case 1:
-                    _a = _b.sent(), data = _a.data, error = _a.error;
-                    if (error) {
-                        console.error('Error fetching profile:', error);
-                        return [2 /*return*/, null];
-                    }
-                    return [2 /*return*/, data];
-            }
-        });
-    });
-}
-exports.getUserProfile = getUserProfile;
-function updateUserProfile(userId, updates) {
-    return __awaiter(this, void 0, void 0, function () {
-        var _a, data, error;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0: return [4 /*yield*/, exports.supabase
-                        .from('profiles')
-                        .update(__assign(__assign({}, updates), { updated_at: new Date().toISOString() }))
-                        .eq('id', userId)
-                        .select()
-                        .single()];
-                case 1:
-                    _a = _b.sent(), data = _a.data, error = _a.error;
-                    if (error) {
-                        console.error('Error updating profile:', error);
-                        throw error;
-                    }
-                    return [2 /*return*/, data];
-            }
-        });
-    });
-}
-exports.updateUserProfile = updateUserProfile;
-// ============================================
-// Investment Functions
-// ============================================
-function getInvestments(userId) {
-    return __awaiter(this, void 0, void 0, function () {
-        var _a, data, error;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0: return [4 /*yield*/, exports.supabase
-                        .from('investments')
+                        .from('withdrawals')
                         .select('*')
                         .eq('user_id', userId)
-                        .order('purchase_date', { ascending: false })];
+                        .order('created_at', { ascending: false })];
                 case 1:
                     _a = _b.sent(), data = _a.data, error = _a.error;
                     if (error) {
-                        console.error('Error fetching investments:', error);
+                        console.error('Error fetching withdrawals:', error);
                         return [2 /*return*/, []];
                     }
                     return [2 /*return*/, data];
@@ -155,21 +108,22 @@ function getInvestments(userId) {
         });
     });
 }
-exports.getInvestments = getInvestments;
-function addInvestment(investment) {
+exports.getWithdrawals = getWithdrawals;
+// ─── Deposit Functions ────────────────────────────────────────────────────────
+function addDeposit(deposit) {
     return __awaiter(this, void 0, void 0, function () {
         var _a, data, error;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0: return [4 /*yield*/, exports.supabase
-                        .from('investments')
-                        .insert([investment])
+                        .from('deposits')
+                        .insert([deposit])
                         .select()
                         .single()];
                 case 1:
                     _a = _b.sent(), data = _a.data, error = _a.error;
                     if (error) {
-                        console.error('Error adding investment:', error);
+                        console.error('Error adding deposit:', error);
                         throw error;
                     }
                     return [2 /*return*/, data];
@@ -177,177 +131,361 @@ function addInvestment(investment) {
         });
     });
 }
-exports.addInvestment = addInvestment;
-function updateInvestment(id, updates) {
+exports.addDeposit = addDeposit;
+function getDeposits(userId) {
     return __awaiter(this, void 0, void 0, function () {
         var _a, data, error;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0: return [4 /*yield*/, exports.supabase
-                        .from('investments')
-                        .update(updates)
-                        .eq('id', id)
-                        .select()
-                        .single()];
+                        .from('deposits')
+                        .select('*')
+                        .eq('user_id', userId)
+                        .order('created_at', { ascending: false })];
                 case 1:
                     _a = _b.sent(), data = _a.data, error = _a.error;
                     if (error) {
-                        console.error('Error updating investment:', error);
-                        throw error;
+                        console.error('Error fetching deposits:', error);
+                        return [2 /*return*/, []];
                     }
                     return [2 /*return*/, data];
             }
         });
     });
 }
-exports.updateInvestment = updateInvestment;
-function deleteInvestment(id) {
+exports.getDeposits = getDeposits;
+// ─── Combined History ─────────────────────────────────────────────────────────
+// Fetches investments, withdrawals, and deposits in parallel
+// and returns them merged and sorted newest-first.
+function getFullHistory(userId) {
     return __awaiter(this, void 0, void 0, function () {
-        var error;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, exports.supabase
-                        .from('investments')
-                        .delete()
-                        .eq('id', id)];
-                case 1:
-                    error = (_a.sent()).error;
-                    if (error) {
-                        console.error('Error deleting investment:', error);
-                        throw error;
+        // ============================================
+        // Profile Functions
+        // ============================================
+        export function createUserProfile(userId, firstName, lastName) {
+            return __awaiter(this, void 0, void 0, function () {
+                var _a, data, error;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: return [4 /*yield*/, exports.supabase
+                                .from('profiles')
+                                .insert([
+                                {
+                                    id: userId,
+                                    first_name: firstName,
+                                    last_name: lastName,
+                                },
+                            ])
+                                .select()
+                                .single()];
+                        case 1:
+                            _a = _b.sent(), data = _a.data, error = _a.error;
+                            if (error) {
+                                console.error('Error creating profile:', error);
+                                throw error;
+                            }
+                            return [2 /*return*/, data];
                     }
-                    return [2 /*return*/, true];
-            }
-        });
-    });
-}
-exports.deleteInvestment = deleteInvestment;
-// ============================================
-// Authentication Functions
-// ============================================
-function signUpWithEmail(email, password, firstName, lastName) {
-    return __awaiter(this, void 0, void 0, function () {
-        var _a, data, error, profileError_1;
+                });
+            });
+        }
+        export function getUserProfile(userId) {
+            return __awaiter(this, void 0, void 0, function () {
+                var _a, data, error;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: return [4 /*yield*/, exports.supabase
+                                .from('profiles')
+                                .select('*')
+                                .eq('id', userId)
+                                .single()];
+                        case 1:
+                            _a = _b.sent(), data = _a.data, error = _a.error;
+                            if (error) {
+                                console.error('Error fetching profile:', error);
+                                return [2 /*return*/, null];
+                            }
+                            return [2 /*return*/, data];
+                    }
+                });
+            });
+        }
+        export function updateUserProfile(userId, updates) {
+            return __awaiter(this, void 0, void 0, function () {
+                var _a, data, error;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: return [4 /*yield*/, exports.supabase
+                                .from('profiles')
+                                .update(__assign(__assign({}, updates), { updated_at: new Date().toISOString() }))
+                                .eq('id', userId)
+                                .select()
+                                .single()];
+                        case 1:
+                            _a = _b.sent(), data = _a.data, error = _a.error;
+                            if (error) {
+                                console.error('Error updating profile:', error);
+                                throw error;
+                            }
+                            return [2 /*return*/, data];
+                    }
+                });
+            });
+        }
+        // ============================================
+        // Investment Functions
+        // ============================================
+        export function getInvestments(userId) {
+            return __awaiter(this, void 0, void 0, function () {
+                var _a, data, error;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: return [4 /*yield*/, exports.supabase
+                                .from('investments')
+                                .select('*')
+                                .eq('user_id', userId)
+                                .order('purchase_date', { ascending: false })];
+                        case 1:
+                            _a = _b.sent(), data = _a.data, error = _a.error;
+                            if (error) {
+                                console.error('Error fetching investments:', error);
+                                return [2 /*return*/, []];
+                            }
+                            return [2 /*return*/, data];
+                    }
+                });
+            });
+        }
+        export function addInvestment(investment) {
+            return __awaiter(this, void 0, void 0, function () {
+                var _a, data, error;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: return [4 /*yield*/, exports.supabase
+                                .from('investments')
+                                .insert([investment])
+                                .select()
+                                .single()];
+                        case 1:
+                            _a = _b.sent(), data = _a.data, error = _a.error;
+                            if (error) {
+                                console.error('Error adding investment:', error);
+                                throw error;
+                            }
+                            return [2 /*return*/, data];
+                    }
+                });
+            });
+        }
+        export function updateInvestment(id, updates) {
+            return __awaiter(this, void 0, void 0, function () {
+                var _a, data, error;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: return [4 /*yield*/, exports.supabase
+                                .from('investments')
+                                .update(updates)
+                                .eq('id', id)
+                                .select()
+                                .single()];
+                        case 1:
+                            _a = _b.sent(), data = _a.data, error = _a.error;
+                            if (error) {
+                                console.error('Error updating investment:', error);
+                                throw error;
+                            }
+                            return [2 /*return*/, data];
+                    }
+                });
+            });
+        }
+        export function deleteInvestment(id) {
+            return __awaiter(this, void 0, void 0, function () {
+                var error;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, exports.supabase
+                                .from('investments')
+                                .delete()
+                                .eq('id', id)];
+                        case 1:
+                            error = (_a.sent()).error;
+                            if (error) {
+                                console.error('Error deleting investment:', error);
+                                throw error;
+                            }
+                            return [2 /*return*/, true];
+                    }
+                });
+            });
+        }
+        // ============================================
+        // Authentication Functions
+        // ============================================
+        export function signUpWithEmail(email, password, firstName, lastName) {
+            return __awaiter(this, void 0, void 0, function () {
+                var _a, data, error, profileError_1;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: return [4 /*yield*/, exports.supabase.auth.signUp({
+                                email: email,
+                                password: password,
+                                options: {
+                                    data: {
+                                        first_name: firstName,
+                                        last_name: lastName,
+                                    },
+                                },
+                            })];
+                        case 1:
+                            _a = _b.sent(), data = _a.data, error = _a.error;
+                            if (error) {
+                                console.error('Error signing up:', error);
+                                throw error;
+                            }
+                            if (!data.user) return [3 /*break*/, 5];
+                            _b.label = 2;
+                        case 2:
+                            _b.trys.push([2, 4, , 5]);
+                            return [4 /*yield*/, createUserProfile(data.user.id, firstName, lastName)];
+                        case 3:
+                            _b.sent();
+                            return [3 /*break*/, 5];
+                        case 4:
+                            profileError_1 = _b.sent();
+                            console.error('Error creating profile:', profileError_1);
+                            return [3 /*break*/, 5];
+                        case 5: return [2 /*return*/, data];
+                    }
+                });
+            });
+        }
+        export function signInWithEmail(email, password) {
+            return __awaiter(this, void 0, void 0, function () {
+                var _a, data, error;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: return [4 /*yield*/, exports.supabase.auth.signInWithPassword({
+                                email: email,
+                                password: password,
+                            })];
+                        case 1:
+                            _a = _b.sent(), data = _a.data, error = _a.error;
+                            if (error) {
+                                console.error('Error signing in:', error);
+                                throw error;
+                            }
+                            return [2 /*return*/, data];
+                    }
+                });
+            });
+        }
+        export function signInWithGoogle() {
+            return __awaiter(this, void 0, void 0, function () {
+                var _a, data, error;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: return [4 /*yield*/, exports.supabase.auth.signInWithOAuth({
+                                provider: 'google',
+                                options: {
+                                    redirectTo: "".concat(window.location.origin, "/dashboard"),
+                                },
+                            })];
+                        case 1:
+                            _a = _b.sent(), data = _a.data, error = _a.error;
+                            if (error) {
+                                console.error('Error signing in with Google:', error);
+                                throw error;
+                            }
+                            return [2 /*return*/, data];
+                    }
+                });
+            });
+        }
+        export function signOut() {
+            return __awaiter(this, void 0, void 0, function () {
+                var error;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, exports.supabase.auth.signOut()];
+                        case 1:
+                            error = (_a.sent()).error;
+                            if (error) {
+                                console.error('Error signing out:', error);
+                                throw error;
+                            }
+                            return [2 /*return*/];
+                    }
+                });
+            });
+        }
+        export function getCurrentUser() {
+            return __awaiter(this, void 0, void 0, function () {
+                var _a, user, error;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: return [4 /*yield*/, exports.supabase.auth.getUser()];
+                        case 1:
+                            _a = _b.sent(), user = _a.data.user, error = _a.error;
+                            if (error) {
+                                console.error('Error getting user:', error);
+                                return [2 /*return*/, null];
+                            }
+                            return [2 /*return*/, user];
+                    }
+                });
+            });
+        }
+        export function onAuthStateChange(callback) {
+            return exports.supabase.auth.onAuthStateChange(function (event, session) {
+                var _a;
+                callback((_a = session === null || session === void 0 ? void 0 : session.user) !== null && _a !== void 0 ? _a : null);
+            });
+            // Sort newest first
+            return mapped.sort(function (a, b) { return new Date(b.date).getTime() - new Date(a.date).getTime(); });
+        }
+        var _a, investments, withdrawals, deposits, mapped;
         return __generator(this, function (_b) {
             switch (_b.label) {
-                case 0: return [4 /*yield*/, exports.supabase.auth.signUp({
-                        email: email,
-                        password: password,
-                        options: {
-                            data: {
-                                first_name: firstName,
-                                last_name: lastName,
-                            },
-                        },
-                    })];
+                case 0: return [4 /*yield*/, Promise.all([
+                        getInvestments(userId),
+                        getWithdrawals(userId),
+                        getDeposits(userId),
+                    ])];
                 case 1:
-                    _a = _b.sent(), data = _a.data, error = _a.error;
-                    if (error) {
-                        console.error('Error signing up:', error);
-                        throw error;
-                    }
-                    if (!data.user) return [3 /*break*/, 5];
-                    _b.label = 2;
-                case 2:
-                    _b.trys.push([2, 4, , 5]);
-                    return [4 /*yield*/, createUserProfile(data.user.id, firstName, lastName)];
-                case 3:
-                    _b.sent();
-                    return [3 /*break*/, 5];
-                case 4:
-                    profileError_1 = _b.sent();
-                    console.error('Error creating profile:', profileError_1);
-                    return [3 /*break*/, 5];
-                case 5: return [2 /*return*/, data];
-            }
-        });
-    });
-}
-exports.signUpWithEmail = signUpWithEmail;
-function signInWithEmail(email, password) {
-    return __awaiter(this, void 0, void 0, function () {
-        var _a, data, error;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0: return [4 /*yield*/, exports.supabase.auth.signInWithPassword({
-                        email: email,
-                        password: password,
-                    })];
-                case 1:
-                    _a = _b.sent(), data = _a.data, error = _a.error;
-                    if (error) {
-                        console.error('Error signing in:', error);
-                        throw error;
-                    }
-                    return [2 /*return*/, data];
-            }
-        });
-    });
-}
-exports.signInWithEmail = signInWithEmail;
-function signInWithGoogle() {
-    return __awaiter(this, void 0, void 0, function () {
-        var _a, data, error;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0: return [4 /*yield*/, exports.supabase.auth.signInWithOAuth({
-                        provider: 'google',
-                        options: {
-                            redirectTo: "".concat(window.location.origin, "/dashboard"),
-                        },
-                    })];
-                case 1:
-                    _a = _b.sent(), data = _a.data, error = _a.error;
-                    if (error) {
-                        console.error('Error signing in with Google:', error);
-                        throw error;
-                    }
-                    return [2 /*return*/, data];
-            }
-        });
-    });
-}
-exports.signInWithGoogle = signInWithGoogle;
-function signOut() {
-    return __awaiter(this, void 0, void 0, function () {
-        var error;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, exports.supabase.auth.signOut()];
-                case 1:
-                    error = (_a.sent()).error;
-                    if (error) {
-                        console.error('Error signing out:', error);
-                        throw error;
-                    }
+                    _a = _b.sent(), investments = _a[0], withdrawals = _a[1], deposits = _a[2];
+                    mapped = __spreadArray(__spreadArray(__spreadArray([], (investments !== null && investments !== void 0 ? investments : []).map(function (i) {
+                        var _a;
+                        return ({
+                            id: "inv-".concat(i.id),
+                            type: 'investment',
+                            amount: i.amount,
+                            sol_amount: i.sol_amount,
+                            sol_price: i.sol_price,
+                            status: 'completed',
+                            plan: '-',
+                            date: (_a = i.purchase_date) !== null && _a !== void 0 ? _a : i.created_at,
+                        });
+                    }), true), (withdrawals !== null && withdrawals !== void 0 ? withdrawals : []).map(function (w) { return ({
+                        id: "wd-".concat(w.id),
+                        type: 'withdrawal',
+                        amount: w.amount,
+                        wallet_name: w.wallet_name,
+                        wallet_address: w.wallet_address,
+                        status: w.status,
+                        plan: '-',
+                        date: w.created_at,
+                    }); }), true), (deposits !== null && deposits !== void 0 ? deposits : []).map(function (d) { return ({
+                        id: "dep-".concat(d.id),
+                        type: 'deposit',
+                        amount: d.amount,
+                        status: d.status,
+                        plan: d.plan,
+                        date: d.created_at,
+                    }); }), true);
                     return [2 /*return*/];
             }
         });
     });
 }
-exports.signOut = signOut;
-function getCurrentUser() {
-    return __awaiter(this, void 0, void 0, function () {
-        var _a, user, error;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0: return [4 /*yield*/, exports.supabase.auth.getUser()];
-                case 1:
-                    _a = _b.sent(), user = _a.data.user, error = _a.error;
-                    if (error) {
-                        console.error('Error getting user:', error);
-                        return [2 /*return*/, null];
-                    }
-                    return [2 /*return*/, user];
-            }
-        });
-    });
-}
-exports.getCurrentUser = getCurrentUser;
-function onAuthStateChange(callback) {
-    return exports.supabase.auth.onAuthStateChange(function (event, session) {
-        var _a;
-        callback((_a = session === null || session === void 0 ? void 0 : session.user) !== null && _a !== void 0 ? _a : null);
-    });
-}
-exports.onAuthStateChange = onAuthStateChange;
+exports.getFullHistory = getFullHistory;
