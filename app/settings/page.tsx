@@ -582,8 +582,7 @@ function AppearancePanel() {
     </div>
   );
 
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
+//
 
 export default function SettingsPage() {
   const [section, setSection] = useState<Section>("profile");
