@@ -462,7 +462,7 @@ function SecurityPanel({ onAction }: { onAction: (msg: string) => void }) {
       {/* ── Delete Account Confirmation Modal ────────────────────────────── */}
       {showDeleteModal && (
         <Modal onClose={() => setShowDeleteModal(false)}>
-          <div className="flex items-center gap-3 mb-4">
+        className="flex items-center gap-3 mb-4">
             <div className="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
               <svg className="w-4 h-4 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="3 6 5 6 21 6" />
@@ -581,8 +581,9 @@ function AppearancePanel() {
       </Card>
     </div>
   );
+}
 
-//
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
   const [section, setSection] = useState<Section>("profile");
