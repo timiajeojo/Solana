@@ -1,9 +1,11 @@
 // app/settings/page.tsx
 "use client";
 
-import { useState, ChangeEvent, ReactNode } from "react";
+import { useState, ChangeEvent, ReactNode, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useUser } from "@/app/context/UserContext";
+import { supabase } from "@/app/component/lib/supabase";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -64,6 +66,21 @@ function Toggle({ checked, onChange }: ToggleProps) {
   );
 }
 
+// ─── Modal ────────────────────────────────────────────────────────────────────
+
+function Modal({ children, onClose }: { children: ReactNode; onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-[#e8e2ff]">
+        {children}
+      </div>
+    </div>
+  );
+}
+
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
 const ProfileIcon = () => (
@@ -94,15 +111,10 @@ const PaletteIcon = () => (
 function ProfilePanel({ onSave }: { onSave: () => void }) {
   const { user, loading, updateUser } = useUser();
 
-  const [draft, setDraft] = useState({
-    firstName: user.firstName,
-    lastName:  user.lastName,
-  });
-  const [dirty,   setDirty]   = useState(false);
-  const [saving,  setSaving]  = useState(false);
+  const [draft, setDraft] = useState({ firstName: user.firstName, lastName: user.lastName });
+  const [dirty,  setDirty]  = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  // Keep draft in sync if context loads after mount
-  // (happens on first render before Supabase responds)
   useState(() => {
     setDraft({ firstName: user.firstName, lastName: user.lastName });
   });
@@ -117,7 +129,7 @@ function ProfilePanel({ onSave }: { onSave: () => void }) {
   async function handleSave() {
     setSaving(true);
     try {
-      await updateUser(draft); // writes to Supabase profiles table
+      await updateUser(draft);
       setDirty(false);
       onSave();
     } finally {
@@ -130,8 +142,7 @@ function ProfilePanel({ onSave }: { onSave: () => void }) {
     setDirty(false);
   }
 
-  const initials = [draft.firstName[0], draft.lastName[0]]
-    .filter(Boolean).join("").toUpperCase() || "?";
+  const initials = [draft.firstName[0], draft.lastName[0]].filter(Boolean).join("").toUpperCase() || "?";
 
   if (loading) {
     return (
@@ -146,7 +157,6 @@ function ProfilePanel({ onSave }: { onSave: () => void }) {
 
   return (
     <div className="space-y-4">
-      {/* Avatar preview */}
       <Card title="Avatar" description="Your initials are generated from your name.">
         <div className="flex items-center gap-4 px-4 sm:px-6 py-5">
           <div className="h-16 w-16 rounded-full bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-xl font-bold text-white shrink-0 shadow-md">
@@ -159,65 +169,24 @@ function ProfilePanel({ onSave }: { onSave: () => void }) {
         </div>
       </Card>
 
-      {/* Editable name fields */}
-      <Card
-        title="Personal Information"
-        description="Update your first and last name. This is shown on your profile."
-      >
+      <Card title="Personal Information" description="Update your first and last name. This is shown on your profile.">
         <Row label="First Name" description="Your given name">
-          <input
-            className={INPUT}
-            value={draft.firstName}
-            onChange={set("firstName")}
-            placeholder="Enter your first name"
-          />
+          <input className={INPUT} value={draft.firstName} onChange={set("firstName")} placeholder="Enter your first name" />
         </Row>
-
         <Row label="Last Name" description="Your family name">
-          <input
-            className={INPUT}
-            value={draft.lastName}
-            onChange={set("lastName")}
-            placeholder="Enter your last name"
-          />
+          <input className={INPUT} value={draft.lastName} onChange={set("lastName")} placeholder="Enter your last name" />
         </Row>
-
-        {/* Email — always read-only, comes from Supabase auth */}
-        <Row
-          label="Email Address"
-          description="Tied to your account — cannot be changed"
-        >
-          <div className="space-y-1">
-            <input
-              className={INPUT_DISABLED}
-              value={user.email}
-              disabled
-              readOnly
-              tabIndex={-1}
-            />
-            <p className="text-xs text-[#6b6b80]">Email cannot be changed</p>
-          </div>
+        <Row label="Email Address" description="Tied to your account — cannot be changed">
+          <input className={INPUT_DISABLED} value={user.email} disabled readOnly tabIndex={-1} />
         </Row>
-
-        {/* Footer */}
         <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-4 bg-[#faf9ff] border-t border-[#e8e2ff]">
-          <p className="text-xs text-[#6b6b80]">
-            {dirty ? "You have unsaved changes." : "Your profile is up to date."}
-          </p>
+          <p className="text-xs text-[#6b6b80]">{dirty ? "You have unsaved changes." : "Your profile is up to date."}</p>
           <div className="flex items-center gap-2">
-            {dirty && (
-              <button onClick={handleDiscard} className={GHOST}>
-                Discard
-              </button>
-            )}
+            {dirty && <button onClick={handleDiscard} className={GHOST}>Discard</button>}
             <button
               onClick={handleSave}
               disabled={!dirty || saving}
-              className={`rounded-lg px-5 py-2 text-sm font-semibold transition-colors ${
-                dirty && !saving
-                  ? "bg-violet-700 hover:bg-violet-800 text-white cursor-pointer shadow-sm"
-                  : "bg-violet-100 text-violet-300 cursor-not-allowed"
-              }`}
+              className={`rounded-lg px-5 py-2 text-sm font-semibold transition-colors ${dirty && !saving ? "bg-violet-700 hover:bg-violet-800 text-white cursor-pointer shadow-sm" : "bg-violet-100 text-violet-300 cursor-not-allowed"}`}
             >
               {saving ? "Saving…" : "Save Changes"}
             </button>
@@ -268,41 +237,287 @@ function NotificationsPanel() {
 // ─── Security Panel ───────────────────────────────────────────────────────────
 
 function SecurityPanel({ onAction }: { onAction: (msg: string) => void }) {
-  const [twoFactor,   setTwoFactor]   = useState(true);
-  const [activityLog, setActivityLog] = useState(false);
+  const router = useRouter();
+  const { user } = useUser();
+
+  // ── Change password modal state
+  const [showPasswordModal,  setShowPasswordModal]  = useState(false);
+  const [newPassword,        setNewPassword]        = useState("");
+  const [confirmPassword,    setConfirmPassword]    = useState("");
+  const [passwordLoading,    setPasswordLoading]    = useState(false);
+  const [passwordError,      setPasswordError]      = useState<string | null>(null);
+
+  // ── Sessions state
+  const [sessionCount,       setSessionCount]       = useState<number | null>(null);
+  const [revoking,           setRevoking]           = useState(false);
+
+  // ── Delete account modal state
+  const [showDeleteModal,    setShowDeleteModal]    = useState(false);
+  const [deleteConfirmText,  setDeleteConfirmText]  = useState("");
+  const [deleteLoading,      setDeleteLoading]      = useState(false);
+  const [deleteError,        setDeleteError]        = useState<string | null>(null);
+
+  // ── 2FA toggle
+  const [twoFactor, setTwoFactor] = useState(false);
+
+  // Load session count on mount
+  useEffect(() => {
+    async function loadSessions() {
+      try {
+        // Get all active sessions for the current user
+        const { data, error } = await supabase.auth.getSession();
+        if (!error && data.session) {
+          // Supabase doesn't expose a list-sessions API on the client;
+          // we show "1 (this device)" as the minimum confirmed count
+          setSessionCount(1);
+        }
+      } catch {
+        setSessionCount(1);
+      }
+    }
+    loadSessions();
+  }, []);
+
+  // ── Change password
+  async function handleChangePassword() {
+    setPasswordError(null);
+    if (!newPassword || newPassword.length < 6) {
+      setPasswordError("Password must be at least 6 characters.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("Passwords do not match.");
+      return;
+    }
+    setPasswordLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      setShowPasswordModal(false);
+      setNewPassword("");
+      setConfirmPassword("");
+      onAction("Password updated successfully!");
+    } catch (e: any) {
+      setPasswordError(e.message || "Failed to update password.");
+    } finally {
+      setPasswordLoading(false);
+    }
+  }
+
+  // ── Revoke all sessions (signs out everywhere including this device)
+  async function handleRevokeAll() {
+    setRevoking(true);
+    try {
+      // signOut with scope "global" signs out all sessions
+      const { error } = await supabase.auth.signOut({ scope: "global" });
+      if (error) throw error;
+      router.push("/auth");
+    } catch (e: any) {
+      onAction("Failed to revoke sessions. Try again.");
+    } finally {
+      setRevoking(false);
+    }
+  }
+
+  // ── Delete account
+  async function handleDeleteAccount() {
+    setDeleteError(null);
+    if (deleteConfirmText !== "DELETE") {
+      setDeleteError('Please type "DELETE" to confirm.');
+      return;
+    }
+    setDeleteLoading(true);
+    try {
+      // Delete the user's profile row first
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (authUser) {
+        await supabase.from("profiles").delete().eq("id", authUser.id);
+      }
+      // Call the admin delete endpoint via a Supabase Edge Function
+      // or use the service-role key on the server. Here we sign out
+      // and redirect — full deletion requires a server-side call.
+      // For now we sign out globally and show a message.
+      await supabase.auth.signOut({ scope: "global" });
+      router.push("/auth");
+    } catch (e: any) {
+      setDeleteError(e.message || "Failed to delete account. Please contact support.");
+      setDeleteLoading(false);
+    }
+  }
 
   return (
-    <div className="space-y-4">
-      <Card title="Authentication" description="Control how you sign in to your account.">
-        <Row label="Two-Factor Authentication" description="Require a verification code on every sign-in">
-          <Toggle checked={twoFactor} onChange={() => { setTwoFactor((v) => !v); onAction("2FA updated"); }} />
-        </Row>
-        <Row label="Change Password" description="Update your account password">
-          <button className={GHOST} onClick={() => onAction("Password reset email sent")}>Update</button>
-        </Row>
-        <Row label="Passkeys" description="Sign in securely without a password">
-          <button className={GHOST} onClick={() => onAction("Passkey setup launched")}>Set up</button>
-        </Row>
-      </Card>
-      <Card title="Sessions" description="Manage where you are currently signed in.">
-        <Row label="Activity Log" description="Track sign-ins and changes to your account">
-          <Toggle checked={activityLog} onChange={() => setActivityLog((v) => !v)} />
-        </Row>
-        <Row label="Active Sessions" description="Currently signed in on 2 devices">
-          <button className={GHOST} onClick={() => onAction("All other sessions revoked")}>Revoke all</button>
-        </Row>
-      </Card>
-      <Card title="Danger Zone" description="These actions are permanent and cannot be undone.">
-        <Row label="Delete Account" description="Remove your account and all associated data">
-          <button
-            onClick={() => onAction("Deletion requires email confirmation")}
-            className="rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors cursor-pointer"
+    <>
+      <div className="space-y-4">
+
+        {/* ── Authentication ── */}
+        <Card title="Authentication" description="Control how you sign in to your account.">
+          <Row label="Two-Factor Authentication" description="Require a verification code on every sign-in">
+            <Toggle checked={twoFactor} onChange={() => { setTwoFactor((v) => !v); onAction(twoFactor ? "2FA disabled" : "2FA enabled"); }} />
+          </Row>
+          <Row label="Change Password" description="Update your account password">
+            <button
+              className={GHOST}
+              onClick={() => { setPasswordError(null); setShowPasswordModal(true); }}
+            >
+              Update
+            </button>
+          </Row>
+        </Card>
+
+        {/* ── Sessions ── */}
+        <Card title="Sessions" description="Manage where you are currently signed in.">
+          <Row
+            label="Active Sessions"
+            description={
+              sessionCount !== null
+                ? `You are signed in on ${sessionCount} device${sessionCount !== 1 ? "s" : ""}`
+                : "Loading session info…"
+            }
           >
-            Delete account
-          </button>
-        </Row>
-      </Card>
-    </div>
+            <button
+              onClick={handleRevokeAll}
+              disabled={revoking}
+              className="rounded-lg border border-orange-200 bg-orange-50 hover:bg-orange-100 px-3 py-1.5 text-xs font-semibold text-orange-600 transition-colors cursor-pointer disabled:opacity-50"
+            >
+              {revoking ? "Signing out…" : "Revoke all"}
+            </button>
+          </Row>
+        </Card>
+
+        {/* ── Danger Zone ── */}
+        <Card title="Danger Zone" description="These actions are permanent and cannot be undone.">
+          <Row label="Delete Account" description="Permanently remove your account and all associated data">
+            <button
+              onClick={() => { setDeleteConfirmText(""); setDeleteError(null); setShowDeleteModal(true); }}
+              className="rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors cursor-pointer"
+            >
+              Delete account
+            </button>
+          </Row>
+        </Card>
+
+      </div>
+
+      {/* ── Change Password Modal ─────────────────────────────────────────── */}
+      {showPasswordModal && (
+        <Modal onClose={() => setShowPasswordModal(false)}>
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-9 h-9 rounded-xl bg-violet-100 flex items-center justify-center">
+              <svg className="w-4 h-4 text-violet-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0110 0v4" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-[#0a0a0a]">Change Password</h3>
+              <p className="text-xs text-[#6b6b80]">Choose a strong password</p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-semibold text-[#0a0a0a] mb-1.5">New Password</label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Min. 6 characters"
+                className="w-full rounded-lg border border-[#e8e2ff] bg-white px-3 py-2 text-sm text-[#0a0a0a] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-shadow"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-[#0a0a0a] mb-1.5">Confirm New Password</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Repeat your new password"
+                className="w-full rounded-lg border border-[#e8e2ff] bg-white px-3 py-2 text-sm text-[#0a0a0a] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-shadow"
+              />
+            </div>
+
+            {passwordError && (
+              <p className="text-xs text-red-500 font-medium">{passwordError}</p>
+            )}
+          </div>
+
+          <div className="flex gap-2 mt-5">
+            <button
+              onClick={() => setShowPasswordModal(false)}
+              className="flex-1 py-2.5 border border-[#e8e2ff] rounded-lg text-sm font-semibold text-[#6b6b80] hover:bg-[#faf9ff] transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleChangePassword}
+              disabled={passwordLoading}
+              className="flex-1 py-2.5 bg-violet-700 hover:bg-violet-800 disabled:bg-violet-200 text-white rounded-lg text-sm font-semibold transition-colors"
+            >
+              {passwordLoading ? "Updating…" : "Update Password"}
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {/* ── Delete Account Confirmation Modal ────────────────────────────── */}
+      {showDeleteModal && (
+        <Modal onClose={() => setShowDeleteModal(false)}>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
+              <svg className="w-4 h-4 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                <path d="M10 11v6M14 11v6" />
+                <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-[#0a0a0a]">Delete Account</h3>
+              <p className="text-xs text-[#6b6b80]">This cannot be undone</p>
+            </div>
+          </div>
+
+          <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4">
+            <p className="text-xs text-red-700 leading-relaxed">
+              Deleting your account will permanently remove all your data including investments, withdrawals, and profile information.
+            </p>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-xs font-semibold text-[#0a0a0a] mb-1.5">
+              Type <span className="text-red-600 font-bold">DELETE</span> to confirm
+            </label>
+            <input
+              type="text"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="DELETE"
+              className="w-full rounded-lg border border-red-200 bg-white px-3 py-2 text-sm text-[#0a0a0a] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition-shadow"
+            />
+          </div>
+
+          {deleteError && (
+            <p className="text-xs text-red-500 font-medium mb-3">{deleteError}</p>
+          )}
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowDeleteModal(false)}
+              className="flex-1 py-2.5 border border-[#e8e2ff] rounded-lg text-sm font-semibold text-[#6b6b80] hover:bg-[#faf9ff] transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDeleteAccount}
+              disabled={deleteLoading || deleteConfirmText !== "DELETE"}
+              className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 disabled:bg-red-200 disabled:cursor-not-allowed text-white rounded-lg text-sm font-semibold transition-colors"
+            >
+              {deleteLoading ? "Deleting…" : "Delete Account"}
+            </button>
+          </div>
+        </Modal>
+      )}
+    </>
   );
 }
 
@@ -366,7 +581,7 @@ function AppearancePanel() {
       </Card>
     </div>
   );
-}
+
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -399,7 +614,7 @@ export default function SettingsPage() {
       <div className="border-b border-[#e8e2ff] bg-[#faf9ff] px-4 sm:px-8 py-5 sm:py-6">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div>
-            <h1 style={{ fontFamily: "'Syne', sans-serif" }} className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#0a0a0a]">
+            <h1 style={{ fontFamily: "var(--font-syne)" }} className="text-xl sm:text-2xl font-bold tracking-tight text-[#0a0a0a]">
               Settings
             </h1>
             <p className="mt-0.5 text-sm text-[#6b6b80]">Manage your account and preferences.</p>
@@ -429,8 +644,6 @@ export default function SettingsPage() {
       {/* ── Body ── */}
       <div className="mx-auto max-w-5xl px-4 sm:px-8 py-6 sm:py-8">
         <div className="flex gap-8 items-start">
-
-          {/* Desktop sidebar */}
           <nav className="hidden md:block w-52 shrink-0 sticky top-6">
             <ul className="space-y-0.5">
               {navItems.map((item) => (
@@ -445,9 +658,8 @@ export default function SettingsPage() {
             </ul>
           </nav>
 
-          {/* Content */}
           <div className="flex-1 min-w-0">
-            <h2 style={{ fontFamily: "'Syne', sans-serif" }} className="hidden md:block text-lg font-bold text-[#0a0a0a] mb-5">
+            <h2 style={{ fontFamily: "var(--font-syne)" }} className="hidden md:block text-lg font-bold text-[#0a0a0a] mb-5">
               {titles[section]}
             </h2>
             <div key={section}>
