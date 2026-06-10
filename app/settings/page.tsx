@@ -279,37 +279,35 @@ function SecurityPanel({ onAction }: { onAction: (msg: string) => void }) {
   }
 
   async function handleChangePassword() {
-    setPasswordError(null);
-    setPasswordSuccess(false);
+  setPasswordError(null);
+  setPasswordSuccess(false);
 
-    if (newPassword.length < 6) {
-      setPasswordError("Password must be at least 6 characters.");
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setPasswordError("Passwords do not match.");
-      return;
-    }
-
-    setPasswordLoading(true);
-    try {
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) throw error;
-      setPasswordSuccess(true);
-      setNewPassword("");
-      setConfirmPassword("");
-      // Close modal after a short delay so user sees the success message
-      setTimeout(() => {
-        setShowPasswordModal(false);
-        setPasswordSuccess(false);
-        onAction("Password updated successfully!");
-      }, 1500);
-    } catch (e: any) {
-      setPasswordError(e.message || "Failed to update password.");
-    } finally {
-      setPasswordLoading(false);
-    }
+  if (newPassword.length < 6) {
+    setPasswordError("Password must be at least 6 characters.");
+    return;
   }
+  if (newPassword !== confirmPassword) {
+    setPasswordError("Passwords do not match.");
+    return;
+  }
+
+  setPasswordLoading(true);
+  try {
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) throw error;
+    
+    // Close modal immediately
+    setShowPasswordModal(false);
+    setNewPassword("");
+    setConfirmPassword("");
+    // Fire the toast
+    onAction("✓ Password updated successfully!");
+  } catch (e: any) {
+    setPasswordError(e.message || "Failed to update password.");
+  } finally {
+    setPasswordLoading(false);
+  }
+}
 
   // ── Revoke all sessions ───────────────────────────────────────────────────
 
