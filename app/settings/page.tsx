@@ -1,7 +1,6 @@
-// app/settings/page.tsx
 "use client";
 
-import { useState, ChangeEvent, ReactNode, useEffect } from "react";
+import { useState, useEffect, ChangeEvent, ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/app/context/UserContext";
@@ -11,9 +10,9 @@ import { supabase } from "@/app/component/lib/supabase";
 
 type Section = "profile" | "notifications" | "security" | "appearance";
 
-interface NavItem   { id: Section; label: string; icon: ReactNode }
-interface CardProps { title: string; description: string; children: ReactNode }
-interface RowProps  { label: string; description: string; children: ReactNode }
+interface NavItem    { id: Section; label: string; icon: ReactNode }
+interface CardProps  { title: string; description: string; children: ReactNode }
+interface RowProps   { label: string; description: string; children: ReactNode }
 interface ToggleProps { checked: boolean; onChange: () => void }
 
 // ─── Shared styles ────────────────────────────────────────────────────────────
@@ -59,14 +58,16 @@ function Toggle({ checked, onChange }: ToggleProps) {
       role="switch"
       aria-checked={checked}
       onClick={onChange}
-      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ${checked ? "bg-violet-700" : "bg-gray-200"}`}
+      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 ${
+        checked ? "bg-violet-700" : "bg-gray-200"
+      }`}
     >
-      <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition duration-200 ${checked ? "translate-x-5" : "translate-x-0"}`} />
+      <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition duration-200 ${
+        checked ? "translate-x-5" : "translate-x-0"
+      }`} />
     </button>
   );
 }
-
-// ─── Modal ────────────────────────────────────────────────────────────────────
 
 function Modal({ children, onClose }: { children: ReactNode; onClose: () => void }) {
   return (
@@ -111,7 +112,7 @@ const PaletteIcon = () => (
 function ProfilePanel({ onSave }: { onSave: () => void }) {
   const { user, loading, updateUser } = useUser();
 
-  const [draft, setDraft] = useState({ firstName: user.firstName, lastName: user.lastName });
+  const [draft,  setDraft]  = useState({ firstName: user.firstName, lastName: user.lastName });
   const [dirty,  setDirty]  = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -180,13 +181,21 @@ function ProfilePanel({ onSave }: { onSave: () => void }) {
           <input className={INPUT_DISABLED} value={user.email} disabled readOnly tabIndex={-1} />
         </Row>
         <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-4 bg-[#faf9ff] border-t border-[#e8e2ff]">
-          <p className="text-xs text-[#6b6b80]">{dirty ? "You have unsaved changes." : "Your profile is up to date."}</p>
+          <p className="text-xs text-[#6b6b80]">
+            {dirty ? "You have unsaved changes." : "Your profile is up to date."}
+          </p>
           <div className="flex items-center gap-2">
-            {dirty && <button onClick={handleDiscard} className={GHOST}>Discard</button>}
+            {dirty && (
+              <button onClick={handleDiscard} className={GHOST}>Discard</button>
+            )}
             <button
               onClick={handleSave}
               disabled={!dirty || saving}
-              className={`rounded-lg px-5 py-2 text-sm font-semibold transition-colors ${dirty && !saving ? "bg-violet-700 hover:bg-violet-800 text-white cursor-pointer shadow-sm" : "bg-violet-100 text-violet-300 cursor-not-allowed"}`}
+              className={`rounded-lg px-5 py-2 text-sm font-semibold transition-colors ${
+                dirty && !saving
+                  ? "bg-violet-700 hover:bg-violet-800 text-white cursor-pointer shadow-sm"
+                  : "bg-violet-100 text-violet-300 cursor-not-allowed"
+              }`}
             >
               {saving ? "Saving…" : "Save Changes"}
             </button>
@@ -238,50 +247,42 @@ function NotificationsPanel() {
 
 function SecurityPanel({ onAction }: { onAction: (msg: string) => void }) {
   const router = useRouter();
-  const { user } = useUser();
 
-  // ── Change password modal state
-  const [showPasswordModal,  setShowPasswordModal]  = useState(false);
-  const [newPassword,        setNewPassword]        = useState("");
-  const [confirmPassword,    setConfirmPassword]    = useState("");
-  const [passwordLoading,    setPasswordLoading]    = useState(false);
-  const [passwordError,      setPasswordError]      = useState<string | null>(null);
+  // ── Password modal
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [newPassword,       setNewPassword]       = useState("");
+  const [confirmPassword,   setConfirmPassword]   = useState("");
+  const [passwordLoading,   setPasswordLoading]   = useState(false);
+  const [passwordError,     setPasswordError]     = useState<string | null>(null);
+  const [passwordSuccess,   setPasswordSuccess]   = useState(false);
 
-  // ── Sessions state
-  const [sessionCount,       setSessionCount]       = useState<number | null>(null);
-  const [revoking,           setRevoking]           = useState(false);
+  // ── Sessions
+  const [revoking, setRevoking] = useState(false);
 
-  // ── Delete account modal state
-  const [showDeleteModal,    setShowDeleteModal]    = useState(false);
-  const [deleteConfirmText,  setDeleteConfirmText]  = useState("");
-  const [deleteLoading,      setDeleteLoading]      = useState(false);
-  const [deleteError,        setDeleteError]        = useState<string | null>(null);
+  // ── Delete modal
+  const [showDeleteModal,   setShowDeleteModal]   = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleteLoading,     setDeleteLoading]     = useState(false);
+  const [deleteError,       setDeleteError]       = useState<string | null>(null);
 
-  // ── 2FA toggle
+  // ── 2FA toggle (UI only)
   const [twoFactor, setTwoFactor] = useState(false);
 
-  // Load session count on mount
-  useEffect(() => {
-    async function loadSessions() {
-      try {
-        // Get all active sessions for the current user
-        const { data, error } = await supabase.auth.getSession();
-        if (!error && data.session) {
-          // Supabase doesn't expose a list-sessions API on the client;
-          // we show "1 (this device)" as the minimum confirmed count
-          setSessionCount(1);
-        }
-      } catch {
-        setSessionCount(1);
-      }
-    }
-    loadSessions();
-  }, []);
+  // ── Change password ───────────────────────────────────────────────────────
 
-  // ── Change password
+  function openPasswordModal() {
+    setNewPassword("");
+    setConfirmPassword("");
+    setPasswordError(null);
+    setPasswordSuccess(false);
+    setShowPasswordModal(true);
+  }
+
   async function handleChangePassword() {
     setPasswordError(null);
-    if (!newPassword || newPassword.length < 6) {
+    setPasswordSuccess(false);
+
+    if (newPassword.length < 6) {
       setPasswordError("Password must be at least 6 characters.");
       return;
     }
@@ -289,14 +290,20 @@ function SecurityPanel({ onAction }: { onAction: (msg: string) => void }) {
       setPasswordError("Passwords do not match.");
       return;
     }
+
     setPasswordLoading(true);
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
-      setShowPasswordModal(false);
+      setPasswordSuccess(true);
       setNewPassword("");
       setConfirmPassword("");
-      onAction("Password updated successfully!");
+      // Close modal after a short delay so user sees the success message
+      setTimeout(() => {
+        setShowPasswordModal(false);
+        setPasswordSuccess(false);
+        onAction("Password updated successfully!");
+      }, 1500);
     } catch (e: any) {
       setPasswordError(e.message || "Failed to update password.");
     } finally {
@@ -304,22 +311,30 @@ function SecurityPanel({ onAction }: { onAction: (msg: string) => void }) {
     }
   }
 
-  // ── Revoke all sessions (signs out everywhere including this device)
+  // ── Revoke all sessions ───────────────────────────────────────────────────
+
   async function handleRevokeAll() {
     setRevoking(true);
     try {
-      // signOut with scope "global" signs out all sessions
+      // Sign out from ALL sessions (global scope)
       const { error } = await supabase.auth.signOut({ scope: "global" });
       if (error) throw error;
+      // Redirect to auth after sign-out
       router.push("/auth");
     } catch (e: any) {
-      onAction("Failed to revoke sessions. Try again.");
-    } finally {
       setRevoking(false);
+      onAction("Failed to revoke sessions. Please try again.");
     }
   }
 
-  // ── Delete account
+  // ── Delete account ────────────────────────────────────────────────────────
+
+  function openDeleteModal() {
+    setDeleteConfirmText("");
+    setDeleteError(null);
+    setShowDeleteModal(true);
+  }
+
   async function handleDeleteAccount() {
     setDeleteError(null);
     if (deleteConfirmText !== "DELETE") {
@@ -328,15 +343,12 @@ function SecurityPanel({ onAction }: { onAction: (msg: string) => void }) {
     }
     setDeleteLoading(true);
     try {
-      // Delete the user's profile row first
       const { data: { user: authUser } } = await supabase.auth.getUser();
       if (authUser) {
+        // Delete profile row
         await supabase.from("profiles").delete().eq("id", authUser.id);
       }
-      // Call the admin delete endpoint via a Supabase Edge Function
-      // or use the service-role key on the server. Here we sign out
-      // and redirect — full deletion requires a server-side call.
-      // For now we sign out globally and show a message.
+      // Sign out all sessions then redirect
       await supabase.auth.signOut({ scope: "global" });
       router.push("/auth");
     } catch (e: any) {
@@ -346,63 +358,59 @@ function SecurityPanel({ onAction }: { onAction: (msg: string) => void }) {
   }
 
   return (
-    <>
-      <div className="space-y-4">
+    <div className="space-y-4">
 
-        {/* ── Authentication ── */}
-        <Card title="Authentication" description="Control how you sign in to your account.">
-          <Row label="Two-Factor Authentication" description="Require a verification code on every sign-in">
-            <Toggle checked={twoFactor} onChange={() => { setTwoFactor((v) => !v); onAction(twoFactor ? "2FA disabled" : "2FA enabled"); }} />
-          </Row>
-          <Row label="Change Password" description="Update your account password">
-            <button
-              className={GHOST}
-              onClick={() => { setPasswordError(null); setShowPasswordModal(true); }}
-            >
-              Update
-            </button>
-          </Row>
-        </Card>
+      {/* ── Authentication ── */}
+      <Card title="Authentication" description="Control how you sign in to your account.">
+        <Row label="Two-Factor Authentication" description="Require a verification code on every sign-in">
+          <Toggle
+            checked={twoFactor}
+            onChange={() => {
+              setTwoFactor((v) => !v);
+              onAction(twoFactor ? "2FA disabled" : "2FA enabled");
+            }}
+          />
+        </Row>
+        <Row label="Change Password" description="Update your account password">
+          <button className={GHOST} onClick={openPasswordModal}>
+            Update
+          </button>
+        </Row>
+      </Card>
 
-        {/* ── Sessions ── */}
-        <Card title="Sessions" description="Manage where you are currently signed in.">
-          <Row
-            label="Active Sessions"
-            description={
-              sessionCount !== null
-                ? `You are signed in on ${sessionCount} device${sessionCount !== 1 ? "s" : ""}`
-                : "Loading session info…"
-            }
+      {/* ── Sessions ── */}
+      <Card title="Sessions" description="Manage where you are currently signed in.">
+        <Row
+          label="Active Sessions"
+          description="Signing out will end all sessions on every device including this one"
+        >
+          <button
+            onClick={handleRevokeAll}
+            disabled={revoking}
+            className="rounded-lg border border-orange-200 bg-orange-50 hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 text-xs font-semibold text-orange-600 transition-colors cursor-pointer"
           >
-            <button
-              onClick={handleRevokeAll}
-              disabled={revoking}
-              className="rounded-lg border border-orange-200 bg-orange-50 hover:bg-orange-100 px-3 py-1.5 text-xs font-semibold text-orange-600 transition-colors cursor-pointer disabled:opacity-50"
-            >
-              {revoking ? "Signing out…" : "Revoke all"}
-            </button>
-          </Row>
-        </Card>
+            {revoking ? "Signing out…" : "Revoke all"}
+          </button>
+        </Row>
+      </Card>
 
-        {/* ── Danger Zone ── */}
-        <Card title="Danger Zone" description="These actions are permanent and cannot be undone.">
-          <Row label="Delete Account" description="Permanently remove your account and all associated data">
-            <button
-              onClick={() => { setDeleteConfirmText(""); setDeleteError(null); setShowDeleteModal(true); }}
-              className="rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors cursor-pointer"
-            >
-              Delete account
-            </button>
-          </Row>
-        </Card>
-
-      </div>
+      {/* ── Danger Zone ── */}
+      <Card title="Danger Zone" description="These actions are permanent and cannot be undone.">
+        <Row label="Delete Account" description="Permanently remove your account and all associated data">
+          <button
+            onClick={openDeleteModal}
+            className="rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors cursor-pointer"
+          >
+            Delete account
+          </button>
+        </Row>
+      </Card>
 
       {/* ── Change Password Modal ─────────────────────────────────────────── */}
       {showPasswordModal && (
         <Modal onClose={() => setShowPasswordModal(false)}>
           <div className="flex items-center gap-3 mb-5">
-            <div className="w-9 h-9 rounded-xl bg-violet-100 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-violet-100 flex items-center justify-center shrink-0">
               <svg className="w-4 h-4 text-violet-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                 <path d="M7 11V7a5 5 0 0110 0v4" />
@@ -410,56 +418,67 @@ function SecurityPanel({ onAction }: { onAction: (msg: string) => void }) {
             </div>
             <div>
               <h3 className="text-base font-bold text-[#0a0a0a]">Change Password</h3>
-              <p className="text-xs text-[#6b6b80]">Choose a strong password</p>
+              <p className="text-xs text-[#6b6b80]">Choose a strong new password</p>
             </div>
           </div>
 
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-semibold text-[#0a0a0a] mb-1.5">New Password</label>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Min. 6 characters"
-                className="w-full rounded-lg border border-[#e8e2ff] bg-white px-3 py-2 text-sm text-[#0a0a0a] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-shadow"
-              />
+          {passwordSuccess ? (
+            <div className="flex flex-col items-center py-4 gap-3">
+              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                <svg className="w-6 h-6 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+              <p className="text-sm font-semibold text-green-700">Password updated successfully!</p>
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-[#0a0a0a] mb-1.5">Confirm New Password</label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Repeat your new password"
-                className="w-full rounded-lg border border-[#e8e2ff] bg-white px-3 py-2 text-sm text-[#0a0a0a] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-shadow"
-              />
-            </div>
-
-            {passwordError && (
-              <p className="text-xs text-red-500 font-medium">{passwordError}</p>
-            )}
-          </div>
-
-          <div className="flex gap-2 mt-5">
-            <button
-              onClick={() => setShowPasswordModal(false)}
-              className="flex-1 py-2.5 border border-[#e8e2ff] rounded-lg text-sm font-semibold text-[#6b6b80] hover:bg-[#faf9ff] transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleChangePassword}
-              disabled={passwordLoading}
-              className="flex-1 py-2.5 bg-violet-700 hover:bg-violet-800 disabled:bg-violet-200 text-white rounded-lg text-sm font-semibold transition-colors"
-            >
-              {passwordLoading ? "Updating…" : "Update Password"}
-            </button>
-          </div>
+          ) : (
+            <>
+              <div className="space-y-3 mb-4">
+                <div>
+                  <label className="block text-xs font-semibold text-[#0a0a0a] mb-1.5">New Password</label>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Min. 6 characters"
+                    className="w-full rounded-lg border border-[#e8e2ff] bg-white px-3 py-2 text-sm text-[#0a0a0a] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-shadow"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-[#0a0a0a] mb-1.5">Confirm New Password</label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Repeat your new password"
+                    className="w-full rounded-lg border border-[#e8e2ff] bg-white px-3 py-2 text-sm text-[#0a0a0a] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-shadow"
+                  />
+                </div>
+                {passwordError && (
+                  <p className="text-xs text-red-500 font-medium">{passwordError}</p>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowPasswordModal(false)}
+                  className="flex-1 py-2.5 border border-[#e8e2ff] rounded-lg text-sm font-semibold text-[#6b6b80] hover:bg-[#faf9ff] transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleChangePassword}
+                  disabled={passwordLoading}
+                  className="flex-1 py-2.5 bg-violet-700 hover:bg-violet-800 disabled:bg-violet-200 disabled:cursor-not-allowed text-white rounded-lg text-sm font-semibold transition-colors"
+                >
+                  {passwordLoading ? "Updating…" : "Update Password"}
+                </button>
+              </div>
+            </>
+          )}
         </Modal>
       )}
 
-      {/* ── Delete Account Confirmation Modal ────────────────────────────── */}
+      {/* ── Delete Account Modal ──────────────────────────────────────────── */}
       {showDeleteModal && (
         <Modal onClose={() => setShowDeleteModal(false)}>
           <div className="flex items-center gap-3 mb-4">
@@ -517,7 +536,7 @@ function SecurityPanel({ onAction }: { onAction: (msg: string) => void }) {
           </div>
         </Modal>
       )}
-    </>
+    </div>
   );
 }
 
@@ -534,7 +553,7 @@ function AppearancePanel() {
   const accents = [
     { id: "violet",  color: "bg-violet-600" },
     { id: "sky",     color: "bg-sky-500"    },
-    { id: "emerald", color: "bg-emerald-500"},
+    { id: "emerald", color: "bg-emerald-500" },
     { id: "rose",    color: "bg-rose-500"   },
     { id: "amber",   color: "bg-amber-500"  },
   ];
@@ -545,8 +564,15 @@ function AppearancePanel() {
         <Row label="Color Scheme" description="Switch between light, dark, or system default">
           <div className="flex flex-wrap gap-1.5">
             {themes.map((t) => (
-              <button key={t} onClick={() => setTheme(t)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold capitalize transition-colors border cursor-pointer ${theme === t ? "bg-violet-700 border-violet-700 text-white shadow-sm" : "bg-white border-[#e8e2ff] text-[#6b6b80] hover:border-violet-300 hover:text-[#0a0a0a]"}`}>
+              <button
+                key={t}
+                onClick={() => setTheme(t)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold capitalize transition-colors border cursor-pointer ${
+                  theme === t
+                    ? "bg-violet-700 border-violet-700 text-white shadow-sm"
+                    : "bg-white border-[#e8e2ff] text-[#6b6b80] hover:border-violet-300 hover:text-[#0a0a0a]"
+                }`}
+              >
                 {t}
               </button>
             ))}
@@ -555,8 +581,14 @@ function AppearancePanel() {
         <Row label="Accent Color" description="Primary highlight colour across the UI">
           <div className="flex items-center gap-2">
             {accents.map((a) => (
-              <button key={a.id} onClick={() => setAccent(a.id)} title={a.id}
-                className={`h-6 w-6 rounded-full ${a.color} transition-transform ring-offset-2 ring-offset-white cursor-pointer ${accent === a.id ? "ring-2 ring-[#0a0a0a] scale-110" : "hover:scale-105"}`} />
+              <button
+                key={a.id}
+                onClick={() => setAccent(a.id)}
+                title={a.id}
+                className={`h-6 w-6 rounded-full ${a.color} transition-transform ring-offset-2 ring-offset-white cursor-pointer ${
+                  accent === a.id ? "ring-2 ring-[#0a0a0a] scale-110" : "hover:scale-105"
+                }`}
+              />
             ))}
           </div>
         </Row>
@@ -569,8 +601,11 @@ function AppearancePanel() {
           <Toggle checked={animations} onChange={() => setAnimations((v) => !v)} />
         </Row>
         <Row label="Language" description="Display language for the entire interface">
-          <select value={language} onChange={(e) => setLanguage(e.target.value)}
-            className="rounded-lg bg-white border border-[#e8e2ff] px-3 py-2 text-sm text-[#0a0a0a] focus:outline-none focus:ring-2 focus:ring-violet-500 transition-shadow appearance-none cursor-pointer">
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="rounded-lg bg-white border border-[#e8e2ff] px-3 py-2 text-sm text-[#0a0a0a] focus:outline-none focus:ring-2 focus:ring-violet-500 transition-shadow appearance-none cursor-pointer"
+          >
             <option value="en">English</option>
             <option value="es">Español</option>
             <option value="fr">Français</option>
@@ -619,7 +654,10 @@ export default function SettingsPage() {
             </h1>
             <p className="mt-0.5 text-sm text-[#6b6b80]">Manage your account and preferences.</p>
           </div>
-          <Link href="/profile" className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-[#6b6b80] hover:text-[#0a0a0a] transition-colors">
+          <Link
+            href="/profile"
+            className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-[#6b6b80] hover:text-[#0a0a0a] transition-colors"
+          >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" />
             </svg>
@@ -632,8 +670,15 @@ export default function SettingsPage() {
       <div className="md:hidden border-b border-[#e8e2ff] bg-white overflow-x-auto">
         <div className="flex min-w-max px-2">
           {navItems.map((item) => (
-            <button key={item.id} onClick={() => setSection(item.id)}
-              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors cursor-pointer ${section === item.id ? "border-violet-700 text-violet-700" : "border-transparent text-[#6b6b80] hover:text-[#0a0a0a]"}`}>
+            <button
+              key={item.id}
+              onClick={() => setSection(item.id)}
+              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors cursor-pointer ${
+                section === item.id
+                  ? "border-violet-700 text-violet-700"
+                  : "border-transparent text-[#6b6b80] hover:text-[#0a0a0a]"
+              }`}
+            >
               <span className={section === item.id ? "text-violet-600" : ""}>{item.icon}</span>
               {item.label}
             </button>
@@ -644,12 +689,20 @@ export default function SettingsPage() {
       {/* ── Body ── */}
       <div className="mx-auto max-w-5xl px-4 sm:px-8 py-6 sm:py-8">
         <div className="flex gap-8 items-start">
+
+          {/* Desktop sidebar */}
           <nav className="hidden md:block w-52 shrink-0 sticky top-6">
             <ul className="space-y-0.5">
               {navItems.map((item) => (
                 <li key={item.id}>
-                  <button onClick={() => setSection(item.id)}
-                    className={`w-full flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium border transition-all cursor-pointer ${section === item.id ? "bg-violet-50 text-violet-700 border-violet-200 shadow-sm" : "border-transparent text-[#6b6b80] hover:text-[#0a0a0a] hover:bg-[#faf9ff]"}`}>
+                  <button
+                    onClick={() => setSection(item.id)}
+                    className={`w-full flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium border transition-all cursor-pointer ${
+                      section === item.id
+                        ? "bg-violet-50 text-violet-700 border-violet-200 shadow-sm"
+                        : "border-transparent text-[#6b6b80] hover:text-[#0a0a0a] hover:bg-[#faf9ff]"
+                    }`}
+                  >
                     <span className={section === item.id ? "text-violet-600" : "text-[#9ca3af]"}>{item.icon}</span>
                     {item.label}
                   </button>
@@ -658,8 +711,12 @@ export default function SettingsPage() {
             </ul>
           </nav>
 
+          {/* Content */}
           <div className="flex-1 min-w-0">
-            <h2 style={{ fontFamily: "var(--font-syne)" }} className="hidden md:block text-lg font-bold text-[#0a0a0a] mb-5">
+            <h2
+              style={{ fontFamily: "var(--font-syne)" }}
+              className="hidden md:block text-lg font-bold text-[#0a0a0a] mb-5"
+            >
               {titles[section]}
             </h2>
             <div key={section}>
