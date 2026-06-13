@@ -8,13 +8,67 @@
   box-sizing: border-box;
 }
 
+:root {
+  --font-dm-sans: 'DM Sans', sans-serif;
+  --font-syne:    'Syne', sans-serif;
+
+  /* Accent color — changed dynamically by the Appearance settings */
+  --accent: #7c3aed;        /* violet-600 */
+  --accent-hover: #6d28d9;  /* violet-700 */
+  --accent-light: #ede9fe;  /* violet-100 */
+}
+
 body {
   background-color: #ffffff;
   color: #000000;
   font-family: var(--font-dm-sans), sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-:root {
-  --font-dm-sans: 'DM Sans', sans-serif;
-  --font-syne:    'Syne', sans-serif;
+/* ── Dark mode base overrides ──────────────────────────────────────────────── */
+html.dark body {
+  background-color: #0a0a0f;
+  color: #f5f5f7;
+}
+
+html.dark .bg-white {
+  background-color: #14141f !important;
+}
+
+html.dark .bg-\[#faf9ff\] {
+  background-color: #1a1a26 !important;
+}
+
+html.dark .text-\[#0a0a0a\] {
+  color: #f5f5f7 !important;
+}
+
+html.dark .text-\[#6b6b80\] {
+  color: #9999b3 !important;
+}
+
+html.dark .border-\[#e8e2ff\] {
+  border-color: #2a2a3d !important;
+}
+
+html.dark .bg-gradient-to-br.from-purple-50,
+html.dark .bg-gradient-to-br.via-white,
+html.dark .bg-gradient-to-br.to-purple-100 {
+  --tw-gradient-from: #0a0a0f !important;
+  --tw-gradient-via: #14141f !important;
+  --tw-gradient-to: #0a0a0f !important;
+}
+
+/* ── Accent color utility classes ──────────────────────────────────────────── */
+/* Use these instead of bg-violet-700 etc. where the accent should be dynamic */
+.bg-accent       { background-color: var(--accent) !important; }
+.bg-accent-hover:hover { background-color: var(--accent-hover) !important; }
+.text-accent     { color: var(--accent) !important; }
+.border-accent   { border-color: var(--accent) !important; }
+.ring-accent     { --tw-ring-color: var(--accent) !important; }
+
+/* ── Reduced motion (Animations toggle) ────────────────────────────────────── */
+html.no-animations * {
+  animation: none !important;
+  transition: none !important;
 }
