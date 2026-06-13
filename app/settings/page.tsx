@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/app/context/UserContext";
 import { supabase } from "@/app/component/lib/supabase";
+import { useTheme } from "next-themes";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -16,6 +17,13 @@ interface RowProps   { label: string; description: string; children: ReactNode }
 interface ToggleProps { checked: boolean; onChange: () => void }
 
 // ─── Shared styles ────────────────────────────────────────────────────────────
+const ACCENT_COLORS: Record<string, { hex: string; hover: string; light: string; tw: string }> = {
+  violet:  { hex: "#7c3aed", hover: "#6d28d9", light: "#ede9fe", tw: "bg-violet-600" },
+  sky:     { hex: "#0ea5e9", hover: "#0284c7", light: "#e0f2fe", tw: "bg-sky-500" },
+  emerald: { hex: "#10b981", hover: "#059669", light: "#d1fae5", tw: "bg-emerald-500" },
+  rose:    { hex: "#f43f5e", hover: "#e11d48", light: "#ffe4e6", tw: "bg-rose-500" },
+  amber:   { hex: "#f59e0b", hover: "#d97706", light: "#fef3c7", tw: "bg-amber-500" },
+};
 
 const INPUT =
   "w-full sm:w-64 rounded-lg border border-[#e8e2ff] bg-white px-3 py-2 text-sm text-[#0a0a0a] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-shadow";
@@ -541,20 +549,79 @@ function SecurityPanel({ onAction }: { onAction: (msg: string) => void }) {
 // ─── Appearance Panel ─────────────────────────────────────────────────────────
 
 function AppearancePanel() {
-  const [theme,      setTheme]      = useState<"light" | "dark" | "system">("light");
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
   const [accent,     setAccent]     = useState("violet");
-  const [compact,    setCompact]    = useState(false);
   const [animations, setAnimations] = useState(true);
   const [language,   setLanguage]   = useState("en");
 
-  const themes  = ["light", "dark", "system"] as const;
-  const accents = [
-    { id: "violet",  color: "bg-violet-600" },
-    { id: "sky",     color: "bg-sky-500"    },
-    { id: "emerald", color: "bg-emerald-500" },
-    { id: "rose",    color: "bg-rose-500"   },
-    { id: "amber",   color: "bg-amber-500"  },
-  ];
+  // Avoid hydration mismatch — next-themes needs a client mount check
+  useEffect(() => {
+    setMounted(true);
+
+    // Restore saved accent color
+    const savedAccent = localStorage.getItem("accent-color");
+    if (savedAccent && ACCENT_COLORS[savedAccent]) {
+      applyAccent(savedAccent);
+      setAccent(savedAccent);
+    }
+
+    // Restore animations preference
+    const savedAnimations = localStorage.getItem("animations");
+    if (savedAnimations === "false") {
+      setAnimations(false);
+      document.documentElement.classList.add("no-animations");
+    }
+
+    // Restore language
+    const savedLang = localStorage.getItem("language");
+    if (savedLang) setLanguage(savedLang);
+  }, []);
+
+  function applyAccent(id: string) {
+    const c = ACCENT_COLORS[id];
+    if (!c) return;
+    document.documentElement.style.setProperty("--accent", c.hex);
+    document.documentElement.style.setProperty("--accent-hover", c.hover);
+    document.documentElement.style.setProperty("--accent-light", c.light);
+  }
+
+  function handleAccentChange(id: string) {
+    setAccent(id);
+    applyAccent(id);
+    localStorage.setItem("accent-color", id);
+  }
+
+  function handleAnimationsToggle() {
+    const next = !animations;
+    setAnimations(next);
+    localStorage.setItem("animations", String(next));
+    if (next) {
+      document.documentElement.classList.remove("no-animations");
+    } else {
+      document.documentElement.classList.add("no-animations");
+    }
+  }
+
+  function handleLanguageChange(e: ChangeEvent<HTMLSelectElement>) {
+    const lang = e.target.value;
+    setLanguage(lang);
+    localStorage.setItem("language", lang);
+    // Full translation wiring comes later — for now we just persist the choice
+  }
+
+  const themes = ["light", "dark", "system"] as const;
+
+  if (!mounted) {
+    // Render a stable placeholder until client mounts (avoids hydration mismatch)
+    return (
+      <div className="space-y-4">
+        <div className="rounded-2xl border border-[#e8e2ff] bg-white h-40 animate-pulse" />
+        <div className="rounded-2xl border border-[#e8e2ff] bg-white h-40 animate-pulse" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -576,32 +643,33 @@ function AppearancePanel() {
             ))}
           </div>
         </Row>
-        <Row label="Accent Color" description="Primary highlight colour across the UI">
+        <Row
+          label="Accent Color"
+          description="Primary highlight colour across the UI"
+        >
           <div className="flex items-center gap-2">
-            {accents.map((a) => (
+            {Object.entries(ACCENT_COLORS).map(([id, c]) => (
               <button
-                key={a.id}
-                onClick={() => setAccent(a.id)}
-                title={a.id}
-                className={`h-6 w-6 rounded-full ${a.color} transition-transform ring-offset-2 ring-offset-white cursor-pointer ${
-                  accent === a.id ? "ring-2 ring-[#0a0a0a] scale-110" : "hover:scale-105"
+                key={id}
+                onClick={() => handleAccentChange(id)}
+                title={id}
+                className={`h-6 w-6 rounded-full ${c.tw} transition-transform ring-offset-2 ring-offset-white cursor-pointer ${
+                  accent === id ? "ring-2 ring-[#0a0a0a] scale-110" : "hover:scale-105"
                 }`}
               />
             ))}
           </div>
         </Row>
       </Card>
-      <Card title="Layout & Motion" description="Adjust density and animation preferences.">
-        <Row label="Compact Mode" description="Reduce spacing and padding throughout the UI">
-          <Toggle checked={compact} onChange={() => setCompact((v) => !v)} />
-        </Row>
+
+      <Card title="Layout & Motion" description="Adjust motion preferences.">
         <Row label="Animations" description="Enable transitions and motion effects">
-          <Toggle checked={animations} onChange={() => setAnimations((v) => !v)} />
+          <Toggle checked={animations} onChange={handleAnimationsToggle} />
         </Row>
         <Row label="Language" description="Display language for the entire interface">
           <select
             value={language}
-            onChange={(e) => setLanguage(e.target.value)}
+            onChange={handleLanguageChange}
             className="rounded-lg bg-white border border-[#e8e2ff] px-3 py-2 text-sm text-[#0a0a0a] focus:outline-none focus:ring-2 focus:ring-violet-500 transition-shadow appearance-none cursor-pointer"
           >
             <option value="en">English</option>
@@ -609,6 +677,11 @@ function AppearancePanel() {
             <option value="fr">Français</option>
             <option value="de">Deutsch</option>
             <option value="ja">日本語</option>
+            <option value="zh">中文</option>
+            <option value="pt">Português</option>
+            <option value="ar">العربية</option>
+            <option value="hi">हिन्दी</option>
+            <option value="ru">Русский</option>
           </select>
         </Row>
       </Card>
