@@ -1,11 +1,9 @@
 
-// ============================================
-// FILE: app/layout.tsx
-// ============================================
-
+// app/layout.tsx
 import './globals.css';
 import type { Metadata } from 'next';
 import { DM_Sans, Syne } from 'next/font/google';
+import { ThemeProvider } from 'next-themes';
 import { UserProvider }    from '@/app/context/UserContext';
 import { BalanceProvider } from '@/app/context/BalanceContext';
 
@@ -44,13 +42,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${syne.variable}`}>
+    <html lang="en" className={`${dmSans.variable} ${syne.variable}`} suppressHydrationWarning>
       <body className={dmSans.className}>
-        <UserProvider>
-          <BalanceProvider>
-            {children}
-          </BalanceProvider>
-        </UserProvider>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+          <UserProvider>
+            <BalanceProvider>
+              {children}
+            </BalanceProvider>
+          </UserProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
