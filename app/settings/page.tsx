@@ -561,7 +561,7 @@ export default function SettingsPage() {
 
   const titles: Record<Section, string> = {
     profile: "Profile", notifications: "Notifications",
-    security: "Security", appearance: "Appearance",
+    security: "Security",
   };
 
   return (
