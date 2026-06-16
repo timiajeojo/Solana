@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { TrendingUp, Wallet, ArrowUpRight, ArrowDownRight, Plus, User, Settings, History, LogOut, CreditCard } from 'lucide-react';
+import { TrendingUp, Wallet, ArrowUpRight, ArrowDownRight, ArrowDownToLine, Plus, User, Settings, History, LogOut, CreditCard } from 'lucide-react';
 import { getCurrentUser, getInvestments, addInvestment, getUserProfile, signOut } from '../component/lib/supabase';
 import { useBalance } from '@/app/context/BalanceContext';
 
@@ -196,7 +196,18 @@ export default function DashboardPage() {
                       <User className="w-5 h-5 text-purple-600" />
                       <span className="font-medium">Profile</span>
                     </button>
-
+                     
+                     <button
+                       onClick={() => {
+                         setShowDropdown(false);
+                         router.push('/deposit');
+                           }}
+                             className="w-full px-4 py-3 text-left hover:bg-purple-50 transition-colors flex items-center gap-3 text-gray-700"
+                              >
+                            <ArrowDownToLine className="w-5 h-5 text-purple-600" />
+                                 <span className="font-medium">Deposit</span>
+                                </button>
+                     
                     <button
                       onClick={() => {
                         setShowDropdown(false);
