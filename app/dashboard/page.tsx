@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { TrendingUp, Wallet, ArrowUpRight, ArrowDownRight, ArrowDownToLine, Plus, User, Settings, History, LogOut, CreditCard } from 'lucide-react';
-import { getCurrentUser, getInvestments, addInvestment, getUserProfile, signOut } from '../component/lib/supabase';
+import { getCurrentUser, getInvestments, addInvestment, getUserProfile, signOut, getDeposits } from '../component/lib/supabase';
 import { useBalance } from '@/app/context/BalanceContext';
 
 interface Investment {
@@ -20,18 +20,44 @@ export default function DashboardPage() {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [investments, setInvestments] = useState<Investment[]>([]);
+  const [totalDeposited, setTotalDeposited] = useState(0);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const { setBalance } = useBalance();
-  const [newInvestment, setNewInvestment] = useState({ 
-    solAmount: '', 
-    pricePerSol: '' 
+  const [newInvestment, setNewInvestment] = useState({
+    solAmount: '',
+    pricePerSol: ''
   });
-  const [currentSolPrice] = useState(102.30);
+
+  // Live SOL price — fetched from CoinGecko, refreshed every 60s
+  const [currentSolPrice, setCurrentSolPrice] = useState(102.30);
+  const [priceLoading, setPriceLoading] = useState(true);
 
   useEffect(() => {
     checkUser();
+    fetchSolPrice();
+
+    // Refresh price every 60 seconds
+    const interval = setInterval(fetchSolPrice, 60000);
+    return () => clearInterval(interval);
   }, []);
+
+  const fetchSolPrice = async () => {
+    try {
+      const res = await fetch(
+        'https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd'
+      );
+      const data = await res.json();
+      if (data?.solana?.usd) {
+        setCurrentSolPrice(data.solana.usd);
+      }
+    } catch (error) {
+      console.error('Error fetching live SOL price:', error);
+      // Keep previous/fallback price on failure
+    } finally {
+      setPriceLoading(false);
+    }
+  };
 
   const checkUser = async () => {
     try {
@@ -41,11 +67,12 @@ export default function DashboardPage() {
         return;
       }
       setUser(currentUser);
-      
+
       const profile = await getUserProfile(currentUser.id);
       setUserProfile(profile);
-      
+
       await loadInvestments(currentUser.id);
+      await loadDeposits(currentUser.id);
     } catch (error) {
       console.error('Error checking user:', error);
       router.push('/auth');
@@ -58,17 +85,30 @@ export default function DashboardPage() {
     try {
       const data = await getInvestments(userId);
       setInvestments(data || []);
-      const solCoins     = (data || []).reduce((s: number, inv: Investment) => s + inv.sol_amount, 0);
-      const invested     = (data || []).reduce((s: number, inv: Investment) => s + inv.amount, 0);
-      const value        = solCoins * currentSolPrice;
+      const solCoins = (data || []).reduce((s: number, inv: Investment) => s + inv.sol_amount, 0);
+      const invested = (data || []).reduce((s: number, inv: Investment) => s + inv.amount, 0);
+      const value = solCoins * currentSolPrice;
 
       setBalance({
-      currentValue:  value,
-      totalSolCoins: solCoins,
-      totalInvested: invested,
-    });
+        currentValue: value,
+        totalSolCoins: solCoins,
+        totalInvested: invested,
+      });
     } catch (error) {
       console.error('Error loading investments:', error);
+    }
+  };
+
+  const loadDeposits = async (userId: string) => {
+    try {
+      const deposits = await getDeposits(userId);
+      // Count all deposits that aren't failed (pending + completed)
+      const total = (deposits || [])
+        .filter((d: any) => d.status !== 'failed')
+        .reduce((sum: number, d: any) => sum + d.amount, 0);
+      setTotalDeposited(total);
+    } catch (error) {
+      console.error('Error loading deposits:', error);
     }
   };
 
@@ -131,11 +171,19 @@ export default function DashboardPage() {
     );
   }
 
+  // ── Core calculations ────────────────────────────────────────────────────
   const totalInvested = investments.reduce((sum, inv) => sum + inv.amount, 0);
   const totalSolCoins = investments.reduce((sum, inv) => sum + inv.sol_amount, 0);
-  const currentValue = totalSolCoins * currentSolPrice;
-  const profitLoss = currentValue - totalInvested;
+
+  // Current portfolio value (SOL holdings valued at live market price)
+  const currentPortfolioValue = totalSolCoins * currentSolPrice;
+
+  // Profit = current portfolio value vs what was actually invested
+  const profitLoss = currentPortfolioValue - totalInvested;
   const profitLossPercent = totalInvested > 0 ? ((profitLoss / totalInvested) * 100).toFixed(2) : '0.00';
+
+  // Avg buy price — the user's own historical average cost per SOL
+  const avgBuyPrice = totalSolCoins > 0 ? totalInvested / totalSolCoins : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100">
@@ -174,8 +222,8 @@ export default function DashboardPage() {
               {/* Dropdown Menu */}
               {showDropdown && (
                 <>
-                  <div 
-                    className="fixed inset-0 z-10" 
+                  <div
+                    className="fixed inset-0 z-10"
                     onClick={() => setShowDropdown(false)}
                   ></div>
                   <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-20">
@@ -196,18 +244,18 @@ export default function DashboardPage() {
                       <User className="w-5 h-5 text-purple-600" />
                       <span className="font-medium">Profile</span>
                     </button>
-                     
-                     <button
-                       onClick={() => {
-                         setShowDropdown(false);
-                         router.push('/deposit');
-                           }}
-                             className="w-full px-4 py-3 text-left hover:bg-purple-50 transition-colors flex items-center gap-3 text-gray-700"
-                              >
-                            <ArrowDownToLine className="w-5 h-5 text-purple-600" />
-                                 <span className="font-medium">Deposit</span>
-                                </button>
-                     
+
+                    <button
+                      onClick={() => {
+                        setShowDropdown(false);
+                        router.push('/deposit');
+                      }}
+                      className="w-full px-4 py-3 text-left hover:bg-purple-50 transition-colors flex items-center gap-3 text-gray-700"
+                    >
+                      <ArrowDownToLine className="w-5 h-5 text-purple-600" />
+                      <span className="font-medium">Deposit</span>
+                    </button>
+
                     <button
                       onClick={() => {
                         setShowDropdown(false);
@@ -283,7 +331,22 @@ export default function DashboardPage() {
         </div>
 
         {/* Portfolio Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+
+          {/* Total Deposited */}
+          <div className="bg-white rounded-2xl p-6 shadow-lg border border-purple-100">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                <ArrowDownToLine className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 font-medium">Total Deposited</p>
+                <p className="text-2xl font-bold text-gray-900">${totalDeposited.toFixed(2)}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Total Invested */}
           <div className="bg-white rounded-2xl p-6 shadow-lg border border-purple-100">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
@@ -296,21 +359,26 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          {/* Current Value — live SOL market price */}
           <div className="bg-white rounded-2xl p-6 shadow-lg border border-purple-100">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
                 <TrendingUp className="w-6 h-6 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600 font-medium">Current Value</p>
-                <p className="text-2xl font-bold text-gray-900">${currentValue.toFixed(2)}</p>
+                <p className="text-sm text-gray-600 font-medium">SOL Market Price</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {priceLoading ? '...' : `$${currentSolPrice.toFixed(2)}`}
+                </p>
               </div>
             </div>
+            <p className="text-xs text-gray-400">Live price, updates every 60s</p>
           </div>
 
+          {/* Profit */}
           <div className={`rounded-2xl p-6 shadow-lg border ${
-            profitLoss >= 0 
-              ? 'bg-green-50 border-green-200' 
+            profitLoss >= 0
+              ? 'bg-green-50 border-green-200'
               : 'bg-red-50 border-red-200'
           }`}>
             <div className="flex items-center gap-3 mb-4">
@@ -351,16 +419,21 @@ export default function DashboardPage() {
             <div>
               <p className="text-sm text-gray-600 mb-2">Total SOL Coins</p>
               <p className="text-3xl font-bold text-purple-600">{totalSolCoins.toFixed(4)}</p>
+              <p className="text-xs text-gray-400 mt-1">
+                ≈ ${currentPortfolioValue.toFixed(2)} (incl. profit)
+              </p>
             </div>
             <div>
               <p className="text-sm text-gray-600 mb-2">Avg. Buy Price</p>
               <p className="text-3xl font-bold text-black">
-                ${totalSolCoins > 0 ? (totalInvested / totalSolCoins).toFixed(2) : '0.00'}
+                ${avgBuyPrice.toFixed(2)}
               </p>
             </div>
             <div>
               <p className="text-sm text-gray-600 mb-2">Current Price</p>
-              <p className="text-3xl font-bold text-black">${currentSolPrice.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-black">
+                {priceLoading ? '...' : `$${currentSolPrice.toFixed(2)}`}
+              </p>
             </div>
             <div>
               <p className="text-sm text-gray-600 mb-2">Total Investments</p>
@@ -407,7 +480,7 @@ export default function DashboardPage() {
               {newInvestment.solAmount && newInvestment.pricePerSol && (
                 <div className="bg-purple-50 border-2 border-purple-200 rounded-xl p-4">
                   <p className="text-sm font-medium text-purple-700 mb-1">Total Investment</p>
-                  <p className="text-3xl font-bold text-purple-900">${calculateTotalInvestment()}</p>
+                 <p className="text-3xl font-bold text-purple-900">${calculateTotalInvestment()}</p>
                   <p className="text-xs text-purple-600 mt-1">
                     {newInvestment.solAmount} SOL × ${newInvestment.pricePerSol}
                   </p>
