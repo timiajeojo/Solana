@@ -1,11 +1,20 @@
 // app/wallets/page.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Wallet, Plus, Copy, ArrowLeft, Trash2, ArrowDownToLine, CheckCircle2 } from 'lucide-react';
-import { useBalance } from '@/app/context/BalanceContext';
+import {
+  Wallet, Plus, Copy, ArrowLeft, Trash2,
+  ArrowDownToLine, CheckCircle2, Loader2, AlertCircle,
+} from 'lucide-react';
 import { getCurrentUser, addWithdrawal } from '../component/lib/supabase';
+import { useUser } from '@/app/context/UserContext';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 interface WalletItem {
   id:      number;
@@ -13,26 +22,80 @@ interface WalletItem {
   address: string;
 }
 
-export default function WithdrawPage() {
-  const router = useRouter();
-  const { currentValue, totalSolCoins } = useBalance();
+function Modal({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-4"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl">
+        {children}
+      </div>
+    </div>
+  );
+}
 
-  const [wallets, setWallets] = useState<WalletItem[]>([
-    { id: 1, name: 'Main Wallet', address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb' },
-    { id: 2, name: 'Savings',     address: '0x8d12A197cB00D4747a1fe03395095ce2A5CC6819' },
-  ]);
+export default function WithdrawPage() {
+  const router  = useRouter();
+  const { user } = useUser();
+
+  const [availableBalance, setAvailableBalance] = useState(0);
+  const [loadingBalance,   setLoadingBalance]   = useState(true);
+  const [wallets,          setWallets]          = useState<WalletItem[]>([]);
+  const [selectedWallet,   setSelectedWallet]   = useState<WalletItem | null>(null);
 
   const [showAddModal,      setShowAddModal]      = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [showSuccessModal,  setShowSuccessModal]  = useState(false);
-  const [newWallet,         setNewWallet]         = useState({ name: '', address: '' });
-  const [selectedWallet,    setSelectedWallet]    = useState<WalletItem | null>(null);
-  const [amount,            setAmount]            = useState('');
-  const [copied,            setCopied]            = useState<number | null>(null);
-  const [submitting,        setSubmitting]        = useState(false);
-  const [submitError,       setSubmitError]       = useState<string | null>(null);
 
-  // ── Handlers ──────────────────────────────────────────────────────────────
+  const [newWallet,   setNewWallet]   = useState({ name: '', address: '' });
+  const [amount,      setAmount]      = useState('');
+  const [copied,      setCopied]      = useState<number | null>(null);
+  const [submitting,  setSubmitting]  = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadBalance();
+  }, []);
+
+  async function loadBalance() {
+    setLoadingBalance(true);
+    try {
+      const authUser = await getCurrentUser();
+      if (!authUser) { router.push('/auth'); return; }
+
+      // Available balance = total profits credited so far
+      const { data, error } = await supabase
+        .from('profits')
+        .select('amount')
+        .eq('user_id', authUser.id);
+
+      if (error) throw error;
+
+      const total = (data || []).reduce((s: number, p: any) => s + p.amount, 0);
+      setAvailableBalance(total);
+    } catch (err) {
+      console.error('Error loading balance:', err);
+    } finally {
+      setLoadingBalance(false);
+    }
+  }
+
+  function handleAddWallet() {
+    if (!newWallet.name.trim() || !newWallet.address.trim()) return;
+    setWallets((prev) => [
+      ...prev,
+      { id: Date.now(), name: newWallet.name.trim(), address: newWallet.address.trim() },
+    ]);
+    setNewWallet({ name: '', address: '' });
+    setShowAddModal(false);
+  }
+
+  function handleDelete(id: number) {
+    if (!confirm('Remove this wallet?')) return;
+    setWallets((prev) => prev.filter((w) => w.id !== id));
+    if (selectedWallet?.id === id) setSelectedWallet(null);
+  }
 
   function handleCopy(address: string, id: number) {
     navigator.clipboard.writeText(address);
@@ -40,42 +103,51 @@ export default function WithdrawPage() {
     setTimeout(() => setCopied(null), 2000);
   }
 
-  function handleAddWallet() {
-    if (!newWallet.name || !newWallet.address) return;
-    setWallets([...wallets, { id: Date.now(), name: newWallet.name, address: newWallet.address }]);
-    setNewWallet({ name: '', address: '' });
-    setShowAddModal(false);
-  }
-
-  function handleDelete(id: number) {
-    if (confirm('Are you sure you want to remove this wallet?')) {
-      setWallets(wallets.filter((w) => w.id !== id));
-      if (selectedWallet?.id === id) setSelectedWallet(null);
-    }
-  }
-
   async function handleWithdraw() {
     if (!selectedWallet || !amount) return;
-    setSubmitting(true);
     setSubmitError(null);
 
+    const withdrawAmount = parseFloat(amount);
+    if (withdrawAmount <= 0) {
+      setSubmitError('Please enter a valid amount.');
+      return;
+    }
+    if (withdrawAmount > availableBalance) {
+      setSubmitError(`Amount exceeds your available profit of $${availableBalance.toFixed(2)}.`);
+      return;
+    }
+
+    setSubmitting(true);
     try {
-      const user = await getCurrentUser();
-      if (!user) { router.push('/auth'); return; }
+      const authUser = await getCurrentUser();
+      if (!authUser) { router.push('/auth'); return; }
 
       await addWithdrawal({
-        user_id:        user.id,
-        amount:         parseFloat(amount),
+        user_id:        authUser.id,
+        amount:         withdrawAmount,
         wallet_name:    selectedWallet.name,
         wallet_address: selectedWallet.address,
         status:         'pending',
+      });
+
+      // Send email notification to admin
+      await fetch('/api/withdrawal/notify', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userName:      `${user.firstName} ${user.lastName}`.trim() || authUser.email,
+          userEmail:     authUser.email,
+          walletName:    selectedWallet.name,
+          walletAddress: selectedWallet.address,
+          amount:        withdrawAmount,
+        }),
       });
 
       setShowWithdrawModal(false);
       setShowSuccessModal(true);
       setAmount('');
       setSelectedWallet(null);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
       setSubmitError('Failed to submit withdrawal. Please try again.');
     } finally {
@@ -83,13 +155,10 @@ export default function WithdrawPage() {
     }
   }
 
-  // ── UI ────────────────────────────────────────────────────────────────────
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-        {/* Back */}
         <button
           onClick={() => router.push('/dashboard')}
           className="flex items-center gap-2 text-gray-600 hover:text-purple-600 transition-colors mb-6"
@@ -98,11 +167,10 @@ export default function WithdrawPage() {
           Back to Dashboard
         </button>
 
-        {/* Header */}
         <div className="flex items-start justify-between mb-6 gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Withdraw</h1>
-            <p className="text-gray-500 mt-1">Select a wallet and withdraw your funds</p>
+            <p className="text-gray-500 mt-1">Withdraw your earned profits</p>
           </div>
           <button
             onClick={() => setShowAddModal(true)}
@@ -113,23 +181,36 @@ export default function WithdrawPage() {
           </button>
         </div>
 
-        {/* Balance — from dashboard context */}
+        {/* Available balance — profit only */}
         <div className="bg-gradient-to-r from-purple-600 to-purple-400 rounded-2xl p-6 mb-6 text-white shadow-lg">
-          <p className="text-purple-100 text-sm font-medium mb-1">Available Balance</p>
-          <p className="text-4xl font-bold">
-            ${currentValue.toFixed(2)}
-            <span className="text-xl font-semibold text-purple-200 ml-2">USD</span>
-          </p>
-          <p className="text-purple-200 text-sm mt-1">{totalSolCoins.toFixed(4)} SOL</p>
+          <p className="text-purple-100 text-sm font-medium mb-1">Available to Withdraw</p>
+          {loadingBalance ? (
+            <div className="flex items-center gap-2">
+              <Loader2 className="w-5 h-5 animate-spin text-purple-200" />
+              <span className="text-purple-200 text-sm">Loading profit balance…</span>
+            </div>
+          ) : (
+            <>
+              <p className="text-4xl font-bold">
+                ${availableBalance.toFixed(2)}
+                <span className="text-xl font-semibold text-purple-200 ml-2">USD</span>
+              </p>
+              <p className="text-purple-200 text-xs mt-1">Total profits earned from your investment plan</p>
+            </>
+          )}
         </div>
 
         {/* Wallet list */}
         {wallets.length === 0 ? (
-          <div className="bg-white rounded-2xl border-2 border-dashed border-gray-200 p-12 text-center">
+          <div className="bg-white rounded-2xl border-2 border-dashed border-gray-200 p-12 text-center mb-6">
             <Wallet className="w-10 h-10 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-400 font-medium">No wallets added yet</p>
-            <button onClick={() => setShowAddModal(true)} className="mt-4 text-purple-600 font-semibold hover:underline text-sm">
-              Add your first wallet
+            <p className="text-sm text-gray-400 mt-1">Add a wallet to withdraw your profits</p>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="mt-4 text-purple-600 font-semibold hover:underline text-sm"
+            >
+              + Add your first wallet
             </button>
           </div>
         ) : (
@@ -185,39 +266,45 @@ export default function WithdrawPage() {
           </div>
         )}
 
-        {/* Withdraw button */}
+        {/* Withdraw CTA */}
         <button
           onClick={() => selectedWallet && setShowWithdrawModal(true)}
-          disabled={!selectedWallet}
+          disabled={!selectedWallet || availableBalance <= 0}
           className={`w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-lg ${
-            selectedWallet ? 'bg-purple-600 hover:bg-purple-700 text-white' : 'bg-gray-100 text-gray-300 cursor-not-allowed'
+            selectedWallet && availableBalance > 0
+              ? 'bg-purple-600 hover:bg-purple-700 text-white'
+              : 'bg-gray-100 text-gray-300 cursor-not-allowed'
           }`}
         >
           <ArrowDownToLine className="w-5 h-5" />
-          {selectedWallet ? `Withdraw to ${selectedWallet.name}` : 'Select a wallet to withdraw'}
+          {availableBalance <= 0
+            ? 'No profit available yet'
+            : selectedWallet
+              ? `Withdraw to ${selectedWallet.name}`
+              : 'Select a wallet to withdraw'}
         </button>
 
       </div>
 
-      {/* ── Withdraw modal ──────────────────────────────────────────────────── */}
+      {/* ── Withdraw modal ── */}
       {showWithdrawModal && selectedWallet && (
         <Modal onClose={() => { setShowWithdrawModal(false); setSubmitError(null); }}>
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-5">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-purple-400 flex items-center justify-center">
               <ArrowDownToLine className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-900">Withdraw Funds</h3>
-              <p className="text-sm text-gray-500">To: {selectedWallet.name}</p>
+              <h3 className="text-lg font-bold text-gray-900">Withdraw Profits</h3>
+              <p className="text-xs text-gray-500">To: {selectedWallet.name}</p>
             </div>
           </div>
 
-          <div className="bg-purple-50 rounded-xl px-4 py-3 mb-5 text-sm text-gray-600">
-            <span className="font-medium">Wallet: </span>
-            <code className="text-xs">{selectedWallet.address.slice(0, 14)}…{selectedWallet.address.slice(-6)}</code>
+          <div className="bg-purple-50 rounded-xl px-4 py-3 mb-4 text-xs text-gray-600">
+            <span className="font-semibold">Wallet: </span>
+            <code>{selectedWallet.address.slice(0, 14)}…{selectedWallet.address.slice(-6)}</code>
           </div>
 
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Amount (USD)</label>
+          <label className="block text-xs font-semibold text-gray-700 mb-1.5">Amount (USD)</label>
           <input
             type="number"
             min="0"
@@ -228,11 +315,14 @@ export default function WithdrawPage() {
             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 text-lg mb-1"
           />
           <p className="text-xs text-gray-400 mb-4">
-            Available: <span className="font-semibold text-purple-600">${currentValue.toFixed(2)}</span>
+            Available profit: <span className="font-semibold text-purple-600">${availableBalance.toFixed(2)}</span>
           </p>
 
           {submitError && (
-            <p className="text-sm text-red-500 mb-3">{submitError}</p>
+            <div className="flex items-center gap-2 text-sm text-red-500 font-medium mb-3">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              {submitError}
+            </div>
           )}
 
           <div className="flex gap-3">
@@ -245,46 +335,49 @@ export default function WithdrawPage() {
             <button
               onClick={handleWithdraw}
               disabled={!amount || Number(amount) <= 0 || submitting}
-              className="flex-1 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-200 disabled:cursor-not-allowed text-white rounded-xl transition-colors font-semibold shadow-md"
+              className="flex-1 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-200 disabled:cursor-not-allowed text-white rounded-xl transition-colors font-semibold shadow-md flex items-center justify-center gap-2"
             >
-              {submitting ? 'Submitting…' : 'Confirm'}
+              {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Submitting…</> : 'Confirm'}
             </button>
           </div>
         </Modal>
       )}
 
-      {/* ── Add wallet modal ──────────────────────────────────────────────── */}
+      {/* ── Add wallet modal ── */}
       {showAddModal && (
         <Modal onClose={() => setShowAddModal(false)}>
-          <h3 className="text-xl font-bold text-gray-900 mb-6">Add New Wallet</h3>
+          <h3 className="text-lg font-bold text-gray-900 mb-5">Add Wallet</h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Wallet Name</label>
+              <label className="block text-xs font-semibold text-gray-700 mb-1.5">Wallet Name</label>
               <input
                 type="text"
                 value={newWallet.name}
                 onChange={(e) => setNewWallet({ ...newWallet, name: e.target.value })}
-                placeholder="e.g. Main Wallet"
+                placeholder="e.g. My Phantom Wallet"
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Wallet Address</label>
+              <label className="block text-xs font-semibold text-gray-700 mb-1.5">Wallet Address</label>
               <input
                 type="text"
                 value={newWallet.address}
                 onChange={(e) => setNewWallet({ ...newWallet, address: e.target.value })}
-                placeholder="0x..."
+                placeholder="Solana wallet address"
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
               />
             </div>
-            <div className="flex gap-3 pt-2">
-              <button onClick={() => setShowAddModal(false)} className="flex-1 py-3 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-semibold">
+            <div className="flex gap-3 pt-1">
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="flex-1 py-3 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-semibold"
+              >
                 Cancel
               </button>
               <button
                 onClick={handleAddWallet}
-                disabled={!newWallet.name || !newWallet.address}
+                disabled={!newWallet.name.trim() || !newWallet.address.trim()}
                 className="flex-1 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-200 disabled:cursor-not-allowed text-white rounded-xl transition-colors font-semibold shadow-md"
               >
                 Add Wallet
@@ -294,16 +387,16 @@ export default function WithdrawPage() {
         </Modal>
       )}
 
-      {/* ── Success modal ─────────────────────────────────────────────────── */}
+      {/* ── Success modal ── */}
       {showSuccessModal && (
         <Modal onClose={() => setShowSuccessModal(false)}>
-          <div className="text-center py-4">
+          <div className="text-center py-2">
             <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 className="w-9 h-9 text-green-500" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Withdrawal Submitted</h3>
-            <p className="text-gray-500 text-sm mb-6">
-              Your withdrawal is being processed. Check History for updates.
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Withdrawal Requested</h3>
+            <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+              Your withdrawal request has been submitted and will be processed shortly.
             </p>
             <div className="flex gap-3">
               <button
@@ -322,19 +415,6 @@ export default function WithdrawPage() {
           </div>
         </Modal>
       )}
-    </div>
-  );
-}
-
-function Modal({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
-  return (
-    <div
-      className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-4"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl">
-        {children}
-      </div>
     </div>
   );
 }
