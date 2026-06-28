@@ -155,81 +155,80 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100">
 
       {/* ── Header ── */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-20 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-400 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">Solana Tracker</h1>
-                <p className="text-xs text-gray-500">Investment Dashboard</p>
-              </div>
-            </div>
+<div className="bg-white border-b border-gray-200 sticky top-0 z-20 shadow-sm">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="flex items-center justify-between h-16">
 
-            {/* User dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setShowDropdown(!showDropdown)}
-                className="flex items-center gap-3 hover:bg-gray-50 rounded-xl p-2 transition-colors"
-              >
-                <div className="text-right hidden sm:block">
-                  <p className="text-sm font-semibold text-gray-900">
-                    {userProfile ? `${userProfile.first_name} ${userProfile.last_name}` : user?.email}
-                  </p>
-                  <p className="text-xs text-gray-500">{user?.email}</p>
-                </div>
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-purple-400 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                  {getInitials()}
-                </div>
-              </button>
-
-              {showDropdown && (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setShowDropdown(false)} />
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-20">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm font-semibold text-gray-900">
-                        {userProfile ? `${userProfile.first_name} ${userProfile.last_name}` : 'User'}
-                      </p>
-                      <p className="text-xs text-gray-500">{user?.email}</p>
-                    </div>
-
-                    {[
-                      { label: 'Profile',  icon: <User className="w-5 h-5 text-purple-600" />,          path: '/profile'  },
-                      { label: 'Deposit',  icon: <ArrowDownToLine className="w-5 h-5 text-purple-600" />, path: '/deposit'  },
-                      { label: 'Withdraw', icon: <CreditCard className="w-5 h-5 text-purple-600" />,     path: '/wallets'  },
-                      { label: 'History',  icon: <History className="w-5 h-5 text-purple-600" />,        path: '/history'  },
-                      { label: 'Settings', icon: <Settings className="w-5 h-5 text-purple-600" />,       path: '/settings' },
-                    ].map(({ label, icon, path }) => (
-                      <button
-                        key={label}
-                        onClick={() => { setShowDropdown(false); router.push(path); }}
-                        className="w-full px-4 py-3 text-left hover:bg-purple-50 transition-colors flex items-center gap-3 text-gray-700"
-                      >
-                        {icon}
-                        <span className="font-medium">{label}</span>
-                      </button>
-                    ))}
-
-                    <div className="border-t border-gray-100 mt-2 pt-2">
-                      <button
-                        onClick={() => { setShowDropdown(false); handleLogout(); }}
-                        className="w-full px-4 py-3 text-left hover:bg-red-50 transition-colors flex items-center gap-3 text-red-600"
-                      >
-                        <LogOut className="w-5 h-5" />
-                        <span className="font-medium">Logout</span>
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
+      {/* Left — Avatar */}
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-purple-400 flex items-center justify-center text-white font-bold text-base shadow-md">
+          {getInitials()}
+        </div>
+        <div className="hidden sm:block">
+          <p className="text-sm font-semibold text-gray-900 leading-tight">
+            {userProfile ? `${userProfile.first_name} ${userProfile.last_name}` : user?.email}
+          </p>
+          <p className="text-xs text-gray-500">{user?.email}</p>
         </div>
       </div>
+
+      {/* Right — Burger menu */}
+      <div className="relative">
+        <button
+          onClick={() => setShowDropdown(!showDropdown)}
+          className="flex flex-col justify-center items-center w-10 h-10 rounded-xl hover:bg-gray-100 transition-colors gap-1.5"
+          aria-label="Menu"
+        >
+          <span className={`block w-5 h-0.5 bg-gray-700 rounded transition-all duration-200 ${showDropdown ? 'rotate-45 translate-y-2' : ''}`} />
+          <span className={`block w-5 h-0.5 bg-gray-700 rounded transition-all duration-200 ${showDropdown ? 'opacity-0' : ''}`} />
+          <span className={`block w-5 h-0.5 bg-gray-700 rounded transition-all duration-200 ${showDropdown ? '-rotate-45 -translate-y-2' : ''}`} />
+        </button>
+
+        {showDropdown && (
+          <>
+            <div className="fixed inset-0 z-10" onClick={() => setShowDropdown(false)} />
+            <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-20">
+              <div className="px-4 py-3 border-b border-gray-100">
+                <p className="text-sm font-semibold text-gray-900">
+                  {userProfile ? `${userProfile.first_name} ${userProfile.last_name}` : 'User'}
+                </p>
+                <p className="text-xs text-gray-500">{user?.email}</p>
+              </div>
+
+              {[
+                { label: 'Profile',  icon: <User className="w-5 h-5 text-purple-600" />,           path: '/profile'  },
+                { label: 'Deposit',  icon: <ArrowDownToLine className="w-5 h-5 text-purple-600" />, path: '/deposit'  },
+                { label: 'Withdraw', icon: <CreditCard className="w-5 h-5 text-purple-600" />,      path: '/wallets'  },
+                { label: 'History',  icon: <History className="w-5 h-5 text-purple-600" />,         path: '/history'  },
+                { label: 'Settings', icon: <Settings className="w-5 h-5 text-purple-600" />,        path: '/settings' },
+              ].map(({ label, icon, path }) => (
+                <button
+                  key={label}
+                  onClick={() => { setShowDropdown(false); router.push(path); }}
+                  className="w-full px-4 py-3 text-left hover:bg-purple-50 transition-colors flex items-center gap-3 text-gray-700"
+                >
+                  {icon}
+                  <span className="font-medium">{label}</span>
+                </button>
+              ))}
+
+              <div className="border-t border-gray-100 mt-2 pt-2">
+                <button
+                  onClick={() => { setShowDropdown(false); handleLogout(); }}
+                  className="w-full px-4 py-3 text-left hover:bg-red-50 transition-colors flex items-center gap-3 text-red-600"
+                >
+                  <LogOut className="w-5 h-5" />
+                  <span className="font-medium">Logout</span>
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+    </div>
+  </div>
+</div>
 
       {/* ── Main Content ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
