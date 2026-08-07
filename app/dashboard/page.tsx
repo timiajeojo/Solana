@@ -255,7 +255,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Add Investment */}
+        {/* Add Investment
         <div className="mb-6 flex justify-end">
           <button
             onClick={() => router.push('/plans')}
@@ -265,6 +265,7 @@ export default function DashboardPage() {
             {activePlan ? 'Change Plan' : 'Add Investment'}
           </button>
         </div>
+         */}
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
